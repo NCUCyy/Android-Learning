@@ -59,6 +59,10 @@ fun Greeting(modifier: Modifier = Modifier) {
         Button(onClick = {
 //            定义点击事件
             Toast.makeText(context, "显示第一个Compose", Toast.LENGTH_LONG).show()
+//              【显式意图】
+//            从当前活动（MainActivity）跳转到指定活动（FirstActivity）
+            val intent = Intent(context, FirstActivity::class.java)
+            context.startActivity(intent)
         }) {
 //            按钮内部的组件
             Row {
