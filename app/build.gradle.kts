@@ -37,6 +37,7 @@ android {
         jvmTarget = "1.8"
     }
     buildFeatures {
+//        默认就是Compose的方式
         compose = true
 //        配置
         viewBinding = true

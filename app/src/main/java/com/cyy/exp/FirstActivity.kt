@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.TextView
 import com.cyy.exp.databinding.ActivityFirstBinding
 
+//AppCompat方式(XML方式；需要在AndroidManifest.xml文件中修改theme的配置：android:theme="@style/Theme.AppCompat">)
 class FirstActivity : AppCompatActivity() {
     lateinit var binding: ActivityFirstBinding
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -1,8 +1,14 @@
 package com.cyy.exp
 
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -14,15 +20,32 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.cyy.exp.ui.theme.ExpTheme
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Icon
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.state.ToggleableState
+import androidx.compose.ui.unit.sp
+import java.util.function.IntConsumer
 
+
+//Compose方式(不需要修改theme配置)
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             ExpTheme {
                 // A surface container using the 'background' color from the theme
-                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    Greeting("Hello Android World！")
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    Greeting()
                 }
             }
         }
@@ -30,19 +53,35 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Surface(color = Color.Green) {
-        Text(
-            text = "你好, $name!",
-            modifier = Modifier.padding(24.dp)
-        )
+fun Greeting(modifier: Modifier = Modifier) {
+    Box(contentAlignment = Alignment.Center) {
+        val context = LocalContext.current
+        Button(onClick = {
+//            定义点击事件
+            Toast.makeText(context, "显示第一个Compose", Toast.LENGTH_LONG).show()
+        }) {
+//            按钮内部的组件
+            Row {
+                Text(
+                    text = "收藏",
+                    fontSize = 30.sp,
+                    modifier = modifier
+                )
+                Icon(
+                    imageVector = Icons.Filled.FavoriteBorder,
+                    contentDescription = "空",
+                    tint = Color.Red
+                )
+            }
+
+        }
     }
 }
 
-@Preview
-@Composable
-fun GreetingPreview() {
-    ExpTheme {
-        Greeting("Cyy")
-    }
-}
+//@Preview
+//@Composable
+//fun GreetingPreview() {
+//    ExpTheme {
+//        Greeting()
+//    }
+//}
