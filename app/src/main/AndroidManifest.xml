@@ -13,15 +13,26 @@
             android:theme="@style/Theme.Exp"
             tools:targetApi="31">
         <activity
+                android:name=".FirstActivity"
+                android:exported="true"
+                android:theme="@style/Theme.AppCompat">
+            <!--            注意：theme要改为如上才能正常运行-->
+            <intent-filter>
+                <!--                设置为应用的MAIN活动-->
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
                 android:name=".MainActivity"
                 android:exported="true"
                 android:label="@string/app_name"
                 android:theme="@style/Theme.Exp">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+            <!--            <intent-filter>-->
+            <!--                <action android:name="android.intent.action.MAIN" />-->
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            <!--                <category android:name="android.intent.category.LAUNCHER" />-->
+            <!--            </intent-filter>-->
         </activity>
     </application>
 
