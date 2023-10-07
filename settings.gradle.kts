@@ -15,4 +15,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Exp"
 include(":app")
- 
+include(":exp1")
