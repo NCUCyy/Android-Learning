@@ -1,36 +1,36 @@
 package com.cyy.exp1
 
-import android.widget.Switch
-import androidx.compose.animation.core.withInfiniteAnimationFrameNanos
-import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.text.resolveDefaults
 import java.math.RoundingMode
 import java.text.DecimalFormat
+import java.util.Scanner
+import kotlin.concurrent.timer
+import kotlin.reflect.typeOf
+import kotlin.system.exitProcess
 
+
+enum class Mode {
+    FixedMember, UnfixedMember
+}
+
+class MoneyException(override var message: String) : Exception(message) {
+    override fun toString(): String = message
+}
 
 // 红包类(所有属性都提供默认值---等价于空参构造器)
 class RedPocket(
+    // 群主
+    var host: User.Host,
     // 红包余额
     var remainMoney: Double = 0.0,
     // 红包大小
     var size: Int = 0,
     // 抢红包的成员
-    var userList: MutableList<User> = mutableListOf<User>(),
-    var mode: Mode = Mode.Unfixed_Member
+    var userList: MutableList<User> = mutableListOf<User>()
 ) {
-
-
     // 红包列表(userList)
     private fun addUser(user: User) {
         this.userList.add(user)
-    }
-
-    fun assignUsers(users: MutableList<User>) {
-        this.userList = users
-    }
-
-    fun assignSize(size: Int) {
-        this.size = size
     }
 
     fun grab(user: User) {
@@ -64,36 +64,34 @@ class RedPocket(
 
     // 抢红包(Host/Member)
     private fun shareMoney(user: User) {
-        if (mode == Mode.Fixed_Member) {
-            // 判断这个人是否能抢
-            if (this.userList.indexOf(user) == -1) {
-                throw MoneyException("抢红包失败---${user.name}不能抢这个红包哟～")
-                return
-            }
-        }
         if (this.userList.size == this.size) {
             // 人数已满
             throw MoneyException("抢红包失败---${user.name}手慢啦，红包已领完～")
-            return
         }
+
         // 这个人能抢到的【金额】
         var money: Double = this.getRandomMoney()
 
-        if (this.mode == Mode.Unfixed_Member)
         // 添加用户到红包列表
-            addUser(user)
+        addUser(user)
         // user抢到多少钱
         user.getMoney(money)
         // 更新红包余额
         this.remainMoney -= money
         // 提示
         println("${user.name}抢到的金额为${user.receivedMoney} ")
+
     }
 
     fun showCase() {
         // 展示所有抢到红包的人的情况
+        userList.sort()
         userList.forEach {
-            println("${it.name}抢到的金额为${it.receivedMoney} ")
+            var record = "${it.name}抢到的金额为${it.receivedMoney}元 ------共有钱：${it.money}元"
+            if (it != host)
+                println("普通成员$record")
+            else
+                println("群主$record")
         }
     }
 }
@@ -114,16 +112,21 @@ sealed class User(var name: String, var money: Double, var receivedMoney: Double
         User(name, money, receivedMoney) {
         // 发红包(Host)
         fun drawMoney(
+            host: User.Host,
             money: Double,
             size: Int,
-            mode: Mode,
             users: MutableList<User> = mutableListOf()
         ): RedPocket {
             if (money > this.money)
                 throw MoneyException("您的余额不足，请更换红包金额后重试！")
             this.money -= money
             // 把钱拿出去，包成一个红包
-            return RedPocket(remainMoney = money, size = size, userList = users, mode = mode)
+            return RedPocket(
+                host = host,
+                remainMoney = money,
+                size = size,
+                userList = users,
+            )
         }
     }
 
@@ -132,13 +135,10 @@ sealed class User(var name: String, var money: Double, var receivedMoney: Double
     }
 }
 
-class MoneyException(override var message: String) : Exception(message) {
-    override fun toString(): String = message
-}
 
+fun main() {
+    println("-------模拟多人抢红包应用-------")
 
-// 成员固定
-fun drawFixed() {
     var host = User.Host("cyy", 600.0, 0.0)
     var users = mutableListOf(
         host,
@@ -148,54 +148,40 @@ fun drawFixed() {
         User.Member("lsq", 100.0, 0.0),
         User.Member("lc", 90.0, 0.0)
     )
-    var redPocket = host.drawMoney(200.0, 10, Mode.Fixed_Member, users)
+    println("(成员列表如下)")
+    for (i in 0 until users.size) {
+        println("${i + 1}、${users[i].name}---余额${users[i].money}")
+    }
+    var redPocket: RedPocket
+    var tmp: Double = 0.0
+    while (true) {
+        try {
+            print("输入红包的「个数」：")
+            val scan = Scanner(System.`in`)
+            val num = scan.nextInt()
+            if (num > users.size)
+                throw Exception("人数超过最大限制！")
+            print("输入「金额」：")
+            val money = scan.nextDouble()
+            // 群主包红包
+            redPocket = host.drawMoney(host, money, num)
+            tmp = money
+            break
+        } catch (e: Exception) {
+            println(e)
+        }
+    }
+    // 打乱顺序
+    users.shuffle()
     // 用户抢红包
+    println("\n----------模拟抢红包的【过程】----------")
     users.forEach {
+        Thread.sleep(1000)
         redPocket.grab(it)
     }
-    var user = User.Member("xwz", 90.0, 0.0)
-    redPocket.grab(user)
+
     // 显示结果
-    println("----------抢红包的结果----------")
+    println("\n----------展示抢红包的【结果】----------")
+    println("红包总金额：$tmp")
     redPocket.showCase()
-}
-
-// 成员不固定
-fun drawUnFixed() {
-    var host = User.Host("cyy", 600.0, 0.0)
-    var member1 = User.Member("gyh", 10.0, 0.0)
-    var member2 = User.Member("xyj", 60.0, 0.0)
-    var member3 = User.Member("kch", 30.0, 0.0)
-    val member4 = User.Member("lsq", 100.0, 0.0)
-    var member5 = User.Member("lc", 90.0, 0.0)
-
-    // 规定红包的{金额}和{大小}
-    var redPocket = host.drawMoney(money = 100.0, size = 3, mode = Mode.Unfixed_Member)
-    // 用户抢红包
-    try {
-        redPocket.grab(member1)
-        redPocket.grab(member2)
-        redPocket.grab(member3)
-        // 抢红包人数达到限制后，其他用户抢，只会在第一个人抢的时候抛一次异常(需要引入线程技术：并发问题)
-        redPocket.grab(member4)
-        redPocket.grab(member5)
-    } catch (e: MoneyException) {
-        println(e)
-    }
-    // 显示结果
-    println("----------抢红包的结果----------")
-    redPocket.showCase()
-}
-
-enum class Mode {
-    Fixed_Member, Unfixed_Member
-
-}
-
-fun main() {
-    println("-----------人员固定-----------")
-    drawFixed()
-    println("\n@@@@@@@@@@@@@@@@@@@@@@@@@\n")
-    println("-----------人员不固定-----------")
-    drawUnFixed()
 }
