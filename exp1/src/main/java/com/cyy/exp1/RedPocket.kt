@@ -1,19 +1,14 @@
 package com.cyy.exp1
 
-import androidx.compose.ui.text.resolveDefaults
+import androidx.compose.ui.text.toUpperCase
 import java.math.RoundingMode
 import java.text.DecimalFormat
+import java.util.Locale
 import java.util.Scanner
-import kotlin.concurrent.timer
-import kotlin.reflect.typeOf
 import kotlin.system.exitProcess
 
 
-enum class Mode {
-    FixedMember, UnfixedMember
-}
-
-class MoneyException(override var message: String) : Exception(message) {
+class MoneyException(override val message: String) : Exception(message) {
     override fun toString(): String = message
 }
 
@@ -89,9 +84,9 @@ class RedPocket(
         userList.forEach {
             var record = "${it.name}抢到的金额为${it.receivedMoney}元 ------共有钱：${it.money}元"
             if (it != host)
-                println("普通成员$record")
+                println("普通成员：$record")
             else
-                println("群主$record")
+                println("群主：$record")
         }
     }
 }
@@ -137,51 +132,59 @@ sealed class User(var name: String, var money: Double, var receivedMoney: Double
 
 
 fun main() {
-    println("-------模拟多人抢红包应用-------")
-
-    var host = User.Host("cyy", 600.0, 0.0)
-    var users = mutableListOf(
-        host,
-        User.Member("gyh", 10.0, 0.0),
-        User.Member("xyj", 60.0, 0.0),
-        User.Member("kch", 30.0, 0.0),
-        User.Member("lsq", 100.0, 0.0),
-        User.Member("lc", 90.0, 0.0)
-    )
-    println("(成员列表如下)")
-    for (i in 0 until users.size) {
-        println("${i + 1}、${users[i].name}---余额${users[i].money}")
-    }
-    var redPocket: RedPocket
-    var tmp: Double = 0.0
     while (true) {
-        try {
-            print("输入红包的「个数」：")
-            val scan = Scanner(System.`in`)
-            val num = scan.nextInt()
-            if (num > users.size)
-                throw Exception("人数超过最大限制！")
-            print("输入「金额」：")
-            val money = scan.nextDouble()
-            // 群主包红包
-            redPocket = host.drawMoney(host, money, num)
-            tmp = money
-            break
-        } catch (e: Exception) {
-            println(e)
+        println("-------模拟多人抢红包应用-------")
+
+        var host = User.Host("cyy", 600.0, 0.0)
+        var users = mutableListOf(
+            host,
+            User.Member("gyh", 10.0, 0.0),
+            User.Member("xyj", 60.0, 0.0),
+            User.Member("kch", 30.0, 0.0),
+            User.Member("lsq", 100.0, 0.0),
+            User.Member("lc", 90.0, 0.0)
+        )
+        println("(成员列表如下)")
+        for (i in 0 until users.size) {
+            println("${i + 1}、${users[i].name}---余额${users[i].money}")
+        }
+        val scan = Scanner(System.`in`)
+        var redPocket: RedPocket
+        var tmp: Double = 0.0
+        while (true) {
+            try {
+                print("输入红包的「个数」：")
+                val num = scan.nextInt()
+                if (num > users.size)
+                    throw Exception("个数超过最大限制！")
+                print("输入「金额」：")
+                val money = scan.nextDouble()
+                // 群主包红包
+                redPocket = host.drawMoney(host, money, num)
+                tmp = money
+                break
+            } catch (e: Exception) {
+                println(e)
+            }
+        }
+        // 打乱顺序
+        users.shuffle()
+        // 用户抢红包
+        println("\n----------模拟抢红包的【过程】----------")
+        users.forEach {
+            Thread.sleep(1000)
+            redPocket.grab(it)
+        }
+
+        // 显示结果
+        println("\n----------展示抢红包的【结果】----------")
+        println("红包总金额：$tmp")
+        redPocket.showCase()
+
+        println("是否要退出？(Y/N)")
+        if (scan.next().uppercase(Locale.getDefault()) == "Y") {
+            println("-----------成功退出-----------")
+            exitProcess(-1)
         }
     }
-    // 打乱顺序
-    users.shuffle()
-    // 用户抢红包
-    println("\n----------模拟抢红包的【过程】----------")
-    users.forEach {
-        Thread.sleep(1000)
-        redPocket.grab(it)
-    }
-
-    // 显示结果
-    println("\n----------展示抢红包的【结果】----------")
-    println("红包总金额：$tmp")
-    redPocket.showCase()
 }

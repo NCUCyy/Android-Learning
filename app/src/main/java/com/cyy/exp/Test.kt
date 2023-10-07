@@ -1,21 +1,17 @@
 package com.cyy.exp
 
-fun operate(x: Double, y: Double, op: (Double, Double) -> Unit) {
+import java.util.Scanner
 
-    op(x, y)
 
+class CharacterException(override val message: String) : Exception(message) {
+    override fun toString(): String = "${message}中包含*或@或￥或#！"
 }
 
 fun main() {
-    var message: String? = "hello kotlin world"
-
-    val c = message?.also {
-
-        println(it.length)
-
-        println(it.lines())
-
-    }
-
-    println(c)
+    val scan = Scanner(System.`in`)
+    val str = scan.next()
+    if (str.contains('@') || str.contains('#') || str.contains('$') || str.contains('*'))
+        throw CharacterException(str)
+    else
+        println(str)
 }

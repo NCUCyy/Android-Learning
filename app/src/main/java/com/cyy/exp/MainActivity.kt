@@ -67,7 +67,7 @@ fun Greeting(modifier: Modifier = Modifier) {
 //            按钮内部的组件
             Row {
                 Text(
-                    text = "收藏",
+                    text = "Hello Android World!",
                     fontSize = 30.sp,
                     modifier = modifier
                 )
