@@ -24,6 +24,7 @@ class SecondActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val data = intent.getParcelableExtra("data", Student::class.java)
+
         setContent {
             ExpTheme {
                 // A surface container using the 'background' color from the theme
