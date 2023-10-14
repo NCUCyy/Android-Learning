@@ -7,7 +7,7 @@ class DiceGame {
 
     // 供活动中调用
     fun rollDice() = rand.nextInt(6) + 1
-    fun judgeFame(first: Int, second: Int) = when (first + second) {
+    fun judgeGame(first: Int, second: Int) = when (first + second) {
         7, 11 -> GameStatus.WIN
         2, 3, 12 -> GameStatus.LOSE
         else -> GameStatus.GOON
