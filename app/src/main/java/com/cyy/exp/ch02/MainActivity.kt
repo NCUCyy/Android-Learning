@@ -47,7 +47,7 @@ fun MainScreen() {
         Column {
             Button(onClick = {
                 val intent = Intent(context, FirstActivity::class.java)
-                intent.putExtra("data", "来自MainActivity的数据")
+                intent.putExtra("data", Student("001", "cyy", "male"))
                 context.startActivity(intent)
             }) {
                 Text("跳转到FirstActivity", fontSize = 30.sp)
@@ -55,7 +55,7 @@ fun MainScreen() {
 
             Button(onClick = {
                 val intent = Intent(context, SecondActivity::class.java)
-                intent.putExtra("data", "来自MainActivity的数据")
+                intent.putExtra("data", Student("002", "lsq", "male"))
                 context.startActivity(intent)
             }) {
                 Text("跳转到SecondActivity", fontSize = 30.sp)

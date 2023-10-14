@@ -1,10 +1,12 @@
 package com.cyy.exp.ch02
 
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Message
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -18,9 +20,10 @@ import com.cyy.exp.R
 import com.cyy.exp.ui.theme.ExpTheme
 
 class SecondActivity : ComponentActivity() {
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val data = intent.getStringExtra("data")
+        val data = intent.getSerializableExtra("data", Student::class.java)
         setContent {
             ExpTheme {
                 // A surface container using the 'background' color from the theme
@@ -36,8 +39,8 @@ class SecondActivity : ComponentActivity() {
 }
 
 @Composable
-fun SecondScreen(message: String) {
+fun SecondScreen(message: Student) {
     Column(modifier = Modifier.fillMaxSize()) {
-        Text(text = "$message", fontSize = 20.sp, maxLines = 2)
+        Text(text = "${message.toString()}", fontSize = 20.sp, maxLines = 2)
     }
 }
