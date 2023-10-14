@@ -23,7 +23,7 @@ class SecondActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val data = intent.getSerializableExtra("data", Student::class.java)
+        val data = intent.getParcelableExtra("data", Student::class.java)
         setContent {
             ExpTheme {
                 // A surface container using the 'background' color from the theme
