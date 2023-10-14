@@ -23,6 +23,8 @@ class SecondActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // 接收MainActivity传递过来的参数(需要指定参数的类型)
         val data = intent.getParcelableExtra("data", Student::class.java)
 
         setContent {
@@ -32,6 +34,7 @@ class SecondActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    // 把参数值传递给「子组件」进行使用
                     CommonScreen(message = data!!)
                 }
             }

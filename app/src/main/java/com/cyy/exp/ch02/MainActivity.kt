@@ -33,11 +33,15 @@ import com.cyy.exp.ui.theme.ExpTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // 使用ActivityResultLauncher进行意图跳转
         val resultLauncher: ActivityResultLauncher<Intent> = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult(),
+            // 意图结束后，执行这个「回调函数」
             ActivityResultCallback {
                 if (it.resultCode == Activity.RESULT_OK) {
-                    Toast.makeText(this, "返回MainActivity", Toast.LENGTH_LONG).show()
+                    // 返回的data数据是个intent类型，里面存储了一段文本内容
+                    val text = it.data?.getStringExtra("toMain")
+                    Toast.makeText(this, "接受：$text", Toast.LENGTH_LONG).show()
                 }
             }
         )
@@ -48,6 +52,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    // 要把这个resultLauncher一直传递到Button手里
                     MainScreen(resultLauncher = resultLauncher)
                 }
             }
@@ -106,7 +111,10 @@ fun <T, D : Parcelable> turnAction(
     data: D,
     resultLauncher: ActivityResultLauncher<Intent>
 ) {
+    // 若要跳转活动，就要先创建一个意图（且必须又当前活动的context）
+    // 传递参数，需调用函数————putExtra(paramName, paramData)
     val intent = Intent(context, activityType)
     intent.putExtra("data", data)
+    // 使用resultLauncher进行意图跳转（或：context.startActivity(intent)也可以）
     resultLauncher.launch(intent)
 }

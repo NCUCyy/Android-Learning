@@ -2,6 +2,7 @@ package com.cyy.exp.ch02
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.compose.foundation.background
@@ -17,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.integerArrayResource
 import androidx.compose.ui.unit.sp
 
 // 通用Screen
@@ -32,7 +34,12 @@ fun <T : Parcelable> CommonScreen(message: T) {
     ) {
         Text(text = "${message.toString()}", fontSize = 20.sp, maxLines = 2)
         Button(onClick = {
-            context.setResult(Activity.RESULT_OK)
+            // 为了实现：点击按钮，结束当前意图(返回代码为：RESULT_OK)
+            val intent = Intent()
+            intent.putExtra("toMain", "${context.localClassName}返回MainActivity")
+            // 传递一个意图参数参数
+            context.setResult(Activity.RESULT_OK,  intent)
+            // 结束当前意图(回到过来的地方)
             context.finish()
         }) {
             Text(text = "返回")
