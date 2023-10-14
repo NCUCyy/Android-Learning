@@ -1,6 +1,8 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    // @Parcelize注解
+    id("kotlin-parcelize")
 }
 
 android {
