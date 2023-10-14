@@ -47,7 +47,7 @@ fun MainScreen() {
         Column {
             Button(onClick = {
                 val intent = Intent(context, FirstActivity::class.java)
-                intent.putExtra("data", Student("001", "cyy", "male"))
+                intent.putExtra("data", Teacher("cy", "female", 20))
                 context.startActivity(intent)
             }) {
                 Text("跳转到FirstActivity", fontSize = 30.sp)

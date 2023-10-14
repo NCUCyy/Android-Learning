@@ -23,7 +23,7 @@ class FirstActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val data = intent.getParcelableExtra("data", Student::class.java)
+        val data = intent.getParcelableExtra("data", Teacher::class.java)
 
         setContent {
             ExpTheme {
@@ -32,16 +32,16 @@ class FirstActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    FirstScreen(message = data!!)
+                    CommonScreen(message = data!!)
                 }
             }
         }
     }
 }
 
-@Composable
-fun FirstScreen(message: Student) {
-    Column(modifier = Modifier.fillMaxSize()) {
-        Text(text = "${message.toString()}", fontSize = 20.sp, maxLines = 2)
-    }
-}
+//@Composable
+//fun FirstScreen(message: Student) {
+//    Column(modifier = Modifier.fillMaxSize()) {
+//        Text(text = "${message.toString()}", fontSize = 20.sp, maxLines = 2)
+//    }
+//}

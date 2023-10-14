@@ -31,16 +31,16 @@ class SecondActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    SecondScreen(message = data!!)
+                    CommonScreen(message = data!!)
                 }
             }
         }
     }
 }
 
-@Composable
-fun SecondScreen(message: Student) {
-    Column(modifier = Modifier.fillMaxSize()) {
-        Text(text = "${message.toString()}", fontSize = 20.sp, maxLines = 2)
-    }
-}
+//@Composable
+//fun SecondScreen(message: Student) {
+//    Column(modifier = Modifier.fillMaxSize()) {
+//        Text(text = "${message.toString()}", fontSize = 20.sp, maxLines = 2)
+//    }
+//}
