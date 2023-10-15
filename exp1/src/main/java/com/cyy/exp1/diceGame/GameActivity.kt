@@ -185,7 +185,10 @@ fun <T> CustomAlertDialog(
     var showDialog by remember { mutableStateOf(false) }
     // 配置本轮游戏的历史
     var history = "每次点数如下：\n"
-    curHistory.forEach {
+    if (curHistory.size > 6)
+        history += "...\n"
+    // 只取后6条记录
+    curHistory.takeLast(6).forEach {
         history += it + "\n"
     }
     AlertDialog(
