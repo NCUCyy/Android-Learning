@@ -1,9 +1,7 @@
 package com.cyy.exp1.diceGame
 
-import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -28,16 +26,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.cyy.exp1.R
-import android.app.AlertDialog
 import android.content.Context
-import android.util.Log
+import android.service.autofill.FillEventHistory
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.window.Dialog
 
 
 class GameActivity : ComponentActivity() {
@@ -101,6 +96,7 @@ fun GameScreen() {
                         // 若是第一次抛骰子，则调用judgeFirstTurn()的逻辑进行判断
                         gameStatus.value =
                             game.judgeFirstTurn(total)
+
                     } else {
                         // 若已经抛过骰子，则调用judgeLaterTurn()的逻辑进行判断
                         gameStatus.value =
@@ -108,41 +104,54 @@ fun GameScreen() {
                                 total,
                                 gameStatus.value
                             )
+
                     }
 
                     // 3、更新状态的point值并把当前游戏状态加入历史
                     cnt.value++
                     gameStatus.value.updatePoint(total)
                     // 加入游戏历史
-                    history.add("次数：${cnt.value}/结果：${gameStatus.value.description}/点数：${gameStatus.value.point}")
+                    history.add("次数：${cnt.value}  结果：${gameStatus.value.description}  点数：${gameStatus.value.point}")
+
                 }) {
                     Text(text = history.toString())
                 }
 
                 // 监视gameStatus状态变量的值是否发生变化，若变化，则立刻更新页面
                 if (gameStatus.value == GameStatus.WIN) {
+                    // 获取当前的
+                    val curHistory = getCurTurnHistory(history)
                     // 自定义对话框
                     CustomAlertDialog(
                         context = context,
                         title = gameStatus.value.description,
-                        result = "请确认是否继续游戏",
                         activityType = GameWinActivity::class.java,
-                        firstStatus, secondStatus, gameStatus, cnt
+                        firstStatus, secondStatus, gameStatus, cnt, curHistory
                     )
                 } else if (gameStatus.value == GameStatus.LOSE) {
+                    val curHistory = getCurTurnHistory(history)
                     // 自定义对话框
                     CustomAlertDialog(
                         context = context,
                         title = gameStatus.value.description,
-                        result = "请确认是否继续游戏",
+
                         activityType = GameLoseActivity::class.java,
-                        firstStatus, secondStatus, gameStatus, cnt
+                        firstStatus, secondStatus, gameStatus, cnt, curHistory
                     )
                 }
 
             }
         }
     }
+}
+
+fun getCurTurnHistory(history: MutableList<String>): MutableList<String> {
+    for (i in history.size - 1 downTo 0) {
+        if (history[i][3] == '1') {
+            return history.subList(i, history.size)
+        }
+    }
+    return mutableListOf<String>()
 }
 
 // 重置界面参数(注意：history不需要重置)
@@ -162,19 +171,25 @@ fun init(
 fun <T> CustomAlertDialog(
     context: Context,
     title: String,
-    result: String,
+
     activityType: Class<T>,
     firstStatus: MutableState<Int>,
     secondStatus: MutableState<Int>,
     gameStatus: MutableState<GameStatus>,
-    cnt: MutableState<Int>
+    cnt: MutableState<Int>,
+    curHistory: MutableList<String>
 ) {
     // 状态变量showDialog------与AlertDialog组件的显示与否进行绑定！！！
     var showDialog by remember { mutableStateOf(false) }
+    // 配置本轮游戏的历史
+    var history = "每次点数如下：\n"
+    curHistory.forEach {
+        history += it + "\n"
+    }
     AlertDialog(
         onDismissRequest = { showDialog = false },
         title = { Text(title) },
-        text = { Text(result) },
+        text = { Text(history) },
         confirmButton = {
             TextButton(
                 onClick = {
@@ -193,7 +208,7 @@ fun <T> CustomAlertDialog(
                     // 取消按钮点击时执行的操作
                     showDialog = false
                     // 跳转到指定Screen
-                    turnScreen(context, result, activityType)
+                    turnScreen(context, title, activityType)
                 }
             ) {
                 Text(text = "退出")
