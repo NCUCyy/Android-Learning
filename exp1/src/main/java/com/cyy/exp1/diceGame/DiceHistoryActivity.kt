@@ -13,17 +13,25 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.util.ArrayList
 import java.util.Objects
@@ -42,6 +50,8 @@ class DiceHistoryActivity : ComponentActivity() {
 @Composable
 fun <T> HistoryScreen(history: ArrayList<T>) {
     val context = LocalContext.current as Activity
+    var turnState by remember { mutableStateOf("") }
+    var showTurn: MutableList<String>
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
@@ -61,7 +71,25 @@ fun <T> HistoryScreen(history: ArrayList<T>) {
             Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "返回")
             Text("返回", fontSize = 30.sp, textAlign = TextAlign.Center)
         }
+
         Column {
+            Row() {
+                Text("请输入查询轮次：")
+                BasicTextField(
+                    value = turnState,
+                    onValueChange = {
+                        turnState = it
+                    },
+                    singleLine = true, // 单行文本框
+                    modifier = Modifier.padding(16.dp) // 修改输入框的边距
+                )
+                Button(onClick = { /*TODO*/ }) {
+                    Icon(imageVector = Icons.Filled.Search, contentDescription = "搜索")
+                    Text("查询")
+                }
+            }
+
+
             history.forEach {
                 Row(
                 ) {
