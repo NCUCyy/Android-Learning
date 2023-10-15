@@ -1,5 +1,6 @@
 package com.cyy.exp1.diceGame
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -28,6 +29,11 @@ import androidx.compose.ui.unit.dp
 import com.cyy.exp1.R
 import android.content.Context
 import android.service.autofill.FillEventHistory
+import android.widget.Toast
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.TextButton
@@ -39,14 +45,31 @@ import androidx.compose.runtime.setValue
 class GameActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // 是否重启游戏
+        var isStart = mutableStateOf(true)
+
+        // 使用ActivityResultLauncher进行意图跳转
+        val resultLauncher: ActivityResultLauncher<Intent> = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult(),
+            // 意图结束后，执行这个「回调函数」
+            ActivityResultCallback {
+                if (it.resultCode == Activity.RESULT_OK) {
+                    // 设置重启游戏
+                    isStart.value = true
+                    // 返回的data数据是个intent类型，里面存储了一段文本内容
+                    val text = it.data?.getStringExtra("message")
+                    Toast.makeText(this, "接受：$text", Toast.LENGTH_LONG).show()
+                }
+            }
+        )
         setContent {
-            GameScreen()
+            GameScreen(resultLauncher, isStart)
         }
     }
 }
 
 @Composable
-fun GameScreen() {
+fun GameScreen(resultLauncher: ActivityResultLauncher<Intent>, isStart: MutableState<Boolean>) {
     // 当前活动的上下文对象
     val context = LocalContext.current
     // 定义了游戏的业务逻辑
@@ -63,6 +86,11 @@ fun GameScreen() {
     var cnt = remember { mutableStateOf(0) }
     // 记录游戏的结果列表
     var history = remember { mutableListOf<String>() }
+
+    if (isStart.value) {
+        init(firstStatus, secondStatus, gameStatus, cnt)
+        isStart.value = false
+    }
 
     Box(
         contentAlignment = Alignment.Center,
@@ -113,7 +141,7 @@ fun GameScreen() {
                     cnt.value++
                     gameStatus.value.updatePoint(total)
                     // 加入游戏历史
-                    history.add("次数：${cnt.value}  结果：${gameStatus.value.description}  点数：${gameStatus.value.point}")
+                    history.add("次数：${cnt.value} 点数：${gameStatus.value.point}")
 
                 }, modifier = Modifier.fillMaxWidth()) {
                     Text(text = history.toString())
@@ -128,7 +156,7 @@ fun GameScreen() {
                         context = context,
                         title = gameStatus.value.description,
                         activityType = GameWinActivity::class.java,
-                        firstStatus, secondStatus, gameStatus, cnt, curHistory
+                        firstStatus, secondStatus, gameStatus, cnt, curHistory, resultLauncher
                     )
                 } else if (gameStatus.value == GameStatus.LOSE) {
                     val curHistory = getCurTurnHistory(history)
@@ -138,7 +166,7 @@ fun GameScreen() {
                         title = gameStatus.value.description,
 
                         activityType = GameLoseActivity::class.java,
-                        firstStatus, secondStatus, gameStatus, cnt, curHistory
+                        firstStatus, secondStatus, gameStatus, cnt, curHistory, resultLauncher
                     )
                 }
 
@@ -147,9 +175,10 @@ fun GameScreen() {
     }
 }
 
+// 获取本轮的记录
 fun getCurTurnHistory(history: MutableList<String>): MutableList<String> {
     for (i in history.size - 1 downTo 0) {
-        if (history[i][3] == '1') {
+        if (history[i].startsWith("次数：1 ")) {
             return history.subList(i, history.size)
         }
     }
@@ -173,61 +202,75 @@ fun init(
 fun <T> CustomAlertDialog(
     context: Context,
     title: String,
-
     activityType: Class<T>,
     firstStatus: MutableState<Int>,
     secondStatus: MutableState<Int>,
     gameStatus: MutableState<GameStatus>,
     cnt: MutableState<Int>,
-    curHistory: MutableList<String>
+    curHistory: MutableList<String>,
+    resultLauncher: ActivityResultLauncher<Intent>
 ) {
     // 状态变量showDialog------与AlertDialog组件的显示与否进行绑定！！！
-    var showDialog by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(true) }
+
     // 配置本轮游戏的历史
-    var history = "每次点数如下：\n"
+    var history = "每次点数如下（共${curHistory.size}次）：\n"
     if (curHistory.size > 6)
         history += "...\n"
     // 只取后6条记录
     curHistory.takeLast(6).forEach {
         history += it + "\n"
     }
-    AlertDialog(
-        onDismissRequest = { showDialog = false },
-        title = { Text(title) },
-        text = { Text(history) },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    // 确定按钮点击时执行的操作
-                    showDialog = false
-                    // 重置界面
-                    init(firstStatus, secondStatus, gameStatus, cnt)
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                // 点击Dialogue以外的地方时执行的操作
+                showDialog = false
+                // 重置界面
+                init(firstStatus, secondStatus, gameStatus, cnt)
+            },
+            title = { Text(title) },
+            text = { Text(history) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        // 确定按钮点击时执行的操作
+                        showDialog = false
+                        // 重置界面
+                        init(firstStatus, secondStatus, gameStatus, cnt)
+                    }
+                ) {
+                    Text(text = "继续")
                 }
-            ) {
-                Text(text = "继续")
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = {
-                    // 取消按钮点击时执行的操作
-                    showDialog = false
-                    // 跳转到指定Screen
-                    turnScreen(context, title, activityType)
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        // 取消按钮点击时执行的操作
+                        showDialog = false
+                        // 跳转到指定Screen
+                        turnScreen(context, title, activityType, resultLauncher)
+                    }
+                ) {
+                    Text(text = "退出")
                 }
-            ) {
-                Text(text = "退出")
-            }
-        },
-        modifier = Modifier.width(280.dp)
-    )
+            },
+            modifier = Modifier.width(280.dp)
+        )
+    }
 }
 
 
-fun <T> turnScreen(context: Context, result: String, activityType: Class<T>) {
+fun <T> turnScreen(
+    context: Context,
+    result: String,
+    activityType: Class<T>,
+    resultLauncher: ActivityResultLauncher<Intent>
+) {
     val intent = Intent(context, activityType)
     intent.putExtra("result", result)
-    context.startActivity(intent)
+    // 意图跳转
+    resultLauncher.launch(intent)
 }
 
 @Composable

@@ -1,6 +1,8 @@
 package com.cyy.exp1.diceGame
 
+import android.app.Activity
 import android.content.ClipDescription
+import android.content.Intent
 import android.media.Image
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -28,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -36,7 +39,8 @@ import androidx.compose.ui.unit.sp
 import com.cyy.exp1.R
 
 @Composable
-fun GameResultScreen(imageId: Int, description: String) {
+fun GameResultScreen(imageId: Int, result: String) {
+    val context = LocalContext.current as Activity
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
@@ -47,11 +51,18 @@ fun GameResultScreen(imageId: Int, description: String) {
             Row(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(text = result, fontSize = 50.sp)
+            }
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.height(400.dp)
             ) {
                 Image(
                     painter = painterResource(id = imageId),
-                    contentDescription = "$description",
+                    contentDescription = "$result",
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(200.dp)
@@ -62,7 +73,14 @@ fun GameResultScreen(imageId: Int, description: String) {
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Button(onClick = {
-                    /*TODO*/
+                    // 返回GameActivity
+                    // 为了实现：点击按钮，结束当前意图(返回代码为：RESULT_OK)
+                    val intent = Intent()
+                    intent.putExtra("message", "请继续游戏...")
+                    // 传递一个意图参数参数
+                    context.setResult(Activity.RESULT_OK, intent)
+                    // 结束当前意图(回到过来的地方)
+                    context.finish()
 
                 }) {
                     Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "返回")

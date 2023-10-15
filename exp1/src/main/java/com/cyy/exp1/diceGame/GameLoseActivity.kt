@@ -8,8 +8,9 @@ import com.cyy.exp1.R
 class GameLoseActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val result = intent.getStringExtra("result")
         setContent {
-            GameResultScreen(imageId = R.mipmap.lose, "输了")
+            GameResultScreen(imageId = R.mipmap.lose, result!!)
         }
     }
 }
