@@ -40,6 +40,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalSavedStateRegistryOwner
 
 
 class GameActivity : ComponentActivity() {
@@ -230,7 +231,9 @@ fun <T> CustomAlertDialog(
                 init(firstStatus, secondStatus, gameStatus, cnt)
             },
             title = { Text(title) },
-            text = { Text(history) },
+            text = {
+                history
+            },
             confirmButton = {
                 TextButton(
                     onClick = {
