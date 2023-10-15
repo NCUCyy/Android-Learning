@@ -41,7 +41,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalSavedStateRegistryOwner
-
+import androidx.compose.ui.res.integerArrayResource
 
 class GameActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -82,14 +82,13 @@ fun GameScreen(resultLauncher: ActivityResultLauncher<Intent>, isStart: MutableS
     val secondStatus = remember { mutableStateOf(0) }
     // 游戏状态(初始化为：GameStatus.START)
     var gameStatus = remember { mutableStateOf(GameStatus.START) }
-
-    // 记录本轮扔了几次
-    var cnt = remember { mutableStateOf(0) }
-    // 记录游戏的结果列表
-    var history = remember { mutableListOf<String>() }
+    // 记录本轮历史
+    var curHistory = remember { mutableListOf<String>() }
+    // 记录总历史
+    var history = remember { mutableListOf<MutableList<String>>() }
 
     if (isStart.value) {
-        init(firstStatus, secondStatus, gameStatus, cnt)
+        init(firstStatus, secondStatus, gameStatus, curHistory)
         isStart.value = false
     }
 
@@ -139,35 +138,34 @@ fun GameScreen(resultLauncher: ActivityResultLauncher<Intent>, isStart: MutableS
                     }
 
                     // 3、更新状态的point值并把当前游戏状态加入历史
-                    cnt.value++
                     gameStatus.value.updatePoint(total)
-                    // 加入游戏历史
-                    history.add("次数：${cnt.value} 点数：${gameStatus.value.point}")
-
+                    // 加入本轮游戏历史
+                    curHistory.add("次数：${curHistory.size + 1} 点数：${gameStatus.value.point}")
                 }, modifier = Modifier.fillMaxWidth()) {
                     Text(text = history.toString())
                 }
 
                 // 监视gameStatus状态变量的值是否发生变化，若变化，则立刻更新页面
                 if (gameStatus.value == GameStatus.WIN) {
-                    // 获取当前的
-                    val curHistory = getCurTurnHistory(history)
+                    // 把本轮的历史加入总历史中
+                    history.add(curHistory.toMutableList())
                     // 自定义对话框
                     CustomAlertDialog(
                         context = context,
                         title = gameStatus.value.description,
                         activityType = GameWinActivity::class.java,
-                        firstStatus, secondStatus, gameStatus, cnt, curHistory, resultLauncher
+                        firstStatus, secondStatus, gameStatus, curHistory, history, resultLauncher
                     )
                 } else if (gameStatus.value == GameStatus.LOSE) {
-                    val curHistory = getCurTurnHistory(history)
+                    // 把本轮的历史加入总历史中
+                    history.add(curHistory.toMutableList())
                     // 自定义对话框
                     CustomAlertDialog(
                         context = context,
                         title = gameStatus.value.description,
 
                         activityType = GameLoseActivity::class.java,
-                        firstStatus, secondStatus, gameStatus, cnt, curHistory, resultLauncher
+                        firstStatus, secondStatus, gameStatus, curHistory, history, resultLauncher
                     )
                 }
 
@@ -176,26 +174,16 @@ fun GameScreen(resultLauncher: ActivityResultLauncher<Intent>, isStart: MutableS
     }
 }
 
-// 获取本轮的记录
-fun getCurTurnHistory(history: MutableList<String>): MutableList<String> {
-    for (i in history.size - 1 downTo 0) {
-        if (history[i].startsWith("次数：1 ")) {
-            return history.subList(i, history.size)
-        }
-    }
-    return mutableListOf<String>()
-}
-
 // 重置界面参数(注意：history不需要重置)
 fun init(
     firstStatus: MutableState<Int>,
     secondStatus: MutableState<Int>,
     gameStatus: MutableState<GameStatus>,
-    cnt: MutableState<Int>
+    curHistory: MutableList<String>
 ) {
     firstStatus.value = 0
     secondStatus.value = 0
-    cnt.value = 0
+    curHistory.clear()
     gameStatus.value = GameStatus.START
 }
 
@@ -207,32 +195,38 @@ fun <T> CustomAlertDialog(
     firstStatus: MutableState<Int>,
     secondStatus: MutableState<Int>,
     gameStatus: MutableState<GameStatus>,
-    cnt: MutableState<Int>,
     curHistory: MutableList<String>,
+    history: MutableList<MutableList<String>>,
     resultLauncher: ActivityResultLauncher<Intent>
 ) {
     // 状态变量showDialog------与AlertDialog组件的显示与否进行绑定！！！
     var showDialog by remember { mutableStateOf(true) }
-
-    // 配置本轮游戏的历史
-    var history = "每次点数如下（共${curHistory.size}次）：\n"
-    if (curHistory.size > 6)
-        history += "...\n"
-    // 只取后6条记录
-    curHistory.takeLast(6).forEach {
-        history += it + "\n"
-    }
     if (showDialog) {
         AlertDialog(
             onDismissRequest = {
                 // 点击Dialogue以外的地方时执行的操作
                 showDialog = false
                 // 重置界面
-                init(firstStatus, secondStatus, gameStatus, cnt)
+                init(firstStatus, secondStatus, gameStatus, curHistory)
             },
             title = { Text(title) },
             text = {
-                history
+                // 展示本轮的历史记录
+                Column {
+                    Row {
+                        Text(text = "每次点数如下（共${curHistory.size}次）：")
+                    }
+                    // 超过6次展示，只展示后6条
+                    if (curHistory.size > 6)
+                        Row {
+                            Text(text = "...")
+                        }
+                    curHistory.takeLast(6).forEach {
+                        Row {
+                            Text(text = it)
+                        }
+                    }
+                }
             },
             confirmButton = {
                 TextButton(
@@ -240,7 +234,7 @@ fun <T> CustomAlertDialog(
                         // 确定按钮点击时执行的操作
                         showDialog = false
                         // 重置界面
-                        init(firstStatus, secondStatus, gameStatus, cnt)
+                        init(firstStatus, secondStatus, gameStatus, curHistory)
                     }
                 ) {
                     Text(text = "继续")
@@ -252,7 +246,7 @@ fun <T> CustomAlertDialog(
                         // 取消按钮点击时执行的操作
                         showDialog = false
                         // 跳转到指定Screen
-                        turnScreen(context, title, activityType, resultLauncher)
+                        turnScreen(context, title, activityType, history, resultLauncher)
                     }
                 ) {
                     Text(text = "退出")
@@ -268,10 +262,12 @@ fun <T> turnScreen(
     context: Context,
     result: String,
     activityType: Class<T>,
+    history: MutableList<MutableList<String>>,
     resultLauncher: ActivityResultLauncher<Intent>
 ) {
     val intent = Intent(context, activityType)
     intent.putExtra("result", result)
+    intent.putExtra("history", ArrayList(history))
     // 意图跳转
     resultLauncher.launch(intent)
 }

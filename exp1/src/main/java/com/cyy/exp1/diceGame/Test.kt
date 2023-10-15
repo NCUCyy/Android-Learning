@@ -1,3 +1,4 @@
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,6 +16,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun MyTableWithSearch() {
+
     var query by remember { mutableStateOf("") }
     val items = listOf(
         "Item 1",

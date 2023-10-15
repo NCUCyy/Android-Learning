@@ -4,10 +4,15 @@ import android.app.Activity
 import android.content.ClipDescription
 import android.content.Intent
 import android.media.Image
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -26,11 +31,13 @@ import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.integerArrayResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -38,9 +45,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cyy.exp1.R
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
-fun GameResultScreen(imageId: Int, result: String) {
+fun GameResultScreen(
+    imageId: Int,
+    data: Intent,
+    resultLauncher: ActivityResultLauncher<Intent>
+) {
+    // 获得当前活动的上下文
     val context = LocalContext.current as Activity
+
+    // 从GameActivity「传数据」到GameWin/LoseActivity（存在intent中）
+    val result = data.getStringExtra("result")!!
+    val history = data.getSerializableExtra("history", ArrayList::class.java)
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
@@ -81,13 +98,14 @@ fun GameResultScreen(imageId: Int, result: String) {
                     context.setResult(Activity.RESULT_OK, intent)
                     // 结束当前意图(回到过来的地方)
                     context.finish()
-
                 }) {
                     Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "返回")
                     Text("返回", fontSize = 30.sp, textAlign = TextAlign.Center)
                 }
                 Button(onClick = {
-                    /*TODO*/
+                    val intent = Intent(context, DiceHistoryActivity::class.java)
+                    intent.putExtra("history", history)
+                    resultLauncher.launch(intent)
                 }) {
                     Icon(imageVector = Icons.Filled.List, contentDescription = "游戏历史")
                     Text("游戏历史", fontSize = 30.sp, textAlign = TextAlign.Center)
@@ -97,3 +115,5 @@ fun GameResultScreen(imageId: Int, result: String) {
 
     }
 }
+
+
