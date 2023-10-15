@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.cyy.exp1.R
 import android.content.Context
 import android.service.autofill.FillEventHistory
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.MutableState
@@ -57,6 +58,7 @@ fun GameScreen() {
     val secondStatus = remember { mutableStateOf(0) }
     // 游戏状态(初始化为：GameStatus.START)
     var gameStatus = remember { mutableStateOf(GameStatus.START) }
+
     // 记录本轮扔了几次
     var cnt = remember { mutableStateOf(0) }
     // 记录游戏的结果列表
@@ -113,7 +115,7 @@ fun GameScreen() {
                     // 加入游戏历史
                     history.add("次数：${cnt.value}  结果：${gameStatus.value.description}  点数：${gameStatus.value.point}")
 
-                }) {
+                }, modifier = Modifier.fillMaxWidth()) {
                     Text(text = history.toString())
                 }
 
