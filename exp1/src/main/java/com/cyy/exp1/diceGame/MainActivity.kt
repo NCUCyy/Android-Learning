@@ -31,15 +31,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            ExpTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    MainScreen()
-                }
-            }
+            MainScreen()
         }
     }
 }
@@ -47,13 +39,20 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen() {
     val context = LocalContext.current
-    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize().background(Color.Black)) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+    ) {
         Image(
-            modifier = Modifier.fillMaxSize().clickable {
-                // 设置Image可点击---点击后跳转到GameActivity
-                val intent = Intent(context, GameActivity::class.java)
-                context.startActivity(intent)
-            },
+            modifier = Modifier
+                .fillMaxSize()
+                .clickable {
+                    // 设置Image可点击---点击后跳转到GameActivity
+                    val intent = Intent(context, GameActivity::class.java)
+                    context.startActivity(intent)
+                },
             painter = painterResource(id = R.mipmap.dicegame),
             contentDescription = "首页"
         )
