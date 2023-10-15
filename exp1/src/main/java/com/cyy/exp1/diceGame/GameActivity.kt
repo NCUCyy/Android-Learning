@@ -1,6 +1,6 @@
 package com.cyy.exp1.diceGame
 
-import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -28,6 +28,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.cyy.exp1.R
+import android.app.AlertDialog
+import android.content.Context
+import android.util.Log
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.window.Dialog
+
 
 class GameActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,12 +55,17 @@ fun GameScreen() {
     val context = LocalContext.current
     // 定义了游戏的业务逻辑
     val game = DiceGame()
+    // 定义状态变量，与组件进行绑定————必须用remember：为了重组后，执行这个函数时仍然记住原来的状态值
     // 骰子1的状态
     val firstStatus = remember { mutableStateOf(0) }
     // 骰子2的状态
     val secondStatus = remember { mutableStateOf(0) }
     // 游戏状态(初始化为：GameStatus.START)
     var gameStatus = remember { mutableStateOf(GameStatus.START) }
+    // 记录本轮扔了几次
+    var cnt = remember { mutableStateOf(0) }
+    // 记录游戏的结果列表
+    var history = remember { mutableListOf<String>() }
 
     Box(
         contentAlignment = Alignment.Center,
@@ -61,7 +77,7 @@ fun GameScreen() {
             Row(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically,
-//                modifier = Modifier.height(400.dp)
+                modifier = Modifier.height(400.dp)
             ) {
                 if (gameStatus.value != GameStatus.START) {
                     CustomImage("骰子1", firstStatus.value)
@@ -74,58 +90,119 @@ fun GameScreen() {
                 modifier = Modifier.height(400.dp)
             ) {
                 Button(onClick = {
-                    // 抛骰子
+                    // 1、抛骰子
                     firstStatus.value = game.rollDice()
                     secondStatus.value = game.rollDice()
+                    val total = firstStatus.value + secondStatus.value
 
+                    // 2、处理业务
                     // 第一次和后几次的逻辑不同
                     if (gameStatus.value == GameStatus.START) {
                         // 若是第一次抛骰子，则调用judgeFirstTurn()的逻辑进行判断
                         gameStatus.value =
-                            game.judgeFirstTurn(firstStatus.value, secondStatus.value)
+                            game.judgeFirstTurn(total)
                     } else {
                         // 若已经抛过骰子，则调用judgeLaterTurn()的逻辑进行判断
                         gameStatus.value =
                             game.judgeLaterTurn(
-                                firstStatus.value,
-                                secondStatus.value,
+                                total,
                                 gameStatus.value
                             )
                     }
-                    // 判断游戏结果：
-                    when (gameStatus.value) {
-                        // 赢
-                        GameStatus.WIN -> {
-                            turnScreen(
-                                context,
-                                gameStatus.value.description,
-                                GameWinActivity::class.java
-                            )
-                        }
-                        // 输
-                        GameStatus.LOSE -> {
-                            turnScreen(
-                                context,
-                                gameStatus.value.description,
-                                GameLoseActivity::class.java
-                            )
-                        }
 
-                        else -> {
-                            Toast.makeText(context, "请继续..", Toast.LENGTH_LONG).show()
-                        }
-                    }
-
+                    // 3、更新状态的point值并把当前游戏状态加入历史
+                    cnt.value++
+                    gameStatus.value.updatePoint(total)
+                    // 加入游戏历史
+                    history.add("次数：${cnt.value}/结果：${gameStatus.value.description}/点数：${gameStatus.value.point}")
                 }) {
-                    Text(text = "点击抛骰子")
+                    Text(text = history.toString())
                 }
-                Row {
-                    Text(text = gameStatus.value.description, color = Color.White)
+
+                // 监视gameStatus状态变量的值是否发生变化，若变化，则立刻更新页面
+                if (gameStatus.value == GameStatus.WIN) {
+                    // 自定义对话框
+                    CustomAlertDialog(
+                        context = context,
+                        title = gameStatus.value.description,
+                        result = "请确认是否继续游戏",
+                        activityType = GameWinActivity::class.java,
+                        firstStatus, secondStatus, gameStatus, cnt
+                    )
+                } else if (gameStatus.value == GameStatus.LOSE) {
+                    // 自定义对话框
+                    CustomAlertDialog(
+                        context = context,
+                        title = gameStatus.value.description,
+                        result = "请确认是否继续游戏",
+                        activityType = GameLoseActivity::class.java,
+                        firstStatus, secondStatus, gameStatus, cnt
+                    )
                 }
+
             }
         }
     }
 }
+
+// 重置界面参数(注意：history不需要重置)
+fun init(
+    firstStatus: MutableState<Int>,
+    secondStatus: MutableState<Int>,
+    gameStatus: MutableState<GameStatus>,
+    cnt: MutableState<Int>
+) {
+    firstStatus.value = 0
+    secondStatus.value = 0
+    cnt.value = 0
+    gameStatus.value = GameStatus.START
+}
+
+@Composable
+fun <T> CustomAlertDialog(
+    context: Context,
+    title: String,
+    result: String,
+    activityType: Class<T>,
+    firstStatus: MutableState<Int>,
+    secondStatus: MutableState<Int>,
+    gameStatus: MutableState<GameStatus>,
+    cnt: MutableState<Int>
+) {
+    // 状态变量showDialog------与AlertDialog组件的显示与否进行绑定！！！
+    var showDialog by remember { mutableStateOf(false) }
+    AlertDialog(
+        onDismissRequest = { showDialog = false },
+        title = { Text(title) },
+        text = { Text(result) },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    // 确定按钮点击时执行的操作
+                    showDialog = false
+                    // 重置界面
+                    init(firstStatus, secondStatus, gameStatus, cnt)
+                }
+            ) {
+                Text(text = "继续")
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = {
+                    // 取消按钮点击时执行的操作
+                    showDialog = false
+                    // 跳转到指定Screen
+                    turnScreen(context, result, activityType)
+                }
+            ) {
+                Text(text = "退出")
+            }
+        },
+        modifier = Modifier.width(280.dp)
+    )
+}
+
 
 fun <T> turnScreen(context: Context, result: String, activityType: Class<T>) {
     val intent = Intent(context, activityType)

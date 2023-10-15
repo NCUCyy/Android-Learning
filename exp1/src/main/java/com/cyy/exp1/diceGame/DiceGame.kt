@@ -20,20 +20,20 @@ class DiceGame {
     fun rollDice() = rand.nextInt(6) + 1
 
     // 供活动中调用
-    fun judgeFirstTurn(first: Int, second: Int) = when (first + second) {
+    fun judgeFirstTurn(total: Int) = when (total) {
         7, 11 -> GameStatus.WIN
         2, 3, 12 -> GameStatus.LOSE
         else -> {
             val status = GameStatus.GOON
-            status.updatePoint(first + second)
+            status.updatePoint(total)
             // {}的结果
             status
         }
     }
 
     // 供活动中调用
-    fun judgeLaterTurn(first: Int, second: Int, status: GameStatus): GameStatus {
-        val result = when (val total = first + second) {
+    fun judgeLaterTurn(total: Int, status: GameStatus): GameStatus {
+        val result = when (total) {
             7 -> GameStatus.LOSE
             status.point -> GameStatus.WIN
             else -> {
