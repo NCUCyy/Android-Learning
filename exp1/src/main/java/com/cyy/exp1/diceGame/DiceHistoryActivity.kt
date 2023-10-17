@@ -62,10 +62,8 @@ class DiceHistoryActivity : ComponentActivity() {
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen(history: ArrayList<*>?) {
-//    val context = LocalContext.current as Activity
     var query = remember { mutableStateOf("") }
     var queryHistory = remember { mutableListOf<String>() }
     // 初始化显示
@@ -86,14 +84,20 @@ fun HistoryScreen(history: ArrayList<*>?) {
             QueryText(query, history, queryHistory)
 
             // 查询的轮次的总体信息
-            ListItem("第${query.value}轮：（共{${queryHistory.size}}次）")
 
+            // 显示轮次
+            var turn = query.value
+            if (turn == "") {
+                turn = history?.size.toString()
+            }
+            ListItem("第${turn}轮：（共${queryHistory.size}次）", Color.LightGray)
+            // 记录为空时的判断
+            if (queryHistory.size == 0)
+                ListItem("无记录", bgColor = Color.White)
             // 查询的轮次的具体信息
             queryHistory.forEach {
-                ListItem(it)
+                ListItem(it, Color.White)
             }
-
-
         }
     }
 }
@@ -116,18 +120,15 @@ fun QueryText(
             onValueChange = {
                 // 输入框改变时...回调
                 query.value = it
+                // 清空原来的数
+                queryHistory.clear()
                 if (query.value != "") {
                     val tmp = query.value.toInt() - 1
                     if (tmp in 0 until history!!.size) {
-                        queryHistory.clear()
                         queryHistory.addAll(history[tmp] as MutableList<String>)
                         Log.i("queryHistory", queryHistory.toString())
-                    } else {
-                        queryHistory.clear()
-                        queryHistory.add("无记录")
                     }
                 } else {
-                    queryHistory.clear()
                     queryHistory.addAll(history!![history.size - 1] as MutableList<String>)
                 }
             },
@@ -167,13 +168,13 @@ fun ReturnBtn() {
 }
 
 @Composable
-fun ListItem(item: String) {
+fun ListItem(item: String, bgColor: Color) {
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
-            .background(Color.White)
+            .background(bgColor)
             .padding(16.dp)
     ) {
         Row(
@@ -186,13 +187,5 @@ fun ListItem(item: String) {
                 modifier = Modifier.fillMaxWidth()
             )
         }
-//        Icon(
-//            imageVector = Icons.Default.,
-//            contentDescription = "图标",
-//            modifier = Modifier
-//                .size(24.dp)
-//                .align(Alignment.CenterEnd)
-//                .padding(8.dp)
-//        )
     }
 }

@@ -81,12 +81,13 @@ fun GameScreen(resultLauncher: ActivityResultLauncher<Intent>, isStart: MutableS
     // 骰子2的状态
     val secondStatus = remember { mutableStateOf(0) }
     // 游戏状态(初始化为：GameStatus.START)
-    var gameStatus = remember { mutableStateOf(GameStatus.START) }
+    val gameStatus = remember { mutableStateOf(GameStatus.START) }
     // 记录本轮历史
-    var curHistory = remember { mutableListOf<String>() }
+    val curHistory = remember { mutableListOf<String>() }
     // 记录总历史
-    var history = remember { mutableListOf<MutableList<String>>() }
-
+    val history = remember { mutableListOf<MutableList<String>>() }
+    // 是否展示规则
+    val showRule = remember { mutableStateOf(false) }
     if (isStart.value) {
         init(firstStatus, secondStatus, gameStatus, curHistory)
         isStart.value = false
@@ -99,6 +100,8 @@ fun GameScreen(resultLauncher: ActivityResultLauncher<Intent>, isStart: MutableS
             .background(Color.Black)
     ) {
         Column {
+            // 规则按钮
+            RuleBtn()
             // 两张Dice的照片
             DiceImg(firstStatus, secondStatus, gameStatus)
             // 游戏按钮
@@ -229,10 +232,10 @@ fun <T> CustomAlertDialog(
     if (showDialog) {
         AlertDialog(
             onDismissRequest = {
-                // 点击Dialogue以外的地方时执行的操作
-                showDialog = false
-                // 重置界面
-                init(firstStatus, secondStatus, gameStatus, curHistory)
+                // 点击Dialogue以外的地方时执行的操作：do nothing
+//                showDialog = false
+//                // 重置界面
+//                init(firstStatus, secondStatus, gameStatus, curHistory)
             },
             title = { Text(title) },
             text = {

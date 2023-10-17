@@ -24,7 +24,7 @@
                 android:name=".diceGame.GameActivity"
                 android:exported="false" />
         <activity
-                android:name=".diceGame.MainActivity"
+                android:name=".diceGame.StartActivity"
                 android:exported="true" />
         <activity
                 android:name=".MainActivity"

@@ -11,6 +11,7 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.compose.ui.graphics.Color
 import com.cyy.exp1.R
 
 class GameLoseActivity : ComponentActivity() {
@@ -30,7 +31,7 @@ class GameLoseActivity : ComponentActivity() {
             }
         )
         setContent {
-            GameResultScreen(imageId = R.mipmap.lose, intent, resultLauncher)
+            GameResultScreen(imageId = R.mipmap.lose, intent, resultLauncher, Color.Gray)
         }
     }
 }

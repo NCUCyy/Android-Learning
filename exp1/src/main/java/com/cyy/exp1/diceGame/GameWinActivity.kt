@@ -13,6 +13,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.material3.Text
+import androidx.compose.ui.graphics.Color
 import com.cyy.exp1.R
 
 class GameWinActivity : ComponentActivity() {
@@ -32,7 +33,7 @@ class GameWinActivity : ComponentActivity() {
             }
         )
         setContent {
-            GameResultScreen(imageId = R.mipmap.happy, intent, resultLauncher)
+            GameResultScreen(imageId = R.mipmap.happy, intent, resultLauncher, Color.Yellow)
         }
     }
 

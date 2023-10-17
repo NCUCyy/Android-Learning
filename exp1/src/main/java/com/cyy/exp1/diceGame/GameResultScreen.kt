@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
@@ -50,11 +51,9 @@ import com.cyy.exp1.R
 fun GameResultScreen(
     imageId: Int,
     data: Intent,
-    resultLauncher: ActivityResultLauncher<Intent>
+    resultLauncher: ActivityResultLauncher<Intent>,
+    bgColor: Color
 ) {
-    // 获得当前活动的上下文
-    val context = LocalContext.current as Activity
-
     // 从GameActivity「传数据」到GameWin/LoseActivity（存在intent中）
     val result = data.getStringExtra("result")!!
     val history = data.getSerializableExtra("history", ArrayList::class.java)
@@ -62,7 +61,7 @@ fun GameResultScreen(
         contentAlignment = Alignment.Center,
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Blue)
+            .background(bgColor)
     ) {
         Column {
             Row(
@@ -85,35 +84,46 @@ fun GameResultScreen(
                         .height(200.dp)
                 )
             }
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Button(onClick = {
-                    // 返回GameActivity
-                    // 为了实现：点击按钮，结束当前意图(返回代码为：RESULT_OK)
-                    val intent = Intent()
-                    intent.putExtra("message", "请继续游戏...")
-                    // 传递一个意图参数参数
-                    context.setResult(Activity.RESULT_OK, intent)
-                    // 结束当前意图(回到过来的地方)
-                    context.finish()
-                }) {
-                    Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "返回")
-                    Text("返回", fontSize = 30.sp, textAlign = TextAlign.Center)
-                }
-                Button(onClick = {
-                    val intent = Intent(context, DiceHistoryActivity::class.java)
-                    intent.putExtra("history", history)
-                    resultLauncher.launch(intent)
-                }) {
-                    Icon(imageVector = Icons.Filled.List, contentDescription = "游戏历史")
-                    Text("游戏历史", fontSize = 30.sp, textAlign = TextAlign.Center)
-                }
-            }
+            // 按钮行
+            BtnRow(resultLauncher, history)
         }
 
     }
 }
 
-
+@Composable
+fun BtnRow(resultLauncher: ActivityResultLauncher<Intent>, history: ArrayList<*>?) {
+    // 获得当前活动的上下文
+    val context = LocalContext.current as Activity
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Button(
+            onClick = {
+                // 返回GameActivity
+                // 为了实现：点击按钮，结束当前意图(返回代码为：RESULT_OK)
+                val intent = Intent()
+                intent.putExtra("message", "请继续游戏...")
+                // 传递一个意图参数参数
+                context.setResult(Activity.RESULT_OK, intent)
+                // 结束当前意图(回到过来的地方)
+                context.finish()
+            }, modifier = Modifier.padding(10.dp)
+        ) {
+            Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "返回")
+            Text("返回", fontSize = 30.sp, textAlign = TextAlign.Center)
+        }
+        Button(
+            onClick = {
+                val intent = Intent(context, DiceHistoryActivity::class.java)
+                intent.putExtra("history", history)
+                resultLauncher.launch(intent)
+            }, modifier = Modifier.padding(10.dp)
+        ) {
+            Icon(imageVector = Icons.Filled.List, contentDescription = "游戏历史")
+            Text("游戏历史", fontSize = 30.sp, textAlign = TextAlign.Center)
+        }
+    }
+}
