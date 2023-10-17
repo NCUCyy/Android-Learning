@@ -94,8 +94,11 @@ fun RuleDialog(showRule: MutableState<Boolean>) {
         title = {
             Column {
                 Text(text = "游戏规则：", fontSize = 30.sp)
-                Text(
-                    """
+            }
+        },
+        text = {
+            Text(
+                """
                      第一次扔：
                      { 7, 11 } -> 赢
                      { 2, 3, 1 } -> 输
@@ -106,11 +109,7 @@ fun RuleDialog(showRule: MutableState<Boolean>) {
                      { 点数与上一次的相同 } -> 赢
                      { 其他 } -> 继续游戏
                 """.trimIndent(), fontSize = 20.sp
-                )
-            }
-
-        },
-        text = {
+            )
         },
         confirmButton = {
             TextButton(
