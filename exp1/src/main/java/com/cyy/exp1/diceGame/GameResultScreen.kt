@@ -87,9 +87,14 @@ fun GameResultScreen(
                 )
             }
             // 按钮行
-            BtnRow(resultLauncher, history)
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                BtnRow(resultLauncher, history)
+            }
         }
-
     }
 }
 
@@ -97,43 +102,37 @@ fun GameResultScreen(
 fun BtnRow(resultLauncher: ActivityResultLauncher<Intent>, history: ArrayList<*>?) {
     // 获得当前活动的上下文
     val context = LocalContext.current as Activity
-    Row(
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth()
+    Button(
+        onClick = {
+            // 返回GameActivity
+            // 为了实现：点击按钮，结束当前意图(返回代码为：RESULT_OK)
+            val intent = Intent()
+            intent.putExtra("message", "请继续游戏...")
+            // 传递一个意图参数参数
+            context.setResult(Activity.RESULT_OK, intent)
+            // 结束当前意图(回到过来的地方)
+            context.finish()
+        }, modifier = Modifier.padding(10.dp)
     ) {
-        Button(
-            onClick = {
-                // 返回GameActivity
-                // 为了实现：点击按钮，结束当前意图(返回代码为：RESULT_OK)
-                val intent = Intent()
-                intent.putExtra("message", "请继续游戏...")
-                // 传递一个意图参数参数
-                context.setResult(Activity.RESULT_OK, intent)
-                // 结束当前意图(回到过来的地方)
-                context.finish()
-            }, modifier = Modifier.padding(10.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Filled.ArrowBack,
-                contentDescription = "返回",
-                modifier = Modifier.padding(8.dp)
-            )
-            Text("返回", fontSize = 25.sp, textAlign = TextAlign.Center)
-        }
-        Button(
-            onClick = {
-                val intent = Intent(context, DiceHistoryActivity::class.java)
-                intent.putExtra("history", history)
-                resultLauncher.launch(intent)
-            }, modifier = Modifier.padding(10.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Rounded.Search,
-                contentDescription = "游戏历史",
-                modifier = Modifier.padding(8.dp)
-            )
-            Text("游戏历史", fontSize = 25.sp, textAlign = TextAlign.Center)
-        }
+        Icon(
+            imageVector = Icons.Filled.ArrowBack,
+            contentDescription = "返回",
+            modifier = Modifier.padding(8.dp)
+        )
+        Text("返回", fontSize = 25.sp, textAlign = TextAlign.Center)
+    }
+    Button(
+        onClick = {
+            val intent = Intent(context, DiceHistoryActivity::class.java)
+            intent.putExtra("history", history)
+            resultLauncher.launch(intent)
+        }, modifier = Modifier.padding(10.dp)
+    ) {
+        Icon(
+            imageVector = Icons.Rounded.Search,
+            contentDescription = "游戏历史",
+            modifier = Modifier.padding(8.dp)
+        )
+        Text("游戏历史", fontSize = 25.sp, textAlign = TextAlign.Center)
     }
 }

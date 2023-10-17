@@ -88,18 +88,22 @@ fun HistoryScreen(history: ArrayList<*>) {
             // 文本框
             QueryText(query, history, queryHistory)
 
-            // 查询的轮次的总体信息
-
+            // 1、查询的轮次的总体信息
             // 显示轮次
             var turn = query.value
             if (turn == "") {
                 turn = history?.size.toString()
             }
-            ListItem("第${turn}轮：（共${queryHistory.size-1}次）", Color.LightGray)
+
             // 记录为空时的判断
-            if (queryHistory.size == 0)
+            if (queryHistory.size == 0) {
+                ListItem("第${turn}轮：（共0次）", Color.LightGray)
                 ListItem("无记录", bgColor = Color.White)
-            // 查询的轮次的具体信息
+            } else {
+                ListItem("第${turn}轮：（共${queryHistory.size - 1}次）", Color.LightGray)
+            }
+
+            // 2、查询的轮次的具体信息
             queryHistory.forEach {
                 ListItem(it, Color.White)
             }

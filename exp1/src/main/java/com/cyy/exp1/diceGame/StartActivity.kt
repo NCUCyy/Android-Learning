@@ -108,7 +108,7 @@ fun RuleDialog(showRule: MutableState<Boolean>) {
                      { 7 } -> 输
                      { 点数与上一次的相同 } -> 赢
                      { 其他 } -> 继续游戏
-                """.trimIndent(), fontSize = 20.sp
+                """.trimIndent(), fontSize = 18.sp
             )
         },
         confirmButton = {

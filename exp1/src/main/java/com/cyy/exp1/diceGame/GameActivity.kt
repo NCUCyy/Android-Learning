@@ -107,7 +107,6 @@ fun GameScreen(resultLauncher: ActivityResultLauncher<Intent>, isStart: MutableS
             // 游戏按钮
             PlayBtn(firstStatus, secondStatus, game, gameStatus, curHistory, history)
 
-
             // 监视gameStatus状态变量的值是否发生变化，若变化，则立刻更新页面
             if (gameStatus.value == GameStatus.WIN) {
                 // 把本轮的历史加入总历史中
