@@ -42,6 +42,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalSavedStateRegistryOwner
 import androidx.compose.ui.res.integerArrayResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
 
 class GameActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,7 +61,7 @@ class GameActivity : ComponentActivity() {
                     isStart.value = true
                     // 返回的data数据是个intent类型，里面存储了一段文本内容
                     val text = it.data?.getStringExtra("message")
-                    Toast.makeText(this, "接受：$text", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "$text", Toast.LENGTH_LONG).show()
                 }
             }
         )
@@ -109,6 +111,7 @@ fun GameScreen(resultLauncher: ActivityResultLauncher<Intent>, isStart: MutableS
             // 监视gameStatus状态变量的值是否发生变化，若变化，则立刻更新页面
             if (gameStatus.value == GameStatus.WIN) {
                 // 把本轮的历史加入总历史中
+                curHistory.add(gameStatus.value.toString())
                 history.add(curHistory.toMutableList())
                 // 自定义对话框
                 CustomAlertDialog(
@@ -119,6 +122,7 @@ fun GameScreen(resultLauncher: ActivityResultLauncher<Intent>, isStart: MutableS
                 )
             } else if (gameStatus.value == GameStatus.LOSE) {
                 // 把本轮的历史加入总历史中
+                curHistory.add(gameStatus.value.toString())
                 history.add(curHistory.toMutableList())
                 // 自定义对话框
                 CustomAlertDialog(
@@ -177,15 +181,10 @@ fun PlayBtn(
                 // ----------这个判断用于：已经产生结果，但是在Dialog完全弹出之前，又成功点击按钮摇了骰子导致添加了错误记录----------
                 if (gameStatus.value == GameStatus.START) {
                     // 若是第一次抛骰子，则调用judgeFirstTurn()的逻辑进行判断
-                    gameStatus.value =
-                        game.judgeFirstTurn(total)
+                    gameStatus.value = game.judgeFirstTurn(total)
                 } else {
                     // 若已经抛过骰子，则调用judgeLaterTurn()的逻辑进行判断
-                    gameStatus.value =
-                        game.judgeLaterTurn(
-                            total,
-                            gameStatus.value
-                        )
+                    gameStatus.value = game.judgeLaterTurn(total, gameStatus.value)
                 }
             }
             // 3、更新状态的point值并把当前游戏状态加入历史
@@ -193,7 +192,7 @@ fun PlayBtn(
             // 加入本轮游戏历史
             curHistory.add("次数：${curHistory.size + 1}          点数：${gameStatus.value.point}")
         }, modifier = Modifier.fillMaxWidth()) {
-            Text(text = history.toString())
+            Text(text = "摇一摇", textAlign = TextAlign.Center, fontSize = 20.sp)
         }
     }
 }
@@ -236,7 +235,7 @@ fun <T> CustomAlertDialog(
                 // 展示本轮的历史记录
                 Column {
                     Row {
-                        Text(text = "每次点数如下（共${curHistory.size}次）：")
+                        Text(text = "每次点数如下（共${curHistory.size-1}次）：")
                     }
                     // 超过6次展示，只展示后6条
                     if (curHistory.size > 6)

@@ -161,6 +161,7 @@ fun TopMenu() {
             )
         }
     })
+    // 展示规则
     if (showRule.value) {
         RuleDialog(showRule = showRule)
     }

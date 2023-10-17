@@ -28,7 +28,7 @@ class GameWinActivity : ComponentActivity() {
                 if (it.resultCode == Activity.RESULT_OK) {
                     // 返回的data数据是个intent类型，里面存储了一段文本内容
                     val text = it.data?.getStringExtra("message")
-                    Toast.makeText(this, "接受：$text", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "$text", Toast.LENGTH_LONG).show()
                 }
             }
         )

@@ -7,7 +7,7 @@ enum class GameStatus(val description: String, var point: Int) {
     GOON("请继续游戏", 0);
 
 
-    override fun toString(): String = "$description/$point"
+    override fun toString(): String = "$description"
     fun updatePoint(point: Int) {
         this.point = point
     }

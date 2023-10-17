@@ -95,7 +95,7 @@ fun HistoryScreen(history: ArrayList<*>) {
             if (turn == "") {
                 turn = history?.size.toString()
             }
-            ListItem("第${turn}轮：（共${queryHistory.size}次）", Color.LightGray)
+            ListItem("第${turn}轮：（共${queryHistory.size-1}次）", Color.LightGray)
             // 记录为空时的判断
             if (queryHistory.size == 0)
                 ListItem("无记录", bgColor = Color.White)
