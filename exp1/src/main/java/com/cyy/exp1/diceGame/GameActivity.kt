@@ -86,8 +86,6 @@ fun GameScreen(resultLauncher: ActivityResultLauncher<Intent>, isStart: MutableS
     val curHistory = remember { mutableListOf<String>() }
     // 记录总历史
     val history = remember { mutableListOf<MutableList<String>>() }
-    // 是否展示规则
-    val showRule = remember { mutableStateOf(false) }
     if (isStart.value) {
         init(firstStatus, secondStatus, gameStatus, curHistory)
         isStart.value = false
@@ -97,11 +95,11 @@ fun GameScreen(resultLauncher: ActivityResultLauncher<Intent>, isStart: MutableS
         contentAlignment = Alignment.Center,
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black)
+            .background(Color.White)
     ) {
         Column {
             // 规则按钮
-            RuleBtn()
+            TopMenu()
             // 两张Dice的照片
             DiceImg(firstStatus, secondStatus, gameStatus)
             // 游戏按钮
@@ -126,7 +124,6 @@ fun GameScreen(resultLauncher: ActivityResultLauncher<Intent>, isStart: MutableS
                 CustomAlertDialog(
                     context = context,
                     title = gameStatus.value.description,
-
                     activityType = GameLoseActivity::class.java,
                     firstStatus, secondStatus, gameStatus, curHistory, history, resultLauncher
                 )
@@ -176,21 +173,21 @@ fun PlayBtn(
 
             // 2、处理业务
             // 第一次和后几次的逻辑不同
-            if (gameStatus.value == GameStatus.START) {
-                // 若是第一次抛骰子，则调用judgeFirstTurn()的逻辑进行判断
-                gameStatus.value =
-                    game.judgeFirstTurn(total)
-
-            } else {
-                // 若已经抛过骰子，则调用judgeLaterTurn()的逻辑进行判断
-                gameStatus.value =
-                    game.judgeLaterTurn(
-                        total,
-                        gameStatus.value
-                    )
-
+            if (!(gameStatus.value == GameStatus.WIN || gameStatus.value == GameStatus.LOSE)) {
+                // ----------这个判断用于：已经产生结果，但是在Dialog完全弹出之前，又成功点击按钮摇了骰子导致添加了错误记录----------
+                if (gameStatus.value == GameStatus.START) {
+                    // 若是第一次抛骰子，则调用judgeFirstTurn()的逻辑进行判断
+                    gameStatus.value =
+                        game.judgeFirstTurn(total)
+                } else {
+                    // 若已经抛过骰子，则调用judgeLaterTurn()的逻辑进行判断
+                    gameStatus.value =
+                        game.judgeLaterTurn(
+                            total,
+                            gameStatus.value
+                        )
+                }
             }
-
             // 3、更新状态的point值并把当前游戏状态加入历史
             gameStatus.value.updatePoint(total)
             // 加入本轮游戏历史
@@ -233,9 +230,6 @@ fun <T> CustomAlertDialog(
         AlertDialog(
             onDismissRequest = {
                 // 点击Dialogue以外的地方时执行的操作：do nothing
-//                showDialog = false
-//                // 重置界面
-//                init(firstStatus, secondStatus, gameStatus, curHistory)
             },
             title = { Text(title) },
             text = {
@@ -265,7 +259,7 @@ fun <T> CustomAlertDialog(
                         init(firstStatus, secondStatus, gameStatus, curHistory)
                     }
                 ) {
-                    Text(text = "继续")
+                    Text(text = "下一轮")
                 }
             },
             dismissButton = {
@@ -277,7 +271,7 @@ fun <T> CustomAlertDialog(
                         turnScreen(context, title, activityType, history, resultLauncher)
                     }
                 ) {
-                    Text(text = "退出")
+                    Text(text = "退出游戏")
                 }
             },
             modifier = Modifier.width(280.dp)

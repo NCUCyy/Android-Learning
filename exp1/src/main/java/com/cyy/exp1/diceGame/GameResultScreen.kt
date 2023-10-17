@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -29,6 +30,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -112,8 +114,12 @@ fun BtnRow(resultLauncher: ActivityResultLauncher<Intent>, history: ArrayList<*>
                 context.finish()
             }, modifier = Modifier.padding(10.dp)
         ) {
-            Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "返回")
-            Text("返回", fontSize = 30.sp, textAlign = TextAlign.Center)
+            Icon(
+                imageVector = Icons.Filled.ArrowBack,
+                contentDescription = "返回",
+                modifier = Modifier.padding(8.dp)
+            )
+            Text("返回", fontSize = 25.sp, textAlign = TextAlign.Center)
         }
         Button(
             onClick = {
@@ -122,8 +128,12 @@ fun BtnRow(resultLauncher: ActivityResultLauncher<Intent>, history: ArrayList<*>
                 resultLauncher.launch(intent)
             }, modifier = Modifier.padding(10.dp)
         ) {
-            Icon(imageVector = Icons.Filled.List, contentDescription = "游戏历史")
-            Text("游戏历史", fontSize = 30.sp, textAlign = TextAlign.Center)
+            Icon(
+                imageVector = Icons.Rounded.Search,
+                contentDescription = "游戏历史",
+                modifier = Modifier.padding(8.dp)
+            )
+            Text("游戏历史", fontSize = 25.sp, textAlign = TextAlign.Center)
         }
     }
 }

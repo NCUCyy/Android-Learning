@@ -9,6 +9,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,9 +19,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
@@ -42,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -54,16 +58,15 @@ class DiceHistoryActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        var history = intent.getSerializableExtra("history", ArrayList::class.java)
-        setContent() {
+        var history = intent.getSerializableExtra("history", ArrayList::class.java)!!
+        setContent {
             HistoryScreen(history)
         }
     }
-
 }
 
 @Composable
-fun HistoryScreen(history: ArrayList<*>?) {
+fun HistoryScreen(history: ArrayList<*>) {
     var query = remember { mutableStateOf("") }
     var queryHistory = remember { mutableListOf<String>() }
     // 初始化显示
@@ -71,12 +74,14 @@ fun HistoryScreen(history: ArrayList<*>?) {
         queryHistory.clear()
         queryHistory.addAll(history!![history.size - 1] as MutableList<String>)
     }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Gray)
     ) {
-        Column {
+        // 设置为可滚动
+        Column(Modifier.verticalScroll(rememberScrollState())) {
             // 返回按钮
             ReturnBtn()
 

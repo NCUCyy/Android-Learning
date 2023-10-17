@@ -11,15 +11,24 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -52,44 +61,24 @@ fun MainScreen() {
         contentAlignment = Alignment.Center,
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black)
+            .background(Color.White)
     ) {
         Column(modifier = Modifier.fillMaxHeight()) {
-            Row {
-                Box(contentAlignment = Alignment.TopStart) {
-                    RuleBtn()
-                }
-            }
+            TopMenu()
+            Spacer(modifier = Modifier.height(150.dp))
+            Image(
+                modifier = Modifier
+                    .size(400.dp)
+                    .clickable {
+                        // 设置Image可点击---点击后跳转到GameActivity
+                        val intent = Intent(context, GameActivity::class.java)
+                        context.startActivity(intent)
+                    },
+                painter = painterResource(id = R.mipmap.home),
+                contentDescription = "首页"
+            )
 
-            Row {
-                Box(contentAlignment = Alignment.Center) {
-                    Image(
-                        modifier = Modifier
-                            .size(400.dp)
-                            .clickable {
-                                // 设置Image可点击---点击后跳转到GameActivity
-                                val intent = Intent(context, GameActivity::class.java)
-                                context.startActivity(intent)
-                            },
-                        painter = painterResource(id = R.mipmap.dicegame),
-                        contentDescription = "首页"
-                    )
-                }
-            }
         }
-    }
-}
-
-@Composable
-fun RuleBtn() {
-    val showRule = remember { mutableStateOf(false) }
-    Button(onClick = {
-        showRule.value = true
-    }) {
-        Text("规则")
-    }
-    if (showRule.value) {
-        RuleDialog(showRule)
     }
 }
 
@@ -128,13 +117,7 @@ fun RuleDialog(showRule: MutableState<Boolean>) {
                 onClick = {
                     // 确定按钮点击时执行的操作
                     showRule.value = false
-//                    // 若不在GameActivity中，则跳转
-//                    if (context != GameActivity::class.java) {
-//                        val intent = Intent(context, GameActivity::class.java)
-//                        context.startActivity(intent)
-//                    }
-                }
-            ) {
+                }) {
                 Text(text = "关闭")
             }
         },
@@ -143,3 +126,43 @@ fun RuleDialog(showRule: MutableState<Boolean>) {
 
 
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TopMenu() {
+    val context = LocalContext.current
+    var showRule = remember {
+        mutableStateOf(false)
+    }
+    TopAppBar(title = {
+        Row() {
+            IconButton(onClick = {
+                // 转到首页
+                context.startActivity(
+                    Intent(
+                        context,
+                        StartActivity::class.java
+                    )
+                )
+            }) {
+                Icon(imageVector = Icons.Default.Home, contentDescription = "rule")
+            }
+            IconButton(onClick = { showRule.value = true }) {
+                Icon(imageVector = Icons.Default.Info, contentDescription = "rule")
+            }
+        }
+
+        Row(modifier = Modifier.fillMaxWidth()) {
+
+            Text(
+                text = "抛骰子游戏",
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
+        }
+    })
+    if (showRule.value) {
+        RuleDialog(showRule = showRule)
+    }
+}
+
