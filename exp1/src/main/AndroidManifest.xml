@@ -9,10 +9,10 @@
             android:supportsRtl="true"
             android:theme="@style/Theme.Exp">
         <activity
-                android:name=".diceGame.DiceHistoryActivity"
+                android:name=".diceGame.Test2"
                 android:exported="false" />
         <activity
-                android:name=".diceGame.Test"
+                android:name=".diceGame.DiceHistoryActivity"
                 android:exported="false" />
         <activity
                 android:name=".diceGame.GameLoseActivity"

@@ -99,80 +99,105 @@ fun GameScreen(resultLauncher: ActivityResultLauncher<Intent>, isStart: MutableS
             .background(Color.Black)
     ) {
         Column {
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.height(400.dp)
-            ) {
-                if (gameStatus.value != GameStatus.START) {
-                    CustomImage("骰子1", firstStatus.value)
-                    CustomImage("骰子2", secondStatus.value)
-                }
+            // 两张Dice的照片
+            DiceImg(firstStatus, secondStatus, gameStatus)
+            // 游戏按钮
+            PlayBtn(firstStatus, secondStatus, game, gameStatus, curHistory, history)
+
+
+            // 监视gameStatus状态变量的值是否发生变化，若变化，则立刻更新页面
+            if (gameStatus.value == GameStatus.WIN) {
+                // 把本轮的历史加入总历史中
+                history.add(curHistory.toMutableList())
+                // 自定义对话框
+                CustomAlertDialog(
+                    context = context,
+                    title = gameStatus.value.description,
+                    activityType = GameWinActivity::class.java,
+                    firstStatus, secondStatus, gameStatus, curHistory, history, resultLauncher
+                )
+            } else if (gameStatus.value == GameStatus.LOSE) {
+                // 把本轮的历史加入总历史中
+                history.add(curHistory.toMutableList())
+                // 自定义对话框
+                CustomAlertDialog(
+                    context = context,
+                    title = gameStatus.value.description,
+
+                    activityType = GameLoseActivity::class.java,
+                    firstStatus, secondStatus, gameStatus, curHistory, history, resultLauncher
+                )
             }
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.height(400.dp)
-            ) {
-                Button(onClick = {
-                    // 1、抛骰子
-                    firstStatus.value = game.rollDice()
-                    secondStatus.value = game.rollDice()
-                    val total = firstStatus.value + secondStatus.value
 
-                    // 2、处理业务
-                    // 第一次和后几次的逻辑不同
-                    if (gameStatus.value == GameStatus.START) {
-                        // 若是第一次抛骰子，则调用judgeFirstTurn()的逻辑进行判断
-                        gameStatus.value =
-                            game.judgeFirstTurn(total)
-
-                    } else {
-                        // 若已经抛过骰子，则调用judgeLaterTurn()的逻辑进行判断
-                        gameStatus.value =
-                            game.judgeLaterTurn(
-                                total,
-                                gameStatus.value
-                            )
-
-                    }
-
-                    // 3、更新状态的point值并把当前游戏状态加入历史
-                    gameStatus.value.updatePoint(total)
-                    // 加入本轮游戏历史
-                    curHistory.add("次数：${curHistory.size + 1} 点数：${gameStatus.value.point}")
-                }, modifier = Modifier.fillMaxWidth()) {
-                    Text(text = history.toString())
-                }
-
-                // 监视gameStatus状态变量的值是否发生变化，若变化，则立刻更新页面
-                if (gameStatus.value == GameStatus.WIN) {
-                    // 把本轮的历史加入总历史中
-                    history.add(curHistory.toMutableList())
-                    // 自定义对话框
-                    CustomAlertDialog(
-                        context = context,
-                        title = gameStatus.value.description,
-                        activityType = GameWinActivity::class.java,
-                        firstStatus, secondStatus, gameStatus, curHistory, history, resultLauncher
-                    )
-                } else if (gameStatus.value == GameStatus.LOSE) {
-                    // 把本轮的历史加入总历史中
-                    history.add(curHistory.toMutableList())
-                    // 自定义对话框
-                    CustomAlertDialog(
-                        context = context,
-                        title = gameStatus.value.description,
-
-                        activityType = GameLoseActivity::class.java,
-                        firstStatus, secondStatus, gameStatus, curHistory, history, resultLauncher
-                    )
-                }
-
-            }
         }
     }
 }
+
+@Composable
+fun DiceImg(
+    firstStatus: MutableState<Int>,
+    secondStatus: MutableState<Int>,
+    gameStatus: MutableState<GameStatus>
+) {
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.height(400.dp)
+    ) {
+        if (gameStatus.value != GameStatus.START) {
+            CustomImage("骰子1", firstStatus.value)
+            CustomImage("骰子2", secondStatus.value)
+        }
+    }
+}
+
+@Composable
+fun PlayBtn(
+    firstStatus: MutableState<Int>,
+    secondStatus: MutableState<Int>,
+    game: DiceGame,
+    gameStatus: MutableState<GameStatus>,
+    curHistory: MutableList<String>,
+    history: MutableList<MutableList<String>>
+) {
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.height(400.dp)
+    ) {
+        Button(onClick = {
+            // 1、抛骰子
+            firstStatus.value = game.rollDice()
+            secondStatus.value = game.rollDice()
+            val total = firstStatus.value + secondStatus.value
+
+            // 2、处理业务
+            // 第一次和后几次的逻辑不同
+            if (gameStatus.value == GameStatus.START) {
+                // 若是第一次抛骰子，则调用judgeFirstTurn()的逻辑进行判断
+                gameStatus.value =
+                    game.judgeFirstTurn(total)
+
+            } else {
+                // 若已经抛过骰子，则调用judgeLaterTurn()的逻辑进行判断
+                gameStatus.value =
+                    game.judgeLaterTurn(
+                        total,
+                        gameStatus.value
+                    )
+
+            }
+
+            // 3、更新状态的point值并把当前游戏状态加入历史
+            gameStatus.value.updatePoint(total)
+            // 加入本轮游戏历史
+            curHistory.add("次数：${curHistory.size + 1}          点数：${gameStatus.value.point}")
+        }, modifier = Modifier.fillMaxWidth()) {
+            Text(text = history.toString())
+        }
+    }
+}
+
 
 // 重置界面参数(注意：history不需要重置)
 fun init(

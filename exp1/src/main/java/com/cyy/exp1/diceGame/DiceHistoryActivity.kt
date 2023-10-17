@@ -15,11 +15,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,12 +33,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
@@ -59,20 +65,88 @@ class DiceHistoryActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen(history: ArrayList<*>?) {
-    val context = LocalContext.current as Activity
-    var query by remember { mutableStateOf("") }
+//    val context = LocalContext.current as Activity
+    var query = remember { mutableStateOf("") }
     var queryHistory = remember { mutableListOf<String>() }
     // 初始化显示
-    if (query == "") {
+    if (query.value == "") {
         queryHistory.clear()
         queryHistory.addAll(history!![history.size - 1] as MutableList<String>)
     }
     Box(
-        contentAlignment = Alignment.Center,
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Yellow)
+            .background(Color.Gray)
     ) {
+        Column {
+            // 返回按钮
+            ReturnBtn()
+
+            // 文本框
+            QueryText(query, history, queryHistory)
+
+            // 查询的轮次的总体信息
+            ListItem("第${query.value}轮：（共{${queryHistory.size}}次）")
+
+            // 查询的轮次的具体信息
+            queryHistory.forEach {
+                ListItem(it)
+            }
+
+
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun QueryText(
+    query: MutableState<String>,
+    history: ArrayList<*>?,
+    queryHistory: MutableList<String>
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(10.dp, shape = CircleShape)
+    ) {
+        TextField(
+            value = query.value,
+            modifier = Modifier.fillMaxWidth(),
+            onValueChange = {
+                // 输入框改变时...回调
+                query.value = it
+                if (query.value != "") {
+                    val tmp = query.value.toInt() - 1
+                    if (tmp in 0 until history!!.size) {
+                        queryHistory.clear()
+                        queryHistory.addAll(history[tmp] as MutableList<String>)
+                        Log.i("queryHistory", queryHistory.toString())
+                    } else {
+                        queryHistory.clear()
+                        queryHistory.add("无记录")
+                    }
+                } else {
+                    queryHistory.clear()
+                    queryHistory.addAll(history!![history.size - 1] as MutableList<String>)
+                }
+            },
+            placeholder = { Text(text = "请输入要查询的轮次...") },
+            singleLine = true, // 单行文本框
+            colors = TextFieldDefaults.textFieldColors(
+                focusedIndicatorColor = Color.Blue, // 设置焦点时的指示线颜色
+                unfocusedIndicatorColor = Color.Gray, // 设置非焦点时的指示线颜色
+            ),
+            shape = MaterialTheme.shapes.extraSmall, // 设置边框形状
+            textStyle = TextStyle.Default.copy(color = Color.Black), // 设置文本颜色
+        )
+    }
+}
+
+@Composable
+fun ReturnBtn() {
+    val context = LocalContext.current as Activity
+    Row {
         Button(
             onClick = {
                 // 返回GameWin/LoseActivity
@@ -85,60 +159,40 @@ fun HistoryScreen(history: ArrayList<*>?) {
                 context.finish()
             }, modifier = Modifier
                 .padding(16.dp)
-                .align(Alignment.TopStart)
         ) {
             Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "返回")
-            Text("返回", fontSize = 10.sp, textAlign = TextAlign.Center)
-        }
-
-        Column {
-            Row(modifier = Modifier.fillMaxWidth()) {
-                TextField(
-                    value = query,
-                    onValueChange = {
-                        query = it
-                        if (query != "") {
-                            val tmp = query.toInt() - 1
-                            if (tmp in 0 until history!!.size) {
-                                queryHistory.clear()
-//                                queryHistory.add("第${query}轮的记录：(共${queryHistory.size}次)")
-                                queryHistory.addAll(history!![tmp] as MutableList<String>)
-                                Log.i("queryHistory", queryHistory.toString())
-                            } else {
-                                queryHistory.clear()
-                                queryHistory.add("无记录")
-                            }
-                        } else {
-                            queryHistory.clear()
-//                            queryHistory.add("第${history!!.size}轮的记录：(共${queryHistory.size}次)")
-                            queryHistory.addAll(history!![history.size - 1] as MutableList<String>)
-                        }
-                    },
-                    placeholder = { Text(text = "请输入要查询的轮次...") },
-                    singleLine = true, // 单行文本框
-                    colors = TextFieldDefaults.textFieldColors(
-                        focusedIndicatorColor = Color.Blue, // 设置焦点时的指示线颜色
-                        unfocusedIndicatorColor = Color.Gray, // 设置非焦点时的指示线颜色
-                    ),
-                    shape = MaterialTheme.shapes.extraSmall, // 设置边框形状
-                    textStyle = TextStyle.Default.copy(color = Color.Black), // 设置文本颜色
-                )
-            }
-
-
-            queryHistory.forEach {
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(text = it)
-                }
-            }
-
-
+            Text("返回", fontSize = 15.sp, textAlign = TextAlign.Center)
         }
     }
 }
 
+@Composable
+fun ListItem(item: String) {
 
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .background(Color.White)
+            .padding(16.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = item,
+                fontSize = 20.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+//        Icon(
+//            imageVector = Icons.Default.,
+//            contentDescription = "图标",
+//            modifier = Modifier
+//                .size(24.dp)
+//                .align(Alignment.CenterEnd)
+//                .padding(8.dp)
+//        )
+    }
+}
