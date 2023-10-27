@@ -28,6 +28,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -181,21 +182,27 @@ fun RightMessageCard(message: Message) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 // 状态提升
-fun MessageContent(messageList: SnapshotStateList<Message>, sendOnClick: (Message) -> Unit) {
+fun MessageContent(
+    messageList: MutableState<SnapshotStateList<Message>>,
+    sendOnClick: (Message) -> Unit
+) {
+    // 用于开启协程（列表滚动到指定位置）
     val scope = rememberCoroutineScope()
 
+    // 输入值
     var inputTxt = remember {
         mutableStateOf("")
     }
+    // 记录列表的状态（如滚动到的位置）
     var lazyState = rememberLazyListState()
 
     ConstraintLayout(modifier = Modifier.fillMaxSize()) {
         LazyColumn(state = lazyState) {
-            items(messageList) { message: Message ->
+            items(messageList.value) { message: Message ->
                 MessageCard(message = message)
             }
         }
-        // 输入框的布局
+        // 输入框的布局（受限布局）
         val inputRef by remember {
             mutableStateOf(createRef())
         }
@@ -231,7 +238,7 @@ fun MessageContent(messageList: SnapshotStateList<Message>, sendOnClick: (Messag
                         val msg =
                             Message(android.R.mipmap.sym_def_app_icon, "我", inputTxt.value, false)
                         // 滚动到最后一条消息
-                        lazyState.scrollToItem(messageList.size - 1)
+                        lazyState.scrollToItem(messageList.value.size - 1)
                         sendOnClick(msg)
                         // 清空输入框的内容
                         inputTxt.value = ""
@@ -256,21 +263,43 @@ fun MessageContent(messageList: SnapshotStateList<Message>, sendOnClick: (Messag
 /**
  * 测试
  */
-@Preview
-@SuppressLint("UnrememberedMutableState")
-@Composable
-fun MessageScreen() {
-    // SnapShotStateList是可变列表，对列表的任何增删改都将触发LazyColumn中的更新
-    // 快照不能保存
-    val messageList: SnapshotStateList<Message> = mutableStateListOf<Message>()
+//@Preview
+//@SuppressLint("UnrememberedMutableState")
+//@Composable
+//fun MessageScreen() {
+//    // SnapShotStateList是可变列表，对列表的任何增删改都将触发LazyColumn中的更新
+//    // 快照不能保存
+//    val messageList: SnapshotStateList<Message> = mutableStateListOf<Message>()
+//
+//    messageList.add((Message(android.R.mipmap.sym_def_app_icon, "机器人", "你好！", true)))
+//    messageList.add((Message(android.R.mipmap.sym_def_app_icon, "机器人", "你好！", true)))
+//    messageList.add((Message(android.R.mipmap.sym_def_app_icon, "机器人", "你好！", true)))
+//    messageList.add((Message(android.R.mipmap.sym_def_app_icon, "机器人", "你好！", true)))
+//    // 调用方
+//    MessageContent(
+//        messageList = messageList,
+//        sendOnClick = { message -> messageList.add(message) })
+//
+//}
 
-    messageList.add((Message(android.R.mipmap.sym_def_app_icon, "机器人", "你好！", true)))
-    messageList.add((Message(android.R.mipmap.sym_def_app_icon, "机器人", "你好！", true)))
-    messageList.add((Message(android.R.mipmap.sym_def_app_icon, "机器人", "你好！", true)))
-    messageList.add((Message(android.R.mipmap.sym_def_app_icon, "机器人", "你好！", true)))
-    // 调用方
-    MessageContent(
-        messageList = messageList,
-        sendOnClick = { message -> messageList.add(message) })
-
-}
+//@Preview
+//@Composable
+//fun MessageScreenSavealbe() {
+//    // SnapShotStateList是可变列表，对列表的任何增删改都将触发LazyColumn中的更新
+//    // 快照不能保存
+//    val messageList: MutableState<SnapshotStateList<Message>> =
+//        rememberSaveable(stateSaver = MessaListSaver) {
+//            mutableStateOf(mutableStateListOf())
+//        }
+//    messageList.value.add((Message(android.R.mipmap.sym_def_app_icon, "机器人", "你好！", true)))
+//    messageList.value.add((Message(android.R.mipmap.sym_def_app_icon, "机器人", "你好！", true)))
+//    messageList.value.add((Message(android.R.mipmap.sym_def_app_icon, "机器人", "你好！", true)))
+//    messageList.value.add((Message(android.R.mipmap.sym_def_app_icon, "机器人", "你好！", true)))
+//    // 调用方
+//    MessageContent(
+//        messageList = messageList,
+//        sendOnClick = { message -> messageList.value.add(message) })
+//
+//}
+//
+//object MessaListSaver:
