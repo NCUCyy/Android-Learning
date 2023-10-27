@@ -1,7 +1,10 @@
 package com.cyy.app.ch03
 
+import android.R
 import android.annotation.SuppressLint
+import android.os.Bundle
 import android.os.Parcelable
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -34,23 +37,20 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.SaverScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.modifier.modifierLocalMapOf
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.semantics.Role.Companion.Image
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import com.cyy.app.R
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 
@@ -236,7 +236,7 @@ fun MessageContent(
                     ), onClick = {
                     scope.launch {
                         val msg =
-                            Message(android.R.mipmap.sym_def_app_icon, "我", inputTxt.value, false)
+                            Message(R.mipmap.sym_def_app_icon, "我", inputTxt.value, false)
                         // 滚动到最后一条消息
                         lazyState.scrollToItem(messageList.value.size - 1)
                         sendOnClick(msg)
@@ -260,9 +260,9 @@ fun MessageContent(
 
 }
 
-/**
- * 测试
- */
+///**
+// * 测试
+// */
 //@Preview
 //@SuppressLint("UnrememberedMutableState")
 //@Composable
@@ -271,10 +271,10 @@ fun MessageContent(
 //    // 快照不能保存
 //    val messageList: SnapshotStateList<Message> = mutableStateListOf<Message>()
 //
-//    messageList.add((Message(android.R.mipmap.sym_def_app_icon, "机器人", "你好！", true)))
-//    messageList.add((Message(android.R.mipmap.sym_def_app_icon, "机器人", "你好！", true)))
-//    messageList.add((Message(android.R.mipmap.sym_def_app_icon, "机器人", "你好！", true)))
-//    messageList.add((Message(android.R.mipmap.sym_def_app_icon, "机器人", "你好！", true)))
+//    messageList.add((Message(R.mipmap.sym_def_app_icon, "机器人", "你好！", true)))
+//    messageList.add((Message(R.mipmap.sym_def_app_icon, "机器人", "你好！", true)))
+//    messageList.add((Message(R.mipmap.sym_def_app_icon, "机器人", "你好！", true)))
+//    messageList.add((Message(R.mipmap.sym_def_app_icon, "机器人", "你好！", true)))
 //    // 调用方
 //    MessageContent(
 //        messageList = messageList,
@@ -282,24 +282,73 @@ fun MessageContent(
 //
 //}
 
-//@Preview
-//@Composable
-//fun MessageScreenSavealbe() {
-//    // SnapShotStateList是可变列表，对列表的任何增删改都将触发LazyColumn中的更新
-//    // 快照不能保存
-//    val messageList: MutableState<SnapshotStateList<Message>> =
-//        rememberSaveable(stateSaver = MessaListSaver) {
-//            mutableStateOf(mutableStateListOf())
-//        }
-//    messageList.value.add((Message(android.R.mipmap.sym_def_app_icon, "机器人", "你好！", true)))
-//    messageList.value.add((Message(android.R.mipmap.sym_def_app_icon, "机器人", "你好！", true)))
-//    messageList.value.add((Message(android.R.mipmap.sym_def_app_icon, "机器人", "你好！", true)))
-//    messageList.value.add((Message(android.R.mipmap.sym_def_app_icon, "机器人", "你好！", true)))
-//    // 调用方
-//    MessageContent(
-//        messageList = messageList,
-//        sendOnClick = { message -> messageList.value.add(message) })
-//
-//}
-//
-//object MessaListSaver:
+@Preview
+@Composable
+fun MessageScreen_Saveable() {
+    // SnapShotStateList是可变列表，对列表的任何增删改都将触发LazyColumn中的更新
+    // 快照不能保存
+    val messageList: MutableState<SnapshotStateList<Message>> =
+        rememberSaveable(stateSaver = MessageListSaver) {
+            mutableStateOf(mutableStateListOf())
+        }
+    messageList.value.add((Message(R.mipmap.sym_def_app_icon, "机器人", "你好！", true)))
+    messageList.value.add((Message(R.mipmap.sym_def_app_icon, "机器人", "你好！", true)))
+    messageList.value.add((Message(R.mipmap.sym_def_app_icon, "机器人", "你好！", true)))
+    messageList.value.add((Message(R.mipmap.sym_def_app_icon, "机器人", "你好！", true)))
+    // 调用方
+    MessageContent(
+        messageList = messageList,
+        sendOnClick = { message -> messageList.value.add(message) })
+}
+
+/**
+ * 2、存 MessageList
+ */
+object MessageListSaver : Saver<SnapshotStateList<Message>, Bundle> {
+    override fun restore(value: Bundle): SnapshotStateList<Message>? {
+        val messageList: SnapshotStateList<Message> = mutableStateListOf()
+        val size = value.getInt("size")
+        for (i in 0 until size) {
+            messageList.add(value.getParcelable("$i")!!)
+        }
+        Log.i("-------------------------",messageList.toString())
+        return messageList
+    }
+
+    override fun SaverScope.save(value: SnapshotStateList<Message>): Bundle? {
+        return Bundle().apply {
+            for (i in 0 until value.size) {
+                putParcelable("$i", value[i])
+            }
+            putInt("listSize", value.size)
+        }
+    }
+}
+
+
+/**
+ * 1、存单个 Message
+ */
+object MessageSaver : Saver<Message, Bundle> {
+    override fun restore(value: Bundle): Message? {
+        return value.getInt("icon")?.let { icon: Int ->
+            value.getString("title")?.let { title: String ->
+                value.getString("content")?.let { content: String ->
+                    value.getBoolean("left")?.let { left: Boolean ->
+                        Message(icon, title, content, left)
+                    }
+                }
+            }
+        }
+    }
+
+    override fun SaverScope.save(value: Message): Bundle? {
+        return Bundle().apply {
+            putInt("icon", value.icon)
+            putString("title", value.title)
+            putString("content", value.content)
+            putBoolean("left", value.left)
+        }
+    }
+
+}
