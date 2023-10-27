@@ -1,4 +1,4 @@
-package com.cyy.exp.ui.theme
+package com.cyy.app.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

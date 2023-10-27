@@ -1,4 +1,4 @@
-package com.cyy.exp
+package com.cyy.app
 
 import org.junit.Test
 

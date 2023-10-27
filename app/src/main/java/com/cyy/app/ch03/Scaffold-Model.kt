@@ -1,4 +1,4 @@
-package com.cyy.exp.ch03
+package com.cyy.app.ch03
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
@@ -41,7 +41,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import kotlin.math.exp
 
 /**
  * 可以发现MainScreen中定义了很多的状态值，这些状态值往往需要作为函数的参数进行传递，处理过程复杂，可以对这些状态值做一个优化处理。
