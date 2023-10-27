@@ -31,7 +31,7 @@ import com.cyy.exp.R
  */
 /**
  * 定义要切换界面的密封类Screen
- *
+ * - 为了方便后续对这三个界面的切换，定义一个通用的密封类Screen
  * @property route String 导航线路名
  * @property title String  标题
  * @property icon ImageVector 图标
@@ -95,5 +95,6 @@ fun HelpScreen() {
 @Preview
 @Composable
 fun Test() {
+    // 使用
     Screen.Home.loadScreen()
 }

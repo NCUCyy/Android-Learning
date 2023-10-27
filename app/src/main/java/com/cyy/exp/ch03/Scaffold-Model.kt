@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlin.math.exp
 
 /**
  * 可以发现MainScreen中定义了很多的状态值，这些状态值往往需要作为函数的参数进行传递，处理过程复杂，可以对这些状态值做一个优化处理。
@@ -57,7 +58,10 @@ class StateHolder(
 
 /**
  * 然后再定义一个组合函数获取所有的状态值
- *
+ * - 注意必须是@Composable函数，因为需要使用remember{...}
+ * - 目的：给StateHolder中的所有属性普通MutableState对象套一层remember{} ===> 可记忆
+ * 1、函数参数的默认值：相当于这些状态的初始值
+ * 2、函数的返回值是：StateHolder对象，存储所有的State状态
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -69,7 +73,7 @@ fun rememberStates(
     scope: CoroutineScope = rememberCoroutineScope(),
 ) = StateHolder(currentScreen, dropState, drawerState, displayedSnackState, scope)
 
-
+// 在此前提下定义一个保存要显示界面的列表
 val screens = listOf(Screen.Home, Screen.Setting, Screen.Help)
 
 // 主界面
@@ -90,11 +94,15 @@ fun MainScreen() {
 //    val displayedSnackState = remember { mutableStateOf(false) }
 
     // 包裹所有状态
+    // 通过这样的方式，单一传递状态值在不同的组合函数共享。
     val states = rememberStates()
     // 页面骨架的脚手架
     Scaffold(
         //定义头部
         topBar = {
+            // 定义顶部栏需要解决两个问题：
+            // （1）需要在顶部栏定义顶部的右侧导航菜单
+            // （2）需要定义顶部的导航按钮，使得启动侧滑菜单
             TopAppBar(
                 // 左侧文本
                 title = {
@@ -201,11 +209,17 @@ fun BottomView(states: StateHolder) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+// 主界面+抽屉界面
 fun DrawView(states: StateHolder) {
     ModalNavigationDrawer(
+        // 抽屉是否可以通过手势进行交互
+        gesturesEnabled = true,
+        // 抽屉打开后，遮挡内容的蒙层的颜色
+        scrimColor = Color.Gray,
+        // 抽屉是否打开
         drawerState = states.drawerState,
+        // 抽屉的内容
         drawerContent = {
-            // 抽屉的配置
             Column(
                 verticalArrangement = Arrangement.Center,
                 modifier = Modifier
@@ -237,8 +251,12 @@ fun DrawView(states: StateHolder) {
                 }
             }
         },
-        // 主屏幕的内容：currentScreen中标记的页面
         content = {
+            /**
+             * 主屏幕的内容：currentScreen中标记的页面
+             * - currentScreen的值改变后，会重新执行这个组合函数，即更新页面
+             * - 想要更换屏幕的内容，只需要currentScreen.value=？？？即可（最终都会过来执行对应的loadScreen()函数）
+             */
             states.currentScreen.value.loadScreen()
         })
 
