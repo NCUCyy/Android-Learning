@@ -35,6 +35,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -52,15 +53,33 @@ import kotlinx.coroutines.withTimeout
 import kotlin.concurrent.timer
 import kotlin.math.exp
 
+/**
+ * 可以发现MainScreen中定义了很多的状态值，这些状态值往往需要作为函数的参数进行传递，处理过程复杂，可以对这些状态值做一个优化处理。
+ * 首先，定义一个类，保存各种需要的状态。
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+class StateHolder(
+    val currentScreen: MutableState<Screen>,
+    val dropState: MutableState<Boolean>,
+    val drawerState: DrawerState,
+    val displayedSnackState: MutableState<Boolean>,
+    val scope: CoroutineScope
+)
 
-class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+/**
+ * 然后再定义一个组合函数获取所有的状态值
+ *
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun rememberStates(
+    currentScreen: MutableState<Screen> = remember { mutableStateOf(Screen.Home) },
+    dropState: MutableState<Boolean> = remember { mutableStateOf(false) },
+    drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
+    displayedSnackState: MutableState<Boolean> = remember { mutableStateOf(false) },
+    scope: CoroutineScope = rememberCoroutineScope(),
+) = StateHolder(currentScreen, dropState, drawerState, displayedSnackState, scope)
 
-        setContent {
-        }
-    }
-}
 
 val screens = listOf(Screen.Home, Screen.Setting, Screen.Help)
 
@@ -71,17 +90,18 @@ val screens = listOf(Screen.Home, Screen.Setting, Screen.Help)
 @Composable
 fun MainScreen() {
     // 记录：当前屏幕
-    val currentScreen = remember { mutableStateOf<Screen>(Screen.Home) }
-    // 记录：是否打开下拉框
-    val dropState = remember { mutableStateOf(false) }
-    // 记录：侧滑菜单的状态（两个值）---DrawerValue.Closed、DrawerValue.Open
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    // Coroutine---协程：启动协程scope.launch()
-    val scope = rememberCoroutineScope()
-    // 记录：信息提示框是否打开
-    val displayedSnackState = remember { mutableStateOf(false) }
+//    val currentScreen = remember { mutableStateOf<Screen>(Screen.Home) }
+//    // 记录：是否打开下拉框
+//    val dropState = remember { mutableStateOf(false) }
+//    // 记录：侧滑菜单的状态（两个值）---DrawerValue.Closed、DrawerValue.Open
+//    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+//    // Coroutine---协程：启动协程scope.launch()
+//    val scope = rememberCoroutineScope()
+//    // 记录：信息提示框是否打开
+//    val displayedSnackState = remember { mutableStateOf(false) }
 
-
+    // 包裹所有状态
+    val states = rememberStates()
     // 页面骨架的脚手架
     Scaffold(
         //定义头部
@@ -96,15 +116,15 @@ fun MainScreen() {
                     // 图标按钮
                     IconButton(onClick = {
                         // 点击按钮，开启异步操作---协程
-                        if (drawerState.currentValue == DrawerValue.Closed) {
+                        if (states.drawerState.currentValue == DrawerValue.Closed) {
                             // 当前为关闭：当用户点击时，打开drawer
-                            scope.launch {
-                                drawerState.open()
+                            states.scope.launch {
+                                states.drawerState.open()
                             }
                         } else {
                             // 当前为打开：当用户点击时，关闭drawer
-                            scope.launch {
-                                drawerState.close()
+                            states.scope.launch {
+                                states.drawerState.close()
                             }
                         }
                     }) {
@@ -117,29 +137,29 @@ fun MainScreen() {
                 // 右侧按钮————按行处理的交互
                 actions = {
                     IconButton(onClick = {
-                        dropState.value = !dropState.value
+                        states.dropState.value = !states.dropState.value
                     }) {
                         Icon(imageVector = Icons.Filled.MoreVert, contentDescription = "More...")
-                        if (dropState.value)
-                            MenuView(currentScreen, dropState)
+                        if (states.dropState.value)
+                            MenuView(states)
                     }
                 })
         },
         //定义底部导航
         bottomBar = {
-            BottomView(currentScreen = currentScreen)
+            BottomView(states)
         },
         //定义悬浮按钮
         floatingActionButton = {
             FloatingActionButton(onClick = {
-                currentScreen.value = Screen.Home
-                displayedSnackState.value = !displayedSnackState.value
+                states.currentScreen.value = Screen.Home
+                states.displayedSnackState.value = !states.displayedSnackState.value
             }) {
                 Icon(imageVector = Icons.Filled.Home, contentDescription = "返回")
             }
         },//定义信息提示区
         snackbarHost = {
-            if (displayedSnackState.value) {
+            if (states.displayedSnackState.value) {
                 Snackbar(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -159,26 +179,22 @@ fun MainScreen() {
              * 2、因为drawerState的open函数和close函数均为suspend挂起函数，需要在协程中运行；
              * - 因此还增加了一个scope的参数，用它来加载drawerState的open函数和close函数。
              */
-            DrawView(
-                currentScreen = currentScreen,
-                drawerState = drawerState,
-                scope = scope
-            )
+            DrawView(states)
         },
     )
 }
 
 // 底部导航栏
 @Composable
-fun BottomView(currentScreen: MutableState<Screen>) {
+fun BottomView(states: StateHolder) {
     BottomAppBar {
         screens.forEach {
             NavigationBarItem(
                 // 选中的按钮被高亮显示
-                selected = currentScreen.value.route == it.route,
+                selected = states.currentScreen.value.route == it.route,
                 onClick = {
                     //定义点击动作:切换当前页面
-                    currentScreen.value = it
+                    states.currentScreen.value = it
                 },
                 icon = {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -196,13 +212,9 @@ fun BottomView(currentScreen: MutableState<Screen>) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DrawView(
-    currentScreen: MutableState<Screen>,
-    drawerState: DrawerState,
-    scope: CoroutineScope
-) {
+fun DrawView(states: StateHolder) {
     ModalNavigationDrawer(
-        drawerState = drawerState,
+        drawerState = states.drawerState,
         drawerContent = {
             // 抽屉的配置
             Column(
@@ -226,11 +238,11 @@ fun DrawView(
                             )
                         },
                         // 选中的按钮被高亮显示
-                        selected = it.route == currentScreen.value.route,
+                        selected = it.route == states.currentScreen.value.route,
                         onClick = {
-                            scope.launch {
-                                currentScreen.value = it
-                                drawerState.close()
+                            states.scope.launch {
+                                states.currentScreen.value = it
+                                states.drawerState.close()
                             }
                         })
                 }
@@ -238,18 +250,18 @@ fun DrawView(
         },
         // 主屏幕的内容：currentScreen中标记的页面
         content = {
-            currentScreen.value.loadScreen()
+            states.currentScreen.value.loadScreen()
         })
 
 }
 
 // 下拉菜单
 @Composable
-fun MenuView(currentScreen: MutableState<Screen>, dropState: MutableState<Boolean>) {
-    DropdownMenu(expanded = dropState.value,
+fun MenuView(states: StateHolder) {
+    DropdownMenu(expanded = states.dropState.value,
         onDismissRequest = {
             // 点击其他地方，则关闭下拉框
-            dropState.value = false
+            states.dropState.value = false
         }) {
         screens.forEach {
             DropdownMenuItem(
@@ -261,9 +273,9 @@ fun MenuView(currentScreen: MutableState<Screen>, dropState: MutableState<Boolea
                     Text(text = it.title, fontSize = 20.sp)
                 }, onClick = {
                     // 修改当前屏幕为...
-                    currentScreen.value = it
+                    states.currentScreen.value = it
                     // 点击完之后，关闭下拉框
-                    dropState.value = false
+                    states.dropState.value = false
                 })
         }
     }
