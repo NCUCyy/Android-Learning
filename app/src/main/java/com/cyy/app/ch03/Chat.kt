@@ -1,10 +1,8 @@
 package com.cyy.app.ch03
 
 import android.R
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Parcelable
-import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -51,6 +49,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import com.google.gson.Gson
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 
@@ -289,16 +288,22 @@ fun MessageScreen_Saveable() {
     // 快照不能保存
     val messageList: MutableState<SnapshotStateList<Message>> =
         rememberSaveable(stateSaver = MessageListSaver) {
-            mutableStateOf(mutableStateListOf())
+            mutableStateOf(mutableStateListOf(
+                Message(R.mipmap.sym_def_app_icon, "机器人", "你好！", true),
+                Message(R.mipmap.sym_def_app_icon, "机器人", "你好！", true),
+                Message(R.mipmap.sym_def_app_icon, "机器人", "你好！", true)
+                ))
         }
-    messageList.value.add((Message(R.mipmap.sym_def_app_icon, "机器人", "你好！", true)))
-    messageList.value.add((Message(R.mipmap.sym_def_app_icon, "机器人", "你好！", true)))
-    messageList.value.add((Message(R.mipmap.sym_def_app_icon, "机器人", "你好！", true)))
-    messageList.value.add((Message(R.mipmap.sym_def_app_icon, "机器人", "你好！", true)))
+//    messageList.value.add((Message(R.mipmap.sym_def_app_icon, "机器人", "你好！", true)))
+//    messageList.value.add((Message(R.mipmap.sym_def_app_icon, "机器人", "你好！", true)))
+//    messageList.value.add((Message(R.mipmap.sym_def_app_icon, "机器人", "你好！", true)))
+//    messageList.value.add((Message(R.mipmap.sym_def_app_icon, "机器人", "你好！", true)))
     // 调用方
     MessageContent(
         messageList = messageList,
-        sendOnClick = { message -> messageList.value.add(message) })
+        sendOnClick = { message ->
+            messageList.value.add(message)
+        })
 }
 
 /**
@@ -307,11 +312,10 @@ fun MessageScreen_Saveable() {
 object MessageListSaver : Saver<SnapshotStateList<Message>, Bundle> {
     override fun restore(value: Bundle): SnapshotStateList<Message>? {
         val messageList: SnapshotStateList<Message> = mutableStateListOf()
-        val size = value.getInt("size")
+        val size = value.getInt("listSize")
         for (i in 0 until size) {
             messageList.add(value.getParcelable("$i")!!)
         }
-        Log.i("-------------------------",messageList.toString())
         return messageList
     }
 

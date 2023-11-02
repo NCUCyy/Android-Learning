@@ -2,6 +2,7 @@ package com.cyy.app.ch03
 
 import android.os.Bundle
 import android.os.Parcelable
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -90,6 +91,8 @@ object UserSaver : Saver<User, Bundle> {
 
     // 保存
     override fun SaverScope.save(value: User): Bundle? {
+        // 测试
+        Log.i("--------User", value.toString())
         return Bundle().apply {
             putString("name", value.name)
             putString("gender", value.gender)
@@ -97,11 +100,35 @@ object UserSaver : Saver<User, Bundle> {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 @Preview
 fun Method_2() {
-    val userSate = rememberSaveable(stateSaver = UserSaver) {
+    val userState = rememberSaveable(stateSaver = UserSaver) {
         mutableStateOf(User("cyy", "female"))
+    }
+    val input = remember { mutableStateOf("") }
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column {
+            Text(text = userState.value.toString(), fontSize = 12.sp)
+            TextField(
+                value = input.value,
+                onValueChange = { it: String -> input.value = it }
+            )
+            TextButton(
+                onClick = {
+                    val (name: String, gender: String) = input.value.split(" ")
+                    userState.value = User(name, gender)
+                    // 清空输入框
+                    input.value = ""
+                }) {
+                Text(text = "点击更新")
+                Icon(imageVector = Icons.Filled.Check, contentDescription = null)
+            }
+        }
     }
 }
 
