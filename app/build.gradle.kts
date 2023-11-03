@@ -7,12 +7,12 @@ plugins {
 
 android {
     namespace = "com.cyy.app"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.cyy.app"
         minSdk = 29
-        targetSdk = 33
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
@@ -57,6 +57,8 @@ android {
 dependencies {
     // 添加constranlayout插件
     implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
+    val nav_version = "2.7.4"
+    implementation("androidx.navigation:navigation-compose:${nav_version}")
     implementation("com.google.code.gson:gson:2.10")
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
