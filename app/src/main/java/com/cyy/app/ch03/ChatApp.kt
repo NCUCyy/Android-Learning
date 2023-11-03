@@ -49,7 +49,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import com.google.gson.Gson
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 
