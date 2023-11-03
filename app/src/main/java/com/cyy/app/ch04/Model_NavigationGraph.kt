@@ -13,16 +13,20 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -143,38 +147,41 @@ fun NavigationGraphScreen(
     NavHost(navController = navController, startDestination = startDestination) {
         // 定义有几个页面，就有几个composable(){...}
         // 根据route进行页面的匹配
+        // 页面1
         composable(route = Screen.RobotListPage.route) {
-            // 页面展示前的数据准备...
+            // 1、页面展示前的数据准备...
             val robots = mutableListOf<Robot>()
             for (i in 0..10) {
                 robots.add(Robot("机器人${i}", "机器人${i}", android.R.mipmap.sym_def_app_icon))
             }
-            // 更新当前显示的Screen
+            // 2、更新当前显示的Screen
             currentScreen.value = Screen.RobotListPage
-            // 此语句处才会展示指定的Screen
+            // 3、此语句处才会展示指定的Screen
             RobotListScreen(navController, robots)
         }
+        // 页面2
         composable(route = Screen.RobotPage.route + "/{robotStr}", arguments = listOf(
             navArgument("robotStr") {
                 type = NavType.StringType
             }
         )) {
-            // 页面展示前的数据准备...（接收名为”robotStr“参数）
+            // 1、页面展示前的数据准备...（接收名为”robotStr“参数）
             // （从①RobotCard跳转过来；或②直接点击底部导航栏过来————都需要传递一个robotStr参数，来指定当前页面需要展示哪个robot的数据）
             val robotStr: String = it.arguments?.getString("robotStr")!!
             val robot: Robot = Gson().fromJson(robotStr, Robot::class.java)
             // 更新当前查看的机器人是谁？（）
             robotState.value = robot
-            // 更新当前显示的Screen
+            // 2、更新当前显示的Screen
             currentScreen.value = Screen.RobotPage
-            // 此语句处才会展示指定的Screen
+            // 3、此语句处才会展示指定的Screen
             RobotDetailScreen(robot)
         }
+        // 页面3
         composable(route = Screen.AboutPage.route) {
-            // 页面展示前的数据准备（无）
-            // 更新当前显示的Screen
+            // 1、页面展示前的数据准备（无）
+            // 2、更新当前显示的Screen
             currentScreen.value = Screen.AboutPage
-            // 此语句处才会展示指定的Screen
+            // 3、此语句处才会展示指定的Screen
             AboutScreen()
         }
     }
@@ -212,7 +219,14 @@ fun MainScreen() {
     // 脚手架
     Scaffold(
         topBar = {
-
+            TopAppBar(
+                title = {
+                    Text(text = currentScreen.value.title)
+                },
+                navigationIcon = {
+                    Icon(imageVector = currentScreen.value.icon, contentDescription = null)
+                }
+            )
         },
         bottomBar = {
             BottomAppBar {
@@ -225,6 +239,7 @@ fun MainScreen() {
                             // 只有点击不同的导航选项，才需要跳转（减少页面的无效闪烁）
                             if (currentScreen.value.route != it.route) {
                                 if (it.route == Screen.RobotPage.route) {
+                                    // 若要去”详情页面“，需要单独判断（robotState为null的情况）
                                     if (robotState.value == null) {
                                         Toast.makeText(context, "未选择Robot！", Toast.LENGTH_LONG)
                                             .show()
@@ -233,16 +248,18 @@ fun MainScreen() {
                                         val robotStr = Gson().toJson(robotState.value)
                                         // 到详情页面，一定需要robotStr参数（所以需要单独出来写）
                                         navController.navigate("${it.route}/${robotStr}") {
+                                            // 回退操作（采用直接回退到RobotListPage页面）
                                             popUpTo(Screen.RobotListPage.route)
                                         }
                                     }
                                 } else {
+                                    // 若去其他页面
                                     // 更新全局变量---当前页面是哪个？
 //                                    currentScreen.value = it
                                     // 实现导航---获取导航控制器、根据页面的route进行匹配（String类型！！！）
                                     // 相当于进”导航栈“
                                     navController.navigate(it.route) {
-                                        // 回退操作
+                                        // 回退操作（采用直接回退到RobotListPage页面）
                                         popUpTo(Screen.RobotListPage.route)
                                     }
                                     /**
@@ -268,12 +285,17 @@ fun MainScreen() {
             }
         },
         content = {
-            // 主题内容
+            // 页面的主体部分
             Box(modifier = Modifier.padding(it)) {
                 NavigationGraphScreen(navController, startDestination, robotState, currentScreen)
             }
         },
         floatingActionButton = {
-
+            FloatingActionButton(onClick = {
+                // 回退
+                navController.popBackStack()
+            }) {
+                Icon(imageVector = Icons.Filled.KeyboardArrowLeft, contentDescription = "返回")
+            }
         })
 }
