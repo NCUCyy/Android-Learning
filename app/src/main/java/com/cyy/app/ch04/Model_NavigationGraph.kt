@@ -50,6 +50,11 @@ import com.google.gson.Gson
 
 data class Robot(val name: String, val description: String, val icon: Int)
 
+/**
+ * 技术：
+ * 1、ConstraintLayout受限布局
+ * 2、Image的Modifier.clickable{...}
+ */
 @Composable
 fun RobotCard(robot: Robot, navController: NavHostController) {
     Card(
@@ -130,6 +135,13 @@ fun AboutScreen() {
 }
 
 /**
+ * 技术：
+ * 1、NavController
+ * 2、NavHost、composable
+ * 3、导航跳转时，参数的接收（宿主）与发送（源）
+ * 4、作为Scaffold的content展示
+ * 5、route的理解（String）
+ *
  * 导航---Host
  *
  * 思考：原来的做法（即Scaffold-Model中的写法）：每个Screen都包含一个loadScreen()函数（该函数返回一个组合函数），通过调用这个函数，就可以直接把预先定义好的Screen加载出来
@@ -182,7 +194,9 @@ fun NavigationGraphScreen(states: StateHolder) {
 
 val screens = listOf(Screen.RobotListPage, Screen.RobotPage, Screen.AboutPage)
 
-// Screen类（与用于显示的Screen实体不同！要区分开！Screen类只用于提供页面需要的元数据metaData：icon、title、"route"【用于导航】）
+/**
+ *Screen类（与用于显示的Screen实体不同！要区分开！Screen类只用于提供页面需要的元数据metaData：icon、title、"route"【用于导航】）
+ */
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
     object RobotListPage :
         Screen(route = "robotList", title = "机器人列表", icon = Icons.Filled.List)
@@ -191,6 +205,9 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
     object AboutPage : Screen(route = "about", title = "关于应用", icon = Icons.Filled.Info)
 }
 
+/**
+ * 主界面---Scaffold骨架
+ */
 @Preview
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -234,42 +251,37 @@ fun MainScreen() {
                         selected = it.route == states.currentScreen.value.route,
                         // 点击后更改当前的Screen
                         onClick = {
-                            // 只有点击不同的导航选项，才需要跳转（减少页面的无效闪烁）
-                            if (states.currentScreen.value.route != it.route) {
-                                if (it.route == Screen.RobotPage.route) {
-                                    // 若要去”详情页面“，需要单独判断（robotState为null的情况）
-                                    if (states.robotState.value == null) {
-                                        Toast.makeText(context, "未选择Robot！", Toast.LENGTH_LONG)
-                                            .show()
-                                    } else {
-//                                        currentScreen.value = it
-                                        val robotStr = Gson().toJson(states.robotState.value)
-                                        // 到详情页面，一定需要robotStr参数（所以需要单独出来写）
-                                        states.navController.navigate("${it.route}/${robotStr}") {
-                                            // 回退操作（采用直接回退到RobotListPage页面）
-                                            popUpTo(Screen.RobotListPage.route)
-                                        }
-                                    }
+                            if (it.route == Screen.RobotPage.route) {
+                                // 若要去”详情页面“，需要单独判断（robotState为null的情况）
+                                if (states.robotState.value == null) {
+                                    Toast.makeText(context, "未选择Robot！", Toast.LENGTH_LONG)
+                                        .show()
                                 } else {
-                                    // 若去其他页面
-                                    // 更新全局变量---当前页面是哪个？
-//                                    currentScreen.value = it
-                                    // 实现导航---获取导航控制器、根据页面的route进行匹配（String类型！！！）
-                                    // 相当于进”导航栈“
-                                    states.navController.navigate(it.route) {
+                                    val robotStr = Gson().toJson(states.robotState.value)
+                                    // 到详情页面，一定需要robotStr参数（所以需要单独出来写）
+                                    states.navController.navigate("${it.route}/${robotStr}") {
                                         // 回退操作（采用直接回退到RobotListPage页面）
                                         popUpTo(Screen.RobotListPage.route)
+                                        launchSingleTop = true
                                     }
-                                    /**
-                                     *回退操作有三种类型可以选择：
-                                     * 1、popUpTo("about")：导航栈出栈到栈顶为"about"为止（理解：点击回退后，把当前Screen到about的所有记录都删掉{about还留着，也就是跳到about界面}）
-                                     * 2、popUpTo("about"){ inclusive=true }：导航栈出栈到栈顶为"about"后，把about也出栈
-                                     * 3、navigate(route){ launchSingleTop = true }；当前要去的route不是导航栈的顶部，则导航过去；否则不去
-                                     *
-                                     */
                                 }
-
+                            } else {
+                                // 若去其他页面
+                                // 实现导航---获取导航控制器、根据页面的route进行匹配（String类型！！！）
+                                // 相当于进”导航栈“
+                                states.navController.navigate(it.route) {
+                                    // 回退操作（采用直接回退到RobotListPage页面）
+                                    popUpTo(Screen.RobotListPage.route)
+                                    launchSingleTop = true
+                                }
+                                /**
+                                 *回退操作有三种类型可以选择：
+                                 * 1、popUpTo("about")：导航栈出栈到栈顶为"about"为止（理解：点击回退后，把当前Screen到about的所有记录都删掉{about还留着，也就是跳到about界面}）
+                                 * 2、popUpTo("about"){ inclusive=true }：导航栈出栈到栈顶为"about"后，把about也出栈
+                                 * 3、navigate(route){ launchSingleTop = true }；若已经处在点击的导航目的地，则不跳转（也就是不闪烁页面）
+                                 */
                             }
+
                         },
                         // 标签
                         label = {
