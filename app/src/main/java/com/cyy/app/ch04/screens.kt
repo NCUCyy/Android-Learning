@@ -133,7 +133,9 @@ fun AboutScreen() {
  */
 @Composable
 fun NavigationGraphScreen(navController: NavHostController, startDestination: String) {
-    NavHost(navController = navController, startDestination = Screen.RobotListPage.route) {
+    // 定义宿主(需要：导航控制器、导航起点---String类型)
+    NavHost(navController = navController, startDestination = startDestination) {
+        // 定义有几个页面，就有几个composable(){...}
         // 根据route进行页面的匹配
         composable(route = Screen.RobotListPage.route) {
             RobotListScreen()
@@ -166,8 +168,12 @@ fun MainScreen() {
     val currentScreen = remember {
         mutableStateOf<Screen>(Screen.RobotListPage)
     }
+    // 导航控制器：宿主、点击动作都需要用到
     val navController: NavHostController = rememberNavController()
+    // 导航起点---route: String
     val startDestination = Screen.RobotListPage.route
+
+    // 脚手架
     Scaffold(
         topBar = {
 
@@ -184,7 +190,7 @@ fun MainScreen() {
                             if (currentScreen.value.route != it.route) {
                                 // 更新全局变量---当前页面是哪个？
                                 currentScreen.value = it
-                                // 真正的跳转操作---根据页面的route进行匹配
+                                // 实现导航---获取导航控制器、根据页面的route进行匹配（String类型！！！）
                                 navController.navigate(currentScreen.value.route)
                             }
                         },
@@ -200,6 +206,7 @@ fun MainScreen() {
             }
         },
         content = {
+            // 主题内容
             Box(modifier = Modifier.padding(it)) {
                 NavigationGraphScreen(navController, startDestination)
             }
