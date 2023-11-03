@@ -13,7 +13,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Face
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.List
@@ -102,10 +101,10 @@ fun RobotCard(robot: Robot, navController: NavHostController) {
 
 // 1、列表界面
 @Composable
-fun RobotListScreen(nacController: NavHostController, robots: MutableList<Robot>) {
+fun RobotListScreen(states: StateHolder, robots: MutableList<Robot>) {
     LazyColumn {
         items(robots) { it: Robot ->
-            RobotCard(robot = it, nacController)
+            RobotCard(robot = it, states.navController)
         }
     }
 }
@@ -113,7 +112,6 @@ fun RobotListScreen(nacController: NavHostController, robots: MutableList<Robot>
 // 2、详情界面（点击进入）
 @Composable
 fun RobotDetailScreen(robot: Robot) {
-//    val robot: Robot = Robot("机器人-测试", "机器人-测试", android.R.mipmap.sym_def_app_icon)
     Box(contentAlignment = Alignment.Center) {
         Column {
             Text(text = "-----这是${robot.name}的详情页面-----", color = Color.Blue)
@@ -137,14 +135,9 @@ fun AboutScreen() {
  * 思考：原来的做法（即Scaffold-Model中的写法）：每个Screen都包含一个loadScreen()函数（该函数返回一个组合函数），通过调用这个函数，就可以直接把预先定义好的Screen加载出来
  */
 @Composable
-fun NavigationGraphScreen(
-    navController: NavHostController,
-    startDestination: String,
-    robotState: MutableState<Robot?>,
-    currentScreen: MutableState<Screen>
-) {
+fun NavigationGraphScreen(states: StateHolder) {
     // 定义宿主(需要：导航控制器、导航起点---String类型)
-    NavHost(navController = navController, startDestination = startDestination) {
+    NavHost(navController = states.navController, startDestination = states.startDestination) {
         // 定义有几个页面，就有几个composable(){...}
         // 根据route进行页面的匹配
         // 页面1
@@ -155,9 +148,9 @@ fun NavigationGraphScreen(
                 robots.add(Robot("机器人${i}", "机器人${i}", android.R.mipmap.sym_def_app_icon))
             }
             // 2、更新当前显示的Screen
-            currentScreen.value = Screen.RobotListPage
+            states.currentScreen.value = Screen.RobotListPage
             // 3、此语句处才会展示指定的Screen
-            RobotListScreen(navController, robots)
+            RobotListScreen(states, robots)
         }
         // 页面2
         composable(route = Screen.RobotPage.route + "/{robotStr}", arguments = listOf(
@@ -170,9 +163,9 @@ fun NavigationGraphScreen(
             val robotStr: String = it.arguments?.getString("robotStr")!!
             val robot: Robot = Gson().fromJson(robotStr, Robot::class.java)
             // 更新当前查看的机器人是谁？（）
-            robotState.value = robot
+            states.robotState.value = robot
             // 2、更新当前显示的Screen
-            currentScreen.value = Screen.RobotPage
+            states.currentScreen.value = Screen.RobotPage
             // 3、此语句处才会展示指定的Screen
             RobotDetailScreen(robot)
         }
@@ -180,7 +173,7 @@ fun NavigationGraphScreen(
         composable(route = Screen.AboutPage.route) {
             // 1、页面展示前的数据准备（无）
             // 2、更新当前显示的Screen
-            currentScreen.value = Screen.AboutPage
+            states.currentScreen.value = Screen.AboutPage
             // 3、此语句处才会展示指定的Screen
             AboutScreen()
         }
@@ -189,6 +182,7 @@ fun NavigationGraphScreen(
 
 val screens = listOf(Screen.RobotListPage, Screen.RobotPage, Screen.AboutPage)
 
+// Screen类（与用于显示的Screen实体不同！要区分开！Screen类只用于提供页面需要的元数据metaData：icon、title、"route"【用于导航】）
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
     object RobotListPage :
         Screen(route = "robotList", title = "机器人列表", icon = Icons.Filled.List)
@@ -202,29 +196,33 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen() {
-    // 所有数据放到顶层
-    // 当前页面是谁（只用于：bottomBar的selected中底部导航栏高亮显示当前页面的选项）
-    val currentScreen = remember {
-        mutableStateOf<Screen>(Screen.RobotListPage)
-    }
-    // 导航控制器：宿主、点击动作都需要用到
-    val navController: NavHostController = rememberNavController()
-    // 导航起点---route: String
-    val startDestination = Screen.RobotListPage.route
-    // 当前查看的robot是谁
-    val robotState = remember {
-        mutableStateOf<Robot?>(null)
-    }
+//    // 当前页面是谁（只用于：bottomBar的selected中底部导航栏高亮显示当前页面的选项）
+//    val currentScreen = remember {
+//        mutableStateOf<Screen>(Screen.RobotListPage)
+//    }
+//    // 导航控制器：宿主、点击动作都需要用到
+//    val navController: NavHostController = rememberNavController()
+//    // 导航起点---route: String
+//    val startDestination = Screen.RobotListPage.route
+//    // 当前查看的robot是谁
+//    val robotState = remember {
+//        mutableStateOf<Robot?>(null)
+//    }
+
+    // 1、定义状态集合————直接把这个状态集合作为compose组件之间传参的媒介
+    // 2、状态定义到顶层————单一数据流
+    val states = rememberStates()
+    // 当前应用的上下文
     val context = LocalContext.current as Activity
     // 脚手架
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(text = currentScreen.value.title)
+                    Text(text = states.currentScreen.value.title)
                 },
                 navigationIcon = {
-                    Icon(imageVector = currentScreen.value.icon, contentDescription = null)
+                    Icon(imageVector = states.currentScreen.value.icon, contentDescription = null)
                 }
             )
         },
@@ -233,21 +231,21 @@ fun MainScreen() {
                 screens.forEach {
                     NavigationBarItem(
                         // 是否选中（高亮）
-                        selected = it.route == currentScreen.value.route,
+                        selected = it.route == states.currentScreen.value.route,
                         // 点击后更改当前的Screen
                         onClick = {
                             // 只有点击不同的导航选项，才需要跳转（减少页面的无效闪烁）
-                            if (currentScreen.value.route != it.route) {
+                            if (states.currentScreen.value.route != it.route) {
                                 if (it.route == Screen.RobotPage.route) {
                                     // 若要去”详情页面“，需要单独判断（robotState为null的情况）
-                                    if (robotState.value == null) {
+                                    if (states.robotState.value == null) {
                                         Toast.makeText(context, "未选择Robot！", Toast.LENGTH_LONG)
                                             .show()
                                     } else {
 //                                        currentScreen.value = it
-                                        val robotStr = Gson().toJson(robotState.value)
+                                        val robotStr = Gson().toJson(states.robotState.value)
                                         // 到详情页面，一定需要robotStr参数（所以需要单独出来写）
-                                        navController.navigate("${it.route}/${robotStr}") {
+                                        states.navController.navigate("${it.route}/${robotStr}") {
                                             // 回退操作（采用直接回退到RobotListPage页面）
                                             popUpTo(Screen.RobotListPage.route)
                                         }
@@ -258,7 +256,7 @@ fun MainScreen() {
 //                                    currentScreen.value = it
                                     // 实现导航---获取导航控制器、根据页面的route进行匹配（String类型！！！）
                                     // 相当于进”导航栈“
-                                    navController.navigate(it.route) {
+                                    states.navController.navigate(it.route) {
                                         // 回退操作（采用直接回退到RobotListPage页面）
                                         popUpTo(Screen.RobotListPage.route)
                                     }
@@ -287,15 +285,40 @@ fun MainScreen() {
         content = {
             // 页面的主体部分
             Box(modifier = Modifier.padding(it)) {
-                NavigationGraphScreen(navController, startDestination, robotState, currentScreen)
+                NavigationGraphScreen(states)
             }
         },
         floatingActionButton = {
             FloatingActionButton(onClick = {
                 // 回退
-                navController.popBackStack()
+                states.navController.popBackStack()
             }) {
                 Icon(imageVector = Icons.Filled.KeyboardArrowLeft, contentDescription = "返回")
             }
         })
 }
+
+/**
+ * 状态集合（对状态的统一管理）
+ */
+class StateHolder(
+    // 当前页面是谁（只用于：bottomBar的selected中底部导航栏高亮显示当前页面的选项）
+    val currentScreen: MutableState<Screen>,
+    // 导航控制器：宿主、点击动作都需要用到
+    val navController: NavHostController,
+    // 导航起点---route: String
+    val startDestination: String,
+    // 当前查看的robot是谁
+    val robotState: MutableState<Robot?>
+)
+
+/**
+ * 返回StateHolder类型（需要添加@Composable注解，才能使用remember{...}，但是本身并不是一个真正用于显示的可组合函数）
+ */
+@Composable
+fun rememberStates(
+    currentScreen: MutableState<Screen> = remember { mutableStateOf(Screen.RobotListPage) },
+    navController: NavHostController = rememberNavController(),
+    startDestination: String = Screen.RobotListPage.route,
+    robotState: MutableState<Robot?> = remember { mutableStateOf(null) }
+) = StateHolder(currentScreen, navController, startDestination, robotState)
