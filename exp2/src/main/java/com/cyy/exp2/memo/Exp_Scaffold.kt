@@ -85,8 +85,8 @@ fun MemoCard(memo: Memo, navController: NavHostController) {
                 // 转化为String再传（因为只能接收【基元类型】）
                 val memoStr = Gson().toJson(memo)
                 // 处理图标的点击动作（导航到指robot的详情页面）
-                navController.navigate("${Screen.RobotPage.route}/${memoStr}") {
-                    popUpTo(Screen.MemoListScreen.route)
+                navController.navigate("${Screen.MemoDetailPage.route}/${memoStr}") {
+                    popUpTo(Screen.MemoListPage.route)
                     launchSingleTop = true
                 }
             },
@@ -165,14 +165,14 @@ fun NavigationGraphScreen(states: StateHolder) {
         // 定义有几个页面，就有几个composable(){...}
         // 根据route进行页面的匹配
         // 页面1
-        composable(route = Screen.RobotListPage.route) {
+        composable(route = Screen.MemoListPage.route) {
             // 1、页面展示前的数据准备...
-            val robots = mutableListOf<Robot>()
+            val memos = mutableListOf<Memo>()
             for (i in 0..10) {
-                robots.add(Robot("机器人${i}", "机器人${i}", R.mipmap.sym_def_app_icon))
+                memos.add(Memo("测试", LocalDateTime.now(), LocalDateTime.now()))
             }
             // 2、更新当前显示的Screen
-            states.currentScreen.value = Screen.RobotListPage
+            states.currentScreen.value = Screen.MemoListPage
             // 3、此语句处才会展示指定的Screen
             MemoListScreen(states, memos)
         }
@@ -301,7 +301,7 @@ fun MainScreen() {
                                     Toast.makeText(context, "未选择Memo！", Toast.LENGTH_LONG)
                                         .show()
                                 } else {
-                                    val robotStr = Gson().toJson(states.robotState.value)
+                                    val robotStr = Gson().toJson(states.memoState.value)
                                     // 到详情页面，一定需要robotStr参数（所以需要单独出来写）
                                     states.navController.navigate("${it.route}/${robotStr}") {
                                         // 回退操作（采用直接回退到RobotListPage页面）
