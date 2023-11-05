@@ -13,6 +13,12 @@
             android:theme="@style/Theme.Exp"
             tools:targetApi="31">
         <activity
+                android:name=".ch04.Activity2"
+                android:exported="true" />
+        <activity
+                android:name=".ch04.Activity"
+                android:exported="true" />
+        <activity
                 android:name=".ch04.MainActivity1"
                 android:exported="true" />
         <activity

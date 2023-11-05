@@ -9,6 +9,9 @@
             android:supportsRtl="true"
             android:theme="@style/Theme.Chenyi">
         <activity
+                android:name=".memo.MemoEditActivity"
+                android:exported="false" />
+        <activity
                 android:name=".memo.MainActivity"
                 android:exported="true"
                 android:label="@string/app_name"

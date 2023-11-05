@@ -54,6 +54,8 @@ android {
 dependencies {
     // 添加constranlayout插件
     implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("com.google.android.material:material:1.8.0")
     val navVersion = "2.7.4"
     implementation("androidx.navigation:navigation-compose:${navVersion}")
     implementation("com.google.code.gson:gson:2.10")
