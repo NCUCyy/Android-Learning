@@ -83,7 +83,10 @@ fun RobotCard(robot: Robot, navController: NavHostController) {
                         // 转化为String再传（因为只能接收【基元类型】）
                         val robotStr = Gson().toJson(robot)
                         // 处理图标的点击动作（导航到指robot的详情页面）
-                        navController.navigate("${Screen.RobotPage.route}/${robotStr}")
+                        navController.navigate("${Screen.RobotPage.route}/${robotStr}") {
+                            popUpTo(Screen.RobotListPage.route)
+                            launchSingleTop = true
+                        }
                     },
                 painter = painterResource(id = robot.icon),
                 contentDescription = null

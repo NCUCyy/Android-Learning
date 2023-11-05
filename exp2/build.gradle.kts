@@ -6,12 +6,12 @@ plugins {
 }
 
 android {
-    namespace = "com.cyy.app"
+    namespace = "com.cyy.exp2"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.cyy.app"
-        minSdk = 29
+        applicationId = "com.cyy.exp2"
+        minSdk = 34
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -39,10 +39,7 @@ android {
         jvmTarget = "1.8"
     }
     buildFeatures {
-//        默认就是Compose的方式
         compose = true
-//        配置
-        viewBinding = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.4.3"
@@ -55,7 +52,6 @@ android {
 }
 
 dependencies {
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
     // 添加constranlayout插件
     implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
     val navVersion = "2.7.4"
@@ -69,9 +65,6 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.8.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")

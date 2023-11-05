@@ -16,3 +16,4 @@ dependencyResolutionManagement {
 rootProject.name = "Chenyi"
 include(":app")
 include(":exp1")
+include(":exp2")
