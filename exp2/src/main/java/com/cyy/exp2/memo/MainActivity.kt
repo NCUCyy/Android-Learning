@@ -3,7 +3,11 @@ package com.cyy.exp2.memo
 import android.R
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,6 +25,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
@@ -40,6 +45,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
@@ -70,8 +76,19 @@ import androidx.navigation.navArgument
 import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import java.security.cert.TrustAnchor
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        setContent {
+            MainScreen()
+        }
+    }
+}
 
 
 /**
@@ -82,13 +99,20 @@ import java.time.format.DateTimeFormatter
 @SuppressLint("RememberReturnType")
 @Composable
 fun MemoCard(memo: Memo, navController: NavHostController) {
+    val memoViewModel: MemoViewModel = viewModel()
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(5.dp)
             .clickable {
-                // 前往MemoEditActivity
-                // TODO
+                // 两个任务：1、传递被点击的Robot数据；2、导航到详情界面
+                memoViewModel.setCur(memo)
+                Log.i("MyLog2", memoViewModel._cur.value.toString())
+                // 处理图标的点击动作（导航到指robot的详情页面）
+                navController.navigate("${Screen.MemoDetailPage.route}/modify") {
+                    popUpTo(Screen.MemoListPage.route)
+                    launchSingleTop = true
+                }
             },
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Blue, contentColor = Color.Yellow)
@@ -120,7 +144,7 @@ fun MemoCard(memo: Memo, navController: NavHostController) {
 
 // 1、列表界面
 @Composable
-fun MemoListScreen(states: StateHolder, memos: MutableList<Memo>) {
+fun MemoListScreen(states: StateHolder) {
     val memoViewModel: MemoViewModel = viewModel()
     val memos = memoViewModel.memos.collectAsState()
     LazyColumn {
@@ -130,8 +154,23 @@ fun MemoListScreen(states: StateHolder, memos: MutableList<Memo>) {
     }
 }
 
+// 2、详情界面（点击进入）
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MemoDetailScreen(isModify: Boolean = true) {
+    val memoViewModel: MemoViewModel = viewModel()
+    var cur = memoViewModel.cur.collectAsState()
+    Log.i("MyLog", cur.value!!.content)
+    Box(contentAlignment = Alignment.Center) {
+        TextField(
+            value = cur.value!!.content,
+            onValueChange = { it: String ->
+                memoViewModel.changeContent(it)
+            })
+    }
+}
 
-// 2、用户界面
+// 3、用户界面
 @Composable
 fun UserScreen() {
     Box(contentAlignment = Alignment.Center) {
@@ -151,8 +190,10 @@ fun UserScreen() {
  *
  * 思考：原来的做法（即Scaffold-Model中的写法）：每个Screen都包含一个loadScreen()函数（该函数返回一个组合函数），通过调用这个函数，就可以直接把预先定义好的Screen加载出来
  */
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun NavigationGraphScreen(states: StateHolder) {
+    val memoViewModel: MemoViewModel = viewModel()
     // 定义宿主(需要：导航控制器、导航起点---String类型)
     NavHost(navController = states.navController, startDestination = states.startDestination) {
         // 定义有几个页面，就有几个composable(){...}
@@ -160,17 +201,35 @@ fun NavigationGraphScreen(states: StateHolder) {
         // 页面1
         composable(route = Screen.MemoListPage.route) {
             // 1、页面展示前的数据准备...
-            val memos = mutableListOf<Memo>()
-            for (i in 0..10) {
-                memos.add(Memo(i, "测试", LocalDateTime.now(), LocalDateTime.now()))
-            }
             // 2、更新当前显示的Screen
             states.currentScreen.value = Screen.MemoListPage
             // 3、此语句处才会展示指定的Screen
-            MemoListScreen(states, memos)
+            MemoListScreen(states)
         }
+        // 页面2.1：modify memo
+        composable(route = Screen.MemoDetailPage.route + "/modify") {
+            // 1、页面展示前的数据准备...
+            // 更新当前查看的机器人是谁？
+            val cur = memoViewModel.cur.collectAsState()
+            states.memoState.value = cur.value
+            Log.i("MyLog3", memoViewModel._cur.value.toString())
 
-        // 页面2
+            // 2、更新当前显示的Screen
+            states.currentScreen.value = Screen.MemoDetailPage
+            Log.i("MyLog", cur.value.toString())
+
+            // 3、此语句处才会展示指定的Screen
+            MemoDetailScreen()
+        }
+        // 页面2.2：new memo
+        composable(route = Screen.MemoDetailPage.route + "/new") {
+            // 1、页面展示前的数据准备...（接收名为”robotStr“参数）
+            // 2、更新当前显示的Screen
+            states.currentScreen.value = Screen.MemoDetailPage
+            // 3、此语句处才会展示指定的Screen
+            MemoDetailScreen(false)
+        }
+        // 页面3
         composable(route = Screen.UserPage.route) {
             // 1、页面展示前的数据准备（无）
             // 2、更新当前显示的Screen
@@ -181,11 +240,17 @@ fun NavigationGraphScreen(states: StateHolder) {
     }
 }
 
-val screens = listOf(Screen.MemoListPage, Screen.UserPage)
+val screens = listOf(Screen.MemoListPage, Screen.MemoDetailPage, Screen.UserPage)
 
+/**
+ *Screen类（与用于显示的Screen实体不同！要区分开！Screen类只用于提供页面需要的元数据metaData：icon、title、"route"【用于导航】）
+ */
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
     object MemoListPage :
         Screen(route = "memoList", title = "备忘录列表", icon = Icons.Filled.List)
+
+    object MemoDetailPage :
+        Screen(route = "memoDetail", title = "备忘录详情", icon = Icons.Filled.Edit)
 
     object UserPage :
         Screen(route = "userInfo", title = "用户信息", icon = Icons.Filled.AccountCircle)
@@ -266,12 +331,29 @@ fun MainScreen() {
                         selected = it.route == states.currentScreen.value.route,
                         // 点击后更改当前的Screen
                         onClick = {
-                            // 实现导航---获取导航控制器、根据页面的route进行匹配（String类型！！！）
-                            // 相当于进”导航栈“
-                            states.navController.navigate(it.route) {
-                                // 回退操作（采用直接回退到RobotListPage页面）
-                                popUpTo(Screen.MemoListPage.route)
-                                launchSingleTop = true
+                            if (it.route == Screen.MemoDetailPage.route) {
+                                // 若要去”详情页面“，需要单独判断（robotState为null的情况）
+                                if (states.memoState.value == null) {
+                                    Toast.makeText(context, "未选择Memo！", Toast.LENGTH_LONG)
+                                        .show()
+                                } else {
+                                    val robotStr = Gson().toJson(states.memoState.value)
+                                    // 到详情页面，一定需要robotStr参数（所以需要单独出来写）
+                                    states.navController.navigate("${it.route}/${robotStr}") {
+                                        // 回退操作（采用直接回退到RobotListPage页面）
+                                        popUpTo(Screen.MemoListPage.route)
+                                        launchSingleTop = true
+                                    }
+                                }
+                            } else {
+                                // 若去其他页面
+                                // 实现导航---获取导航控制器、根据页面的route进行匹配（String类型！！！）
+                                // 相当于进”导航栈“
+                                states.navController.navigate(it.route) {
+                                    // 回退操作（采用直接回退到RobotListPage页面）
+                                    popUpTo(Screen.MemoListPage.route)
+                                    launchSingleTop = true
+                                }
                             }
                         },
                         // 标签
@@ -293,10 +375,10 @@ fun MainScreen() {
             }
         },
         floatingActionButton = {
-            if (states.currentScreen.value == Screen.MemoListPage)
+            if (states.currentScreen.value == Screen.MemoListPage) {
                 FloatingActionButton(onClick = {
-                    // 前往MemoEditActivity
-                    // TODO
+                    // 跳转到new Memo界面
+                    states.navController.navigate("${Screen.MemoDetailPage.route}/new")
                 }, shape = RoundedCornerShape(100.dp)) {
                     Icon(
                         imageVector = Icons.Filled.Edit,
@@ -304,6 +386,18 @@ fun MainScreen() {
                         Modifier.size(25.dp)
                     )
                 }
+            } else {
+                FloatingActionButton(onClick = {
+                    // 跳转到详情界面
+                    states.navController.navigate(Screen.MemoListPage.route)
+                }, shape = RoundedCornerShape(100.dp)) {
+                    Icon(
+                        imageVector = Icons.Filled.Done,
+                        contentDescription = "完成",
+                        Modifier.size(25.dp)
+                    )
+                }
+            }
         })
 }
 

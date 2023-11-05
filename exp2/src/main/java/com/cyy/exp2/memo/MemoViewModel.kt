@@ -1,5 +1,8 @@
 package com.cyy.exp2.memo
 
+import android.util.Log
+import androidx.compose.material3.contentColorFor
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
@@ -10,8 +13,8 @@ import java.time.LocalDateTime
 
 data class Memo(
     val id: Int,
-    val content: String,
-    val modifyTime: LocalDateTime,
+    var content: String,
+    var modifyTime: LocalDateTime,
     val createTime: LocalDateTime
 )
 
@@ -26,6 +29,26 @@ class MemoViewModel : ViewModel() {
 
     // memo的id
     private var cnt: Int = 0
+
+    val _cur: MutableStateFlow<Memo?> = MutableStateFlow(null)
+    val cur = _cur.asStateFlow()
+
+
+    init {
+        _memos.value.add(Memo(1, "test", LocalDateTime.now(), LocalDateTime.now()))
+        _memos.value.add(Memo(2, "test", LocalDateTime.now(), LocalDateTime.now()))
+        _memos.value.add(Memo(3, "test", LocalDateTime.now(), LocalDateTime.now()))
+    }
+
+
+    fun setCur(memo: Memo) {
+        Log.i("MyLog2", "123123")
+        _cur.value = memo
+    }
+
+    fun changeContent(input: String) {
+        _cur.value?.content = input
+    }
 
     fun add(content: String) {
         val memo = Memo(

@@ -25,6 +25,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.integerArrayResource
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.google.gson.Gson
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -65,6 +69,7 @@ class Activity : ComponentActivity() {
         )
         setContent {
             Screen(resultLauncher)
+            Screen2()
         }
     }
 }
@@ -74,20 +79,12 @@ class Activity : ComponentActivity() {
 fun Screen(resultLauncher: ActivityResultLauncher<Intent>) {
     val context = LocalContext.current as Activity
     val vm: TVM = viewModel()
-    Log.i(vm.toString(),"123")
+    Log.i("vm1", vm.toString())
+}
 
-    val t = vm.t.collectAsState()
-    val x: T = t.value[0]
-    Column {
-        Button(onClick = {
-            val intent = Intent(context, Activity2::class.java)
-            intent.putExtra("id", x.id)
-            intent.putExtra("vm", vm)
-            resultLauncher.launch(intent)
-        }) {
-            Text("点击我")
-        }
-        Text(text = "${x.id}")
-    }
+@Composable
+fun Screen2() {
+    val vm: TVM = viewModel()
+    Log.i("vm2", vm.toString())
 }
 
