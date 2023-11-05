@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
+import java.io.Serializable
 import java.time.LocalDate
 import kotlin.system.exitProcess
 
@@ -107,7 +108,7 @@ fun MainScreen(resultLauncher: ActivityResultLauncher<Intent>) {
 }
 
 @Composable
-fun <T, D : Parcelable> CustomButton(
+fun <T, D : Serializable> CustomButton(
     title: String,
     context: Context,
     activityType: Class<T>,
@@ -126,7 +127,7 @@ fun <T, D : Parcelable> CustomButton(
     }
 }
 
-fun <T, D : Parcelable> turnAction(
+fun <T, D : Serializable> turnAction(
     context: Context,
     activityType: Class<T>,
     data: D,

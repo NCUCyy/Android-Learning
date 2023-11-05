@@ -15,7 +15,7 @@ class FirstActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         // 接收MainActivity传递过来的参数(需要指定参数的类型)
-        val data = intent.getParcelableExtra("data", Teacher::class.java)
+        val data = intent.getSerializableExtra("data", Teacher::class.java)
 
         setContent {
             // 把参数值传递给「子组件」进行使用

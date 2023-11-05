@@ -20,10 +20,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.io.Serializable
 
 // 通用Screen
 @Composable
-fun <T : Parcelable> CommonScreen(message: T) {
+fun <T : Serializable> CommonScreen(message: T) {
     val context = LocalContext.current as Activity
     Column(
         verticalArrangement = Arrangement.Center,
@@ -38,7 +39,8 @@ fun <T : Parcelable> CommonScreen(message: T) {
             maxLines = 2,
             modifier = Modifier
                 .fillMaxWidth()
-                .border(BorderStroke(2.dp, Color.Blue)).padding(5.dp)
+                .border(BorderStroke(2.dp, Color.Blue))
+                .padding(5.dp)
         )
         Button(onClick = {
             // 为了实现：点击按钮，结束当前意图(返回代码为：RESULT_OK)
