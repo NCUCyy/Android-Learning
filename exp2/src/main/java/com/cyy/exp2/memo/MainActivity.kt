@@ -10,15 +10,20 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -29,6 +34,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.List
@@ -37,6 +44,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.DropdownMenu
@@ -60,9 +68,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.FocusRequester.Companion.createRefs
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -132,29 +144,45 @@ fun MemoCard(memo: Memo, navController: NavHostController) {
                 }
             },
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Blue, contentColor = Color.Yellow)
+        colors = CardDefaults.cardColors(
+            containerColor = Color(255, 204, 0),
+            contentColor = Color.Black
+        )
     ) {
         ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
             var (contentRef, timeRef) = remember {
                 createRefs()
             }
-            val vGuideline = createGuidelineFromStart(0.6f)
+            val vGuideline = createGuidelineFromStart(0.45f)
             val hGuideline = createGuidelineFromTop(0.7f)
-            Text(text = memo.content, modifier = Modifier.constrainAs(contentRef) {
-                top.linkTo(parent.top)
-                bottom.linkTo(hGuideline)
-                start.linkTo(parent.start)
-                end.linkTo(parent.end)
-            }, fontSize = 20.sp)
+            Text(
+                text = memo.content,
+                modifier = Modifier
+                    .padding(top = 10.dp, bottom = 10.dp)
+                    .constrainAs(contentRef) {
+                        top.linkTo(parent.top)
+                        bottom.linkTo(hGuideline)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                    },
+                fontSize = 20.sp
+            )
             // 转化时间表示方式，用于显示
             val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
             val modifyTime = memo.modifyTime.format(formatter)
-            Text(text = modifyTime, modifier = Modifier.constrainAs(timeRef) {
-                top.linkTo(hGuideline)
-                bottom.linkTo(parent.bottom)
-                start.linkTo(vGuideline)
-                end.linkTo(parent.end)
-            }, fontSize = 13.sp)
+            Text(
+                text = "上次修改：$modifyTime",
+                modifier = Modifier
+                    .padding(bottom = 10.dp)
+                    .constrainAs(timeRef) {
+                        top.linkTo(hGuideline)
+                        bottom.linkTo(parent.bottom)
+                        start.linkTo(vGuideline)
+                        end.linkTo(parent.end)
+                    },
+                fontSize = 13.sp,
+                color = Color.DarkGray
+            )
         }
     }
 }
@@ -211,12 +239,32 @@ fun MemoDetailScreen(isNew: Boolean = false) {
 }
 
 // 3、用户界面
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun UserScreen() {
-    Box(contentAlignment = Alignment.Center) {
-        Text(text = "用户信息界面")
+    // 创建一个 ViewModelProvider 实例
+    val viewModelProvider = ViewModelProvider(LocalContext.current as ViewModelStoreOwner)
+    // 获取指定类型的 ViewModel
+    val userViewModel = viewModelProvider[UserViewModel::class.java]
+    val user = userViewModel.user.collectAsState()
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Image(
+            painter = painterResource(id = R.mipmap.sym_def_app_icon),
+            contentDescription = null,
+            modifier = Modifier
+                .size(100.dp)
+        )
+        Text(text = "用户名：" + user.value!!.username, fontSize = 20.sp)
+        Text(text = "出生日期：" + user.value!!.birth.toString(), fontSize = 20.sp)
+        Text(text = "性别：" + user.value!!.gender, fontSize = 20.sp)
     }
 }
+
 
 /**
  * 技术：
@@ -323,7 +371,7 @@ fun MenuView(states: StateHolder) {
         DropdownMenuItem(
             // 在前面的Icon
             leadingIcon = {
-                Icon(imageVector = Icons.Filled.Star, contentDescription = null)
+                Icon(imageVector = Icons.Filled.ExitToApp, contentDescription = null)
             },
             text = {
                 Text(text = "退出App", fontSize = 20.sp)
@@ -485,7 +533,7 @@ fun MainScreen() {
                         Modifier.size(25.dp)
                     )
                 }
-            } else {
+            } else if (states.currentScreen.value == Screen.MemoDetailPage) {
                 FloatingActionButton(onClick = {
                     // 跳转到详情界面
                     states.navController.navigate(Screen.MemoListPage.route)
@@ -497,6 +545,18 @@ fun MainScreen() {
                         Modifier.size(25.dp)
                     )
                 }
+            } else if (states.currentScreen.value == Screen.UserPage) {
+                FloatingActionButton(onClick = {
+                    // 跳转到详情界面
+                    states.navController.navigate(Screen.MemoListPage.route)
+                }, shape = RoundedCornerShape(100.dp)) {
+                    Icon(
+                        imageVector = Icons.Filled.Home,
+                        contentDescription = "完成",
+                        Modifier.size(25.dp)
+                    )
+                }
+
             }
         })
 }
@@ -507,6 +567,12 @@ fun MainScreen() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DrawView(states: StateHolder) {
+    // 创建一个 ViewModelProvider 实例
+    val viewModelProvider = ViewModelProvider(LocalContext.current as ViewModelStoreOwner)
+
+    // 获取指定类型的 ViewModel
+    val userViewModel = viewModelProvider[UserViewModel::class.java]
+    val user = userViewModel.user.collectAsState()
     ModalNavigationDrawer(
         // 抽屉是否可以通过手势进行交互
         gesturesEnabled = true,
@@ -526,15 +592,21 @@ fun DrawView(states: StateHolder) {
                 Row(modifier = Modifier.padding(bottom = 50.dp)) {
                     Image(
                         painter = painterResource(id = R.mipmap.sym_def_app_icon),
-                        contentDescription = null
+                        contentDescription = null,
+                        modifier = Modifier.clickable {
+                            states.scope.launch {
+                                states.drawerState.close()
+                            }
+                            states.navController.navigate(Screen.UserPage.route)
+                        }
                     )
-                    Text(text = "这个家伙很懒，没有留下任何内容...")
+                    Text(text = user.value!!.username, fontSize = 30.sp)
                 }
                 // 抽屉中要显示的内容
                 screens.forEach {
                     NavigationDrawerItem(
                         label = {
-                            Text(it.title, fontSize = 30.sp)
+                            Text(it.title, fontSize = 20.sp)
                         },
                         icon = {
                             Icon(

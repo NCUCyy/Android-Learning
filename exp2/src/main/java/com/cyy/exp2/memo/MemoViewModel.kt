@@ -38,9 +38,12 @@ class MemoViewModel : ViewModel() {
 
 
     init {
-        _memos.value.add(Memo(1, "test", LocalDateTime.now(), LocalDateTime.now()))
-        _memos.value.add(Memo(2, "test", LocalDateTime.now(), LocalDateTime.now()))
-        _memos.value.add(Memo(3, "test", LocalDateTime.now(), LocalDateTime.now()))
+        _memos.value.add(Memo(1, "今日：学习Android基础", LocalDateTime.now(), LocalDateTime.now()))
+        _memos.value.add(Memo(4, "操作系统实验报告！", LocalDateTime.now(), LocalDateTime.now()))
+        _memos.value.add(Memo(5, "Android实验报告！！！", LocalDateTime.now(), LocalDateTime.now()))
+        _memos.value.add(Memo(6, "看论文！！！！！！", LocalDateTime.now(), LocalDateTime.now()))
+        _memos.value.add(Memo(7, "光声图像理论基础学习", LocalDateTime.now(), LocalDateTime.now()))
+        _memos.value.add(Memo(8, "代码复现", LocalDateTime.now(), LocalDateTime.now()))
     }
 
     fun setCur(memo: Memo) {
