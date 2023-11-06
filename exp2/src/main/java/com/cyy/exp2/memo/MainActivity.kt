@@ -1,8 +1,10 @@
 package com.cyy.exp2.memo
 
 import android.R
+import android.R.attr.fragment
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.Application
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -24,18 +26,20 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -57,7 +61,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -66,24 +69,34 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.core.app.ActivityCompat.finishAffinity
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelLazy
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import java.security.cert.TrustAnchor
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import kotlin.system.exitProcess
+
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        /**
+         * 获得当前Activity的ViewModel---方法一
+         */
+        // 创建一个 ViewModelProvider 实例
+        val viewModelProvider = ViewModelProvider(this)
+        // 获取指定类型的 ViewModel
+        val viewModel = viewModelProvider[MemoViewModel::class.java]
         setContent {
             MainScreen()
         }
@@ -99,7 +112,12 @@ class MainActivity : ComponentActivity() {
 @SuppressLint("RememberReturnType")
 @Composable
 fun MemoCard(memo: Memo, navController: NavHostController) {
-    val memoViewModel: MemoViewModel = viewModel()
+//    val memoViewModel: MemoViewModel = viewModel()
+    // 创建一个 ViewModelProvider 实例
+    val viewModelProvider = ViewModelProvider(LocalContext.current as ViewModelStoreOwner)
+
+    // 获取指定类型的 ViewModel
+    val memoViewModel = viewModelProvider[MemoViewModel::class.java]
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -145,7 +163,12 @@ fun MemoCard(memo: Memo, navController: NavHostController) {
 // 1、列表界面
 @Composable
 fun MemoListScreen(states: StateHolder) {
-    val memoViewModel: MemoViewModel = viewModel()
+    //    val memoViewModel: MemoViewModel = viewModel()
+    // 创建一个 ViewModelProvider 实例
+    val viewModelProvider = ViewModelProvider(LocalContext.current as ViewModelStoreOwner)
+
+    // 获取指定类型的 ViewModel
+    val memoViewModel = viewModelProvider[MemoViewModel::class.java]
     val memos = memoViewModel.memos.collectAsState()
     LazyColumn {
         items(memos.value) { it: Memo ->
@@ -158,7 +181,12 @@ fun MemoListScreen(states: StateHolder) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MemoDetailScreen(isModify: Boolean = true) {
-    val memoViewModel: MemoViewModel = viewModel()
+//    val memoViewModel: MemoViewModel = viewModel()
+    // 创建一个 ViewModelProvider 实例
+    val viewModelProvider = ViewModelProvider(LocalContext.current as ViewModelStoreOwner)
+
+    // 获取指定类型的 ViewModel
+    val memoViewModel = viewModelProvider[MemoViewModel::class.java]
     var cur = memoViewModel.cur.collectAsState()
     Log.i("MyLog", cur.value!!.content)
     Box(contentAlignment = Alignment.Center) {
@@ -193,7 +221,12 @@ fun UserScreen() {
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun NavigationGraphScreen(states: StateHolder) {
-    val memoViewModel: MemoViewModel = viewModel()
+//    val memoViewModel: MemoViewModel = viewModel()
+    // 创建一个 ViewModelProvider 实例
+    val viewModelProvider = ViewModelProvider(LocalContext.current as ViewModelStoreOwner)
+
+    // 获取指定类型的 ViewModel
+    val memoViewModel = viewModelProvider[MemoViewModel::class.java]
     // 定义宿主(需要：导航控制器、导航起点---String类型)
     NavHost(navController = states.navController, startDestination = states.startDestination) {
         // 定义有几个页面，就有几个composable(){...}
@@ -255,6 +288,43 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
     object UserPage :
         Screen(route = "userInfo", title = "用户信息", icon = Icons.Filled.AccountCircle)
 }
+
+@Composable
+fun MenuView(states: StateHolder) {
+    val context = LocalContext.current as Activity
+    DropdownMenu(expanded = states.dropState.value,
+        onDismissRequest = {
+            // 点击其他地方，则关闭下拉框
+            states.dropState.value = false
+        }) {
+        DropdownMenuItem(
+            // 在前面的Icon
+            leadingIcon = {
+                Icon(imageVector = Icons.Filled.Star, contentDescription = null)
+            },
+            text = {
+                Text(text = "点赞App", fontSize = 20.sp)
+            }, onClick = {
+                // 点击完之后，关闭下拉框
+                states.dropState.value = false
+                Toast.makeText(context, "感谢支持！", Toast.LENGTH_LONG).show()
+            })
+        DropdownMenuItem(
+            // 在前面的Icon
+            leadingIcon = {
+                Icon(imageVector = Icons.Filled.Star, contentDescription = null)
+            },
+            text = {
+                Text(text = "退出App", fontSize = 20.sp)
+            }, onClick = {
+                // 点击完之后，关闭下拉框
+                states.dropState.value = false
+                finishAffinity(context)
+                exitProcess(-1)
+            })
+    }
+}
+
 
 /**
  * 主界面---Scaffold骨架
@@ -321,7 +391,15 @@ fun MainScreen() {
 
                     }
                 },
-            )
+                actions = {
+                    IconButton(onClick = {
+                        states.dropState.value = !states.dropState.value
+                    }) {
+                        Icon(imageVector = Icons.Filled.MoreVert, contentDescription = "More...")
+                        if (states.dropState.value)
+                            MenuView(states)
+                    }
+                })
         },
         bottomBar = {
             BottomAppBar {
@@ -477,6 +555,7 @@ class StateHolder(
     val scope: CoroutineScope,
     // 用于判断Drawer 是否打开
     val drawerState: DrawerState,
+    val dropState: MutableState<Boolean>
 )
 
 /**
@@ -491,4 +570,13 @@ fun rememberStates(
     memoState: MutableState<Memo?> = remember { mutableStateOf(null) },
     scope: CoroutineScope = rememberCoroutineScope(),
     drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
-) = StateHolder(currentScreen, navController, startDestination, memoState, scope, drawerState)
+    dropState: MutableState<Boolean> = mutableStateOf(false)
+) = StateHolder(
+    currentScreen,
+    navController,
+    startDestination,
+    memoState,
+    scope,
+    drawerState,
+    dropState
+)

@@ -52,7 +52,9 @@ android {
 }
 
 dependencies {
-    // 添加constranlayout插件
+    implementation ("androidx.fragment:fragment-ktx:1.2.5")
+    implementation("androidx.activity:activity-ktx:1.3.1")
+    // 添加constraintlayout插件
     implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.8.0")
