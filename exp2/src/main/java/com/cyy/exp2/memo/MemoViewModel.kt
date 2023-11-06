@@ -43,28 +43,30 @@ class MemoViewModel : ViewModel() {
         _memos.value.add(Memo(3, "test", LocalDateTime.now(), LocalDateTime.now()))
     }
 
-
     fun setCur(memo: Memo) {
         _cur.value = memo
-    }
-
-    fun initInput() {
-        _input.value = _cur.value?.content!!
+        _input.value = _cur.value!!.content
     }
 
     fun changeInput(input: String) {
         Log.i("--------change-----------", input)
         _input.value = input
-        _cur.value!!.content = input
+        updateCur(input)
     }
 
-    fun add(content: String) {
+    private fun updateCur(content: String) {
+        _cur.value!!.content = content
+        _cur.value!!.modifyTime = LocalDateTime.now()
+    }
+
+    fun add() {
         val memo = Memo(
             cnt++,
-            content = content,
+            content = "",
             createTime = LocalDateTime.now(),
             modifyTime = LocalDateTime.now()
         )
         _memos.value.add(memo)
+        setCur(memo)
     }
 }

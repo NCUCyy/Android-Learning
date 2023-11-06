@@ -126,7 +126,7 @@ fun MemoCard(memo: Memo, navController: NavHostController) {
                 memoViewModel.setCur(memo)
                 Log.i("MyLog2", memoViewModel.cur.value.toString())
                 // 处理图标的点击动作（导航到指robot的详情页面）
-                navController.navigate("${Screen.MemoDetailPage.route}/modify") {
+                navController.navigate("${Screen.MemoDetailPage.route}") {
                     popUpTo(Screen.MemoListPage.route)
                     launchSingleTop = true
                 }
@@ -178,23 +178,36 @@ fun MemoListScreen(states: StateHolder) {
 // 2、详情界面（点击进入）
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MemoDetailScreen(isModify: Boolean = true) {
+fun MemoDetailScreen(isNew: Boolean = false) {
     // 创建一个 ViewModelProvider 实例
     val viewModelProvider = ViewModelProvider(LocalContext.current as ViewModelStoreOwner)
 
     // 获取指定类型的 ViewModel
     val memoViewModel = viewModelProvider[MemoViewModel::class.java]
     var input = memoViewModel.input.collectAsState()
-    memoViewModel.initInput()
-    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-        TextField(modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White),
-            value = input.value,
-            onValueChange = { it: String ->
-                memoViewModel.changeInput(it)
-            })
+    if (!isNew) {
+        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+            TextField(modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White),
+                value = input.value,
+                onValueChange = { it: String ->
+                    memoViewModel.changeInput(it)
+                })
+        }
+    } else {
+        // 内部自动设置了当前的cur是新添加的memo
+        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+            TextField(modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White),
+                value = input.value,
+                onValueChange = { it: String ->
+                    memoViewModel.changeInput(it)
+                })
+        }
     }
+
 }
 
 // 3、用户界面
@@ -238,7 +251,7 @@ fun NavigationGraphScreen(states: StateHolder) {
             MemoListScreen(states)
         }
         // 页面2.1：modify memo
-        composable(route = Screen.MemoDetailPage.route + "/modify") {
+        composable(route = Screen.MemoDetailPage.route) {
             // 1、页面展示前的数据准备...
             // 更新当前查看的机器人是谁？
             val cur = memoViewModel.cur.collectAsState()
@@ -258,7 +271,7 @@ fun NavigationGraphScreen(states: StateHolder) {
             // 2、更新当前显示的Screen
             states.currentScreen.value = Screen.MemoDetailPage
             // 3、此语句处才会展示指定的Screen
-            MemoDetailScreen(false)
+            MemoDetailScreen(isNew = true)
         }
         // 页面3
         composable(route = Screen.UserPage.route) {
@@ -337,6 +350,11 @@ fun MainScreen() {
     val states = rememberStates()
     // 当前应用的上下文
     val context = LocalContext.current as Activity
+    // 创建一个 ViewModelProvider 实例
+    val viewModelProvider = ViewModelProvider(LocalContext.current as ViewModelStoreOwner)
+
+    // 获取指定类型的 ViewModel
+    val memoViewModel = viewModelProvider[MemoViewModel::class.java]
     // 脚手架
     Scaffold(
         topBar = {
@@ -410,12 +428,15 @@ fun MainScreen() {
                             if (it.route == Screen.MemoDetailPage.route) {
                                 // 若要去”详情页面“，需要单独判断（robotState为null的情况）
                                 if (states.memoState.value == null) {
-                                    Toast.makeText(context, "未选择Memo！", Toast.LENGTH_LONG)
+                                    Toast.makeText(
+                                        context,
+                                        "请选择要查看的备忘录！",
+                                        Toast.LENGTH_LONG
+                                    )
                                         .show()
                                 } else {
-                                    val robotStr = Gson().toJson(states.memoState.value)
                                     // 到详情页面，一定需要robotStr参数（所以需要单独出来写）
-                                    states.navController.navigate("${it.route}/${robotStr}") {
+                                    states.navController.navigate("${it.route}") {
                                         // 回退操作（采用直接回退到RobotListPage页面）
                                         popUpTo(Screen.MemoListPage.route)
                                         launchSingleTop = true
@@ -454,6 +475,8 @@ fun MainScreen() {
             if (states.currentScreen.value == Screen.MemoListPage) {
                 FloatingActionButton(onClick = {
                     // 跳转到new Memo界面
+                    // 一点击按钮就需要创建
+                    memoViewModel.add()
                     states.navController.navigate("${Screen.MemoDetailPage.route}/new")
                 }, shape = RoundedCornerShape(100.dp)) {
                     Icon(
@@ -466,6 +489,7 @@ fun MainScreen() {
                 FloatingActionButton(onClick = {
                     // 跳转到详情界面
                     states.navController.navigate(Screen.MemoListPage.route)
+                    Toast.makeText(context, "保存成功！！", Toast.LENGTH_LONG).show()
                 }, shape = RoundedCornerShape(100.dp)) {
                     Icon(
                         imageVector = Icons.Filled.Done,
@@ -524,6 +548,7 @@ fun DrawView(states: StateHolder) {
                         onClick = {
                             states.scope.launch {
                                 states.currentScreen.value = it
+                                states.navController.navigate(states.currentScreen.value.route)
                                 states.drawerState.close()
                             }
                         })
