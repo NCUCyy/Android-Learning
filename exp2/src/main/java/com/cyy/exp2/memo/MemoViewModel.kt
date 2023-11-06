@@ -30,8 +30,11 @@ class MemoViewModel : ViewModel() {
     // memo的id
     private var cnt: Int = 0
 
-    val _cur: MutableStateFlow<Memo?> = MutableStateFlow(null)
+    private val _cur: MutableStateFlow<Memo?> = MutableStateFlow(null)
     val cur = _cur.asStateFlow()
+
+    private val _input: MutableStateFlow<String> = MutableStateFlow("")
+    val input = _input.asStateFlow()
 
 
     init {
@@ -42,12 +45,17 @@ class MemoViewModel : ViewModel() {
 
 
     fun setCur(memo: Memo) {
-        Log.i("MyLog2", "123123")
         _cur.value = memo
     }
 
-    fun changeContent(input: String) {
-        _cur.value?.content = input
+    fun initInput() {
+        _input.value = _cur.value?.content!!
+    }
+
+    fun changeInput(input: String) {
+        Log.i("--------change-----------", input)
+        _input.value = input
+        _cur.value!!.content = input
     }
 
     fun add(content: String) {

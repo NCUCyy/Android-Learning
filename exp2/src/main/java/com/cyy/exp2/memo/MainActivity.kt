@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -86,7 +87,6 @@ import java.time.format.DateTimeFormatter
 import kotlin.system.exitProcess
 
 
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -112,7 +112,6 @@ class MainActivity : ComponentActivity() {
 @SuppressLint("RememberReturnType")
 @Composable
 fun MemoCard(memo: Memo, navController: NavHostController) {
-//    val memoViewModel: MemoViewModel = viewModel()
     // 创建一个 ViewModelProvider 实例
     val viewModelProvider = ViewModelProvider(LocalContext.current as ViewModelStoreOwner)
 
@@ -125,7 +124,7 @@ fun MemoCard(memo: Memo, navController: NavHostController) {
             .clickable {
                 // 两个任务：1、传递被点击的Robot数据；2、导航到详情界面
                 memoViewModel.setCur(memo)
-                Log.i("MyLog2", memoViewModel._cur.value.toString())
+                Log.i("MyLog2", memoViewModel.cur.value.toString())
                 // 处理图标的点击动作（导航到指robot的详情页面）
                 navController.navigate("${Screen.MemoDetailPage.route}/modify") {
                     popUpTo(Screen.MemoListPage.route)
@@ -163,7 +162,6 @@ fun MemoCard(memo: Memo, navController: NavHostController) {
 // 1、列表界面
 @Composable
 fun MemoListScreen(states: StateHolder) {
-    //    val memoViewModel: MemoViewModel = viewModel()
     // 创建一个 ViewModelProvider 实例
     val viewModelProvider = ViewModelProvider(LocalContext.current as ViewModelStoreOwner)
 
@@ -181,19 +179,20 @@ fun MemoListScreen(states: StateHolder) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MemoDetailScreen(isModify: Boolean = true) {
-//    val memoViewModel: MemoViewModel = viewModel()
     // 创建一个 ViewModelProvider 实例
     val viewModelProvider = ViewModelProvider(LocalContext.current as ViewModelStoreOwner)
 
     // 获取指定类型的 ViewModel
     val memoViewModel = viewModelProvider[MemoViewModel::class.java]
-    var cur = memoViewModel.cur.collectAsState()
-    Log.i("MyLog", cur.value!!.content)
-    Box(contentAlignment = Alignment.Center) {
-        TextField(
-            value = cur.value!!.content,
+    var input = memoViewModel.input.collectAsState()
+    memoViewModel.initInput()
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+        TextField(modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White),
+            value = input.value,
             onValueChange = { it: String ->
-                memoViewModel.changeContent(it)
+                memoViewModel.changeInput(it)
             })
     }
 }
@@ -221,7 +220,6 @@ fun UserScreen() {
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun NavigationGraphScreen(states: StateHolder) {
-//    val memoViewModel: MemoViewModel = viewModel()
     // 创建一个 ViewModelProvider 实例
     val viewModelProvider = ViewModelProvider(LocalContext.current as ViewModelStoreOwner)
 
@@ -245,7 +243,7 @@ fun NavigationGraphScreen(states: StateHolder) {
             // 更新当前查看的机器人是谁？
             val cur = memoViewModel.cur.collectAsState()
             states.memoState.value = cur.value
-            Log.i("MyLog3", memoViewModel._cur.value.toString())
+            Log.i("MyLog3", memoViewModel.cur.value.toString())
 
             // 2、更新当前显示的Screen
             states.currentScreen.value = Screen.MemoDetailPage
