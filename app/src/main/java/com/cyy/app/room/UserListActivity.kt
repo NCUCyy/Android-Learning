@@ -41,18 +41,15 @@ class UserListActivity : ComponentActivity() {
 fun ContentView() {
     val application = LocalContext.current.applicationContext as MyApp
     val userViewModel = viewModel<UserViewModel>(
-        factory = UserViewModelFactory((application).repository)
+        factory = GenericViewModelFactory((application).repository, UserViewModel::class.java)
     )
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         val userList by userViewModel.allUser.collectAsStateWithLifecycle()
         UserList(Modifier.weight(1f), userList)
         Row {
             Button(onClick = {
-                val user1 = User(1, "cyy", "cyy", "男", mutableListOf())
-                val user2 = User(2, "cyy", "cyy", "男", mutableListOf())
-                val user3 = User(3, "cyy", "cyy", "男", mutableListOf())
-                val user4 = User(4, "cyy", "cyy", "男", mutableListOf())
-                userViewModel.insert(user1, user2, user3, user4)
+                val user = User("cyy", "cyy", "男")
+                userViewModel.insert(user)
             }) {
                 Text(text = "新增")
             }

@@ -32,7 +32,7 @@ abstract class AppDataBase : RoomDatabase() {
             return INSTANCE ?: synchronized(this) {
                 val dataBase = Room.databaseBuilder(
                     context.applicationContext,
-                    AppDataBase::class.java, "room_test."
+                    AppDataBase::class.java, "room_test2"
                 ).build()
                 INSTANCE = dataBase
                 dataBase

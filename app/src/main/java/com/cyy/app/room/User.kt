@@ -7,17 +7,15 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "t_user")
 data class User(
-    @PrimaryKey(autoGenerate = true) val id: Int,
     val username: String,
     val password: String,
     val sex: String,
-    @Ignore val records: MutableList<Int>
 ) {
+    @PrimaryKey(autoGenerate = true)
+    // 自增的主键，在类内部定义，不要出现在构造函数的参数中，这样在实例化时才不需要设置该值
+    var id: Int = 0
+
+    @Ignore
     // 对于有@Ignore注解的属性，需要提供一个构造函数（不包含它）
-    constructor(
-        id: Int,
-        username: String,
-        password: String,
-        sex: String
-    ) : this(id, username, password, sex, mutableListOf())
+    var records: MutableList<Int> = mutableListOf()
 }

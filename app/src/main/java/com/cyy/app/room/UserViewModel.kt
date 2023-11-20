@@ -44,11 +44,26 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
 }
 
 // 为了创建 ViewModel 对象，需要使用 ViewModelProvider.Factory。
-class UserViewModelFactory(private val repository: UserRepository) : ViewModelProvider.Factory {
+//class UserViewModelFactory(private val repository: UserRepository) : ViewModelProvider.Factory {
+//    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+//        if (modelClass.isAssignableFrom(UserViewModel::class.java)) {
+//            @Suppress("UNCHECKED_CAST")
+//            return UserViewModel(repository) as T
+//        }
+//        throw IllegalArgumentException("Unknown ViewModel class")
+//    }
+//}
+
+class GenericViewModelFactory<T : ViewModel>(
+    private val repository: Any,
+    private val viewModelClass: Class<T>
+) : ViewModelProvider.Factory {
+
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(UserViewModel::class.java)) {
+        if (modelClass.isAssignableFrom(viewModelClass)) {
             @Suppress("UNCHECKED_CAST")
-            return UserViewModel(repository) as T
+            return viewModelClass.getDeclaredConstructor(repository.javaClass)
+                .newInstance(repository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
