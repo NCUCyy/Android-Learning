@@ -1,12 +1,13 @@
 package com.cyy.app.room
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "t_user")
 data class User(
-    @PrimaryKey val id: Int,
+    @PrimaryKey(autoGenerate = true) val id: Int,
     val username: String,
     val password: String,
     val sex: String,
