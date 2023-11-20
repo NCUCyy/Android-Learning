@@ -1,8 +1,12 @@
+import org.jetbrains.kotlin.kapt3.base.Kapt.kapt
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     // @Parcelize注解
     id("kotlin-parcelize")
+    // 启用ksp
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -32,11 +36,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
     buildFeatures {
 //        默认就是Compose的方式
@@ -54,13 +58,21 @@ android {
     }
 }
 
-dependencies {
+dependencies {//Room
+    val roomVersion = "2.5.0"
+
+    implementation("androidx.room:room-runtime:$roomVersion")
+    implementation("androidx.room:room-ktx:$roomVersion")
+
+    // To use Kotlin Symbol Processing (KSP)
+    ksp("androidx.room:room-compiler:$roomVersion")
+
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
     // 添加constranlayout插件
     implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
     val navVersion = "2.7.4"
     implementation("androidx.navigation:navigation-compose:${navVersion}")
-    implementation("com.google.code.gson:gson:2.10")
+    implementation("com.google.code.gson:gson:2.10.1")
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
     implementation("androidx.activity:activity-compose:1.7.0")
