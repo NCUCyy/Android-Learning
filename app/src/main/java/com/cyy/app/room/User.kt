@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "t_user")
 data class User(
-    val username: String,
+    val username: String,// 唯一
     val password: String,
     val sex: String,
 ) {
@@ -17,5 +17,5 @@ data class User(
 
     @Ignore
     // 对于有@Ignore注解的属性，需要提供一个构造函数（不包含它）
-    var records: MutableList<Int> = mutableListOf()
+    var records: MutableList<Record> = mutableListOf()
 }

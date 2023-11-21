@@ -1,8 +1,8 @@
 package com.cyy.app.room
 
+
 import androidx.annotation.WorkerThread
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
  * 1、Repository只需持有 DAO 对象，而非整个数据库实例对象。因为 DAO 包含了数据库的所有读取/写入方法，因此它只需要访问 DAO。
@@ -12,31 +12,31 @@ import kotlinx.coroutines.flow.MutableStateFlow
  * 5、Repository的用途是在不同的数据源之间进行协调。在这个简单示例中，数据源只有一个，因此该数据仓库并未执行多少操作。
  */
 // 将DAO声明为构造函数中的私有属性。传入 DAO 而不是整个数据库对象，因为你只需要访问DAO。
-class UserRepository(private val userDao: UserDao) {
+class RecordRepository(private val recordDao: RecordDao) {
     // 默认情况下，Room 会在非主线程执行挂起函数进行查询，
     // 因此，我们不需要实现其他任何东西来确保避免在主线程中执行过长时间的数据操作。
     @WorkerThread
-    suspend fun insert(vararg user: User) {
-        userDao.insert(*user)
+    suspend fun insert(vararg record: Record) {
+        recordDao.insert(*record)
     }
 
     @WorkerThread
-    suspend fun update(vararg user: User) {
-        userDao.update(*user)
+    suspend fun update(vararg record: Record) {
+        recordDao.update(*record)
     }
 
     @WorkerThread
-    suspend fun delete(vararg user: User) {
-        userDao.delete(*user)
+    suspend fun delete(vararg record: Record) {
+        recordDao.delete(*record)
     }
 
     @WorkerThread
     suspend fun deleteAll() {
-        userDao.deleteAll()
+        recordDao.deleteAll()
     }
 
     @WorkerThread
-    suspend fun getByUsername(username: String): User {
-        return userDao.getByUsername(username)
+    fun getByUserId(userId: Int): Flow<List<Record>> {
+        return recordDao.getByUserId(userId)
     }
 }

@@ -4,6 +4,9 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverter
+import androidx.room.TypeConverters
+import androidx.room.migration.Migration
 
 /**
  * Room 是 SQLite 数据库之上的一个数据库层。它负责处理平常使用 SQLiteOpenHelper 所处理的单调乏味的任务。
@@ -18,10 +21,12 @@ import androidx.room.RoomDatabase
  * 5、getDatabase 会返回该单例。首次使用时，它会创建数据库，具体方法是：使用 Room 的数据库构建器在 AppDataBase 类的应用上下文中创建 RoomDatabase 对象，并指定数据库的名称为 “app_database”。
  */
 // 定义一个数据库类，用注解 @Database 标记，并将实体类的数组作为参数传递（会自动创建对应的数据表）
-@Database(entities = [User::class], version = 1, exportSchema = false)
+@Database(entities = [User::class, Record::class], version = 1, exportSchema = false)
+@TypeConverters(Converters::class)
 abstract class AppDataBase : RoomDatabase() {
 
     abstract fun getUserDao(): UserDao
+    abstract fun getRecordDao(): RecordDao
 
     // 创建一个单例对象，避免同时打开多个数据库实例
     companion object {
@@ -32,8 +37,10 @@ abstract class AppDataBase : RoomDatabase() {
             return INSTANCE ?: synchronized(this) {
                 val dataBase = Room.databaseBuilder(
                     context.applicationContext,
-                    AppDataBase::class.java, "room_test2"
-                ).build()
+                    AppDataBase::class.java, "room_test_record2"
+                )
+//                    .addMigrations(migration_1_2)
+                    .build()
                 INSTANCE = dataBase
                 dataBase
             }
