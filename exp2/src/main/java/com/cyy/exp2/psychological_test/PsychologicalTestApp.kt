@@ -2,6 +2,7 @@ package com.cyy.exp2.psychological_test
 
 import android.app.Application
 import androidx.activity.ComponentActivity
+import com.cyy.exp2.psychological_test.repository.RecordRepository
 import com.cyy.exp2.psychological_test.repository.UserRepository
 
 class PsychologicalTestApp : Application() {
@@ -10,7 +11,7 @@ class PsychologicalTestApp : Application() {
 
     val userRepository by lazy { UserRepository(database.getUserDao()) }
 
-    //    val recordRepository by lazy { RecordRepository(database.getRecordDao()) }
+    val recordRepository by lazy { RecordRepository(database.getRecordDao()) }
     override fun onCreate() {
         super.onCreate()
     }

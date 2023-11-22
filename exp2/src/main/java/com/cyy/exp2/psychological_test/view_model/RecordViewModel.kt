@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import com.cyy.exp2.psychological_test.pojo.Record
+import java.time.OffsetDateTime
 
 /**
  *ViewModel 的作用是向界面提供数据，它以一种可以感知生命周期的方式保存应用的界面数据，不受配置变化的影响。
@@ -42,6 +43,14 @@ class RecordViewModel(private val repository: RecordRepository, private val logi
         started = SharingStarted.WhileSubscribed(5000)
     )
 
+//    init {
+//        viewModelScope.launch {
+//            repository.insert(Record(OffsetDateTime.now(), 100, 1))
+//            repository.insert(Record(OffsetDateTime.now(), 100, 1))
+//        }
+//
+//    }
+
     fun insert(vararg record: Record) = viewModelScope.launch {
         repository.insert(*record)
     }
@@ -60,7 +69,7 @@ class RecordViewModel(private val repository: RecordRepository, private val logi
 
 }
 
-class RecordViewModelRepository(private val repository: RecordRepository, private val userId: Int) :
+class RecordViewModelFactory(private val repository: RecordRepository, private val userId: Int) :
     ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(RecordViewModel::class.java)) {

@@ -49,6 +49,7 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
     fun setLoginUser(user: User) {
         loginRes.value = true
         _loginUser.value = user
+        Log.i("想看", _loginUser.value.toString())
     }
 
     fun login(username: String, password: String) = viewModelScope.launch {

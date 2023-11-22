@@ -88,18 +88,20 @@ fun EnterScreen(resultLauncher: ActivityResultLauncher<Intent>) {
     val loginViewModel: LoginViewModel = viewModel()
     var username = loginViewModel.username.collectAsState()
     var password = loginViewModel.password.collectAsState()
+
     val userViewModel = viewModel<UserViewModel>(
         factory = UserViewModelFactory(
             application.userRepository,
         )
     )
+    val loginUser = userViewModel.loginUser.collectAsState()
     // 监听登录状态！---使用LiveData而不是StateFlow
     userViewModel.loginRes.observe(context as ComponentActivity) {
         if (it) {
             Toast.makeText(application, "登录成功", Toast.LENGTH_SHORT).show()
             // 跳转到TestActivity(并携带userId，表示登录的用户)
-            val intent = Intent(context, TestActivity::class.java)
-            intent.putExtra("userId", userViewModel.loginUser.value!!.id)
+            val intent = Intent(context as Activity, TestActivity::class.java)
+            intent.putExtra("userId", loginUser.value?.id)
             resultLauncher.launch(intent)
         } else {
             Toast.makeText(application, "用户名或密码错误", Toast.LENGTH_SHORT).show()
