@@ -46,16 +46,12 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
 //        }
 //    }
 
-    fun setLoginUser(user: User) {
-        loginRes.value = true
-        _loginUser.value = user
-        Log.i("想看", _loginUser.value.toString())
-    }
 
     fun login(username: String, password: String) = viewModelScope.launch {
         var user = repository.getByUsername(username)
         if (user != null && user.password == password) {
-            setLoginUser(user)
+            loginRes.value = true
+            _loginUser.value = user
         } else {
             loginRes.value = false
         }
@@ -64,12 +60,10 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
     fun register(vararg user: User) = viewModelScope.launch {
         val selectedUser = repository.getByUsername(user[0].username)
         if (selectedUser != null) {
-//            _registerRes.value = false
+            registerRes.value = false
         } else {
             repository.insert(*user)
-//            _registerRes.value = true
-            val user = repository.getByUsername(user[0].username)
-            setLoginUser(user)
+            registerRes.value = true
         }
     }
 

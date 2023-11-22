@@ -1,9 +1,9 @@
 package com.cyy.exp2.psychological_test.ui
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -11,10 +11,9 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,45 +22,47 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cyy.exp2.psychological_test.PsychologicalTestApp
+import com.cyy.exp2.psychological_test.pojo.User
 import com.cyy.exp2.psychological_test.view_model.LoginViewModel
 import com.cyy.exp2.psychological_test.view_model.UserViewModel
 import com.cyy.exp2.psychological_test.view_model.UserViewModelFactory
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 /**
  * 显式意图跳转到TestActivity，并携带userId------>用于创建RecordViewModel
@@ -82,7 +83,7 @@ class LoginActivity : ComponentActivity() {
             }
         )
         setContent {
-            EnterScreen(resultLauncher)
+            LoginScreen(resultLauncher)
         }
     }
 }
@@ -90,20 +91,17 @@ class LoginActivity : ComponentActivity() {
 /**
  * 使用livedata进行监视：若数据发生改变，则执行操作
  */
+@SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalMaterial3Api::class)
 // 登录界面
 @Composable
-fun EnterScreen(resultLauncher: ActivityResultLauncher<Intent>) {
-    // 用于"正在登录..."的Dialog的显示
-    var flag by remember { mutableStateOf(false) }
-    var showProgress by remember { mutableStateOf(true) }
-    val coroutineScope = rememberCoroutineScope()
-
+fun LoginScreen(resultLauncher: ActivityResultLauncher<Intent>) {
     val context = LocalContext.current
     val application = LocalContext.current.applicationContext as PsychologicalTestApp
     val loginViewModel: LoginViewModel = viewModel()
     var username = loginViewModel.username.collectAsState()
     var password = loginViewModel.password.collectAsState()
+    val showDialog = remember { mutableStateOf(false) }
 
     val userViewModel = viewModel<UserViewModel>(
         factory = UserViewModelFactory(
@@ -115,12 +113,25 @@ fun EnterScreen(resultLauncher: ActivityResultLauncher<Intent>) {
     userViewModel.loginRes.observe(context as ComponentActivity) {
         if (it) {
             Toast.makeText(application, "登录成功", Toast.LENGTH_SHORT).show()
+            // 登录成功后，将登录信息清空
+            loginViewModel.afterLogin()
             // 跳转到TestActivity(并携带userId，表示登录的用户)
             val intent = Intent(context as Activity, TestActivity::class.java)
             intent.putExtra("userId", loginUser.value?.id)
             resultLauncher.launch(intent)
         } else {
             Toast.makeText(application, "用户名或密码错误", Toast.LENGTH_SHORT).show()
+        }
+    }
+    // 监听注册状态！---使用LiveData而不是StateFlow
+    userViewModel.registerRes.observe(context as ComponentActivity) {
+        if (it) {
+            showDialog.value = false
+            // 注册成功后，将注册信息复制到登录信息
+            loginViewModel.afterRegister()
+            Toast.makeText(application, "注册成功", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(application, "用户名已存在", Toast.LENGTH_SHORT).show()
         }
     }
     Box(
@@ -142,6 +153,7 @@ fun EnterScreen(resultLauncher: ActivityResultLauncher<Intent>) {
             Spacer(modifier = Modifier.width(8.dp)) // 添加一些间距
             Text(
                 text = "心理测试 App",
+                fontWeight = FontWeight.Bold,
                 fontSize = 30.sp,
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.titleLarge.copy(
@@ -158,29 +170,20 @@ fun EnterScreen(resultLauncher: ActivityResultLauncher<Intent>) {
                 elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = Color.White,
-                    contentColor = Color.White,
                 ),
             ) {
-                Box(
-                    modifier = Modifier.padding(
-                        top = 30.dp,
-                        start = 20.dp,
-                        end = 20.dp,
-                        bottom = 20.dp
-                    )
-                ) {
-                    InputBox(username, "请输入用户名...", action = loginViewModel::updateUsername)
-                }
-                Box(
-                    modifier = Modifier.padding(
-                        top = 5.dp,
-                        start = 20.dp,
-                        end = 20.dp,
-                        bottom = 20.dp
-                    )
-                ) {
-                    InputBox(password, "请输入密码...", action = loginViewModel::updatePassword)
-                }
+                ScreenTitle(title = "登录")
+                Divider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp),
+                    color = Color(0xFFC4C4C4),
+                )
+                Spacer(modifier = Modifier.height(30.dp))
+                InputBox(username, "请输入用户名...", action = loginViewModel::updateUsername)
+                Spacer(modifier = Modifier.height(25.dp))
+                InputBox(password, "请输入密码...", action = loginViewModel::updatePassword)
+                Spacer(modifier = Modifier.height(30.dp))
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
@@ -193,13 +196,6 @@ fun EnterScreen(resultLauncher: ActivityResultLauncher<Intent>) {
                             onClick = {
                                 /*TODO*/
                                 userViewModel.login(username.value, password.value)
-                                // 正在登录
-//                                showProgress = true
-//                                flag = true
-//                                coroutineScope.launch {
-//                                    delay(2000L) // 延迟2秒
-//                                    showProgress = false
-//                                }
                             },
                             elevation = ButtonDefaults.elevatedButtonElevation(defaultElevation = 10.dp)
                         ) {
@@ -208,7 +204,7 @@ fun EnterScreen(resultLauncher: ActivityResultLauncher<Intent>) {
                         Button(
                             onClick = {
                                 /*TODO*/
-//                                userViewModel.register(username.value, password.value)
+                                showDialog.value = true
                             },
                             elevation = ButtonDefaults.elevatedButtonElevation(defaultElevation = 10.dp)
                         ) {
@@ -218,27 +214,103 @@ fun EnterScreen(resultLauncher: ActivityResultLauncher<Intent>) {
                 }
             }
         }
-
     }
-    // 正在登录
-//    if (flag && showProgress) {
-//        Dialog(onDismissRequest = {
-//            flag = false
-//        }) {
-//            Box(
-//                modifier = Modifier
-//                    .height(150.dp)
-//                    .width(300.dp)
-//                    .background(Color.White),
-//                contentAlignment = Alignment.Center
-//            ) {
-//                Column {
-//                    LinearProgressIndicator()
-//                    Text("正在登录...")
-//                }
-//            }
-//        }
-//    }
+    // 注册对话框---用showDialog控制是否显示
+    RegisterScreen(
+        showDialog,
+        loginViewModel
+    ) { username, password, sex ->
+        userViewModel.register(User(username, password, sex))
+    }
+}
+
+@Composable
+fun RegisterScreen(
+    showDialog: MutableState<Boolean>,
+    loginViewModel: LoginViewModel,
+    onRegister: (username: String, password: String, sex: String) -> Unit
+) {
+    val options = listOf("男", "女")
+    var username = loginViewModel.registerUsername.collectAsState()
+    var password = loginViewModel.registerPassword.collectAsState()
+    var sex = loginViewModel.registerSex.collectAsState()
+
+
+    if (showDialog.value) {
+        Dialog(onDismissRequest = {
+            showDialog.value = false
+        }) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Card(
+                    elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFFC4E5F5),
+                    ),
+                ) {
+                    ScreenTitle(title = "注册")
+                    Divider(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 10.dp),
+                        color = Color(0xFFC4C4C4),
+                    )
+
+                    Spacer(modifier = Modifier.height(30.dp))
+                    InputBox(
+                        input = username,
+                        placeHolder = "请输入用户名...",
+                        action = loginViewModel::updateRegisterUsername
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    InputBox(
+                        input = password,
+                        placeHolder = "请输入密码...",
+                        action = loginViewModel::updateRegisterPassword
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(), horizontalArrangement = Arrangement.Center
+                        ) {
+                            options.forEach {
+                                RadioButton(
+                                    selected = (it == sex.value),
+                                    onClick = { loginViewModel.updateRegisterSex(it) }
+                                )
+                                Text(
+                                    fontSize = 16.sp,
+                                    text = it,
+                                    modifier = Modifier.padding(top = 10.dp, end = 20.dp)
+                                )
+                            }
+                        }
+
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 20.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Button(
+                            elevation = ButtonDefaults.elevatedButtonElevation(defaultElevation = 10.dp),
+                            onClick = {
+                                onRegister(username.value, password.value, sex.value)
+                            }) {
+                            Text("注册")
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 
@@ -248,24 +320,49 @@ fun EnterScreen(resultLauncher: ActivityResultLauncher<Intent>) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InputBox(input: State<String>, placeHolder: String, action: (String) -> Unit) {
-    Card(elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp)) {
-        TextField(
-            value = input.value,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 20.dp, end = 20.dp),
-            onValueChange = {
-                action(it)
-            },
-            placeholder = { Text(text = placeHolder) },
-            singleLine = true, // 单行文本框
-            shape = MaterialTheme.shapes.extraSmall, // 设置边框形状
-            textStyle = TextStyle.Default.copy(color = Color.Black), // 设置文本颜色
-            colors = TextFieldDefaults.textFieldColors(
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent
-            ),
+    Box(
+        modifier = Modifier.padding(
+            start = 20.dp,
+            end = 20.dp,
+        )
+    ) {
+        Card(elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp)) {
+            TextField(
+                value = input.value,
+                modifier = Modifier
+                    .fillMaxWidth(),
+                onValueChange = {
+                    action(it)
+                },
+                placeholder = { Text(text = placeHolder) },
+                singleLine = true, // 单行文本框
+                shape = MaterialTheme.shapes.extraSmall, // 设置边框形状
+                textStyle = TextStyle.Default.copy(color = Color.Black), // 设置文本颜色
+                colors = TextFieldDefaults.textFieldColors(
+                    containerColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent,
+                    placeholderColor = Color.Gray,
+                ),
+            )
+        }
+    }
+}
+
+@Composable
+fun ScreenTitle(title: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 26.dp)
+    ) {
+        Text(
+            text = title,
+            fontSize = 25.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(start = 10.dp, top = 20.dp),
+            color = Color(0xFF4E403C)
         )
     }
 }
