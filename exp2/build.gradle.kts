@@ -3,6 +3,8 @@ plugins {
     id("org.jetbrains.kotlin.android")
     // @Parcelize注解
     id("kotlin-parcelize")
+    // 启用ksp
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -32,11 +34,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
@@ -52,6 +54,15 @@ android {
 }
 
 dependencies {
+        val roomVersion = "2.5.0"
+
+    implementation("androidx.room:room-runtime:$roomVersion")
+    implementation("androidx.room:room-ktx:$roomVersion")
+
+    // To use Kotlin Symbol Processing (KSP)
+    ksp("androidx.room:room-compiler:$roomVersion")
+
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
     implementation ("androidx.fragment:fragment-ktx:1.5.6")
     implementation("androidx.activity:activity-ktx:1.7.0")
     // 添加constraintlayout插件

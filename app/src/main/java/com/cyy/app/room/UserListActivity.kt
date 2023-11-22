@@ -62,6 +62,8 @@ fun ContentView() {
     val loginRes by userViewModel.loginRes.collectAsState()
     val registerRes by userViewModel.registerRes.collectAsState()
     var recordViewModel: RecordViewModel? = null
+
+    // 当这个Activity完成返回登录界面时，这个RecordViewModel也会被一起销毁；下次登录就会是一个新的RecordViewModel
     if (loginRes) {
         recordViewModel = viewModel(
             factory = RecordViewModelRepository(

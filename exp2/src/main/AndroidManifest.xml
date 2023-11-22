@@ -10,11 +10,11 @@
             android:supportsRtl="true"
             android:theme="@style/Theme.Chenyi">
         <activity
-                android:name=".psychological_test.TestActivity"
-                android:exported="false" />
+                android:name=".psychological_test.ui.TestActivity"
+                android:exported="true" />
         <activity
-                android:name=".psychological_test.LoginActivity"
-                android:exported="false" />
+                android:name=".psychological_test.ui.LoginActivity"
+                android:exported="true" />
         <activity
                 android:name=".jump2.FirstActivity"
                 android:exported="true"

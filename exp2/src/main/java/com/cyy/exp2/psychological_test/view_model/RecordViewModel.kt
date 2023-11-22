@@ -1,4 +1,4 @@
-package com.cyy.app.room
+package com.cyy.exp2.psychological_test.view_model
 
 import android.util.Log
 import androidx.compose.animation.EnterTransition.Companion.None
@@ -10,6 +10,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.cyy.exp2.psychological_test.repository.RecordRepository
 import com.google.gson.internal.NonNullElementWrapperList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,6 +22,7 @@ import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
+import com.cyy.exp2.psychological_test.pojo.Record
 
 /**
  *ViewModel 的作用是向界面提供数据，它以一种可以感知生命周期的方式保存应用的界面数据，不受配置变化的影响。
