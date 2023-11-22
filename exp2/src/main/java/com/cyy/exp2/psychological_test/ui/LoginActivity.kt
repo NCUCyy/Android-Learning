@@ -14,10 +14,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -29,6 +31,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -36,6 +39,11 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -46,11 +54,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cyy.exp2.psychological_test.PsychologicalTestApp
 import com.cyy.exp2.psychological_test.view_model.LoginViewModel
 import com.cyy.exp2.psychological_test.view_model.UserViewModel
 import com.cyy.exp2.psychological_test.view_model.UserViewModelFactory
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 /**
  * 显式意图跳转到TestActivity，并携带userId------>用于创建RecordViewModel
@@ -83,6 +94,11 @@ class LoginActivity : ComponentActivity() {
 // 登录界面
 @Composable
 fun EnterScreen(resultLauncher: ActivityResultLauncher<Intent>) {
+    // 用于"正在登录..."的Dialog的显示
+    var flag by remember { mutableStateOf(false) }
+    var showProgress by remember { mutableStateOf(true) }
+    val coroutineScope = rememberCoroutineScope()
+
     val context = LocalContext.current
     val application = LocalContext.current.applicationContext as PsychologicalTestApp
     val loginViewModel: LoginViewModel = viewModel()
@@ -177,6 +193,13 @@ fun EnterScreen(resultLauncher: ActivityResultLauncher<Intent>) {
                             onClick = {
                                 /*TODO*/
                                 userViewModel.login(username.value, password.value)
+                                // 正在登录
+//                                showProgress = true
+//                                flag = true
+//                                coroutineScope.launch {
+//                                    delay(2000L) // 延迟2秒
+//                                    showProgress = false
+//                                }
                             },
                             elevation = ButtonDefaults.elevatedButtonElevation(defaultElevation = 10.dp)
                         ) {
@@ -197,7 +220,25 @@ fun EnterScreen(resultLauncher: ActivityResultLauncher<Intent>) {
         }
 
     }
-
+    // 正在登录
+//    if (flag && showProgress) {
+//        Dialog(onDismissRequest = {
+//            flag = false
+//        }) {
+//            Box(
+//                modifier = Modifier
+//                    .height(150.dp)
+//                    .width(300.dp)
+//                    .background(Color.White),
+//                contentAlignment = Alignment.Center
+//            ) {
+//                Column {
+//                    LinearProgressIndicator()
+//                    Text("正在登录...")
+//                }
+//            }
+//        }
+//    }
 }
 
 

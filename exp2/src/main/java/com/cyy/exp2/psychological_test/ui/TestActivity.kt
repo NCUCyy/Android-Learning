@@ -7,11 +7,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -28,13 +33,29 @@ class TestActivity : ComponentActivity() {
         val userId = intent.getIntExtra("userId", -1)
         super.onCreate(savedInstanceState)
         setContent {
-            TestScreen(userId)
+            MainScreen(userId)
         }
     }
 }
 
+val screens = listOf(Screen.TestPage, Screen.HistoryPage, Screen.UserPage)
+
+/**
+ *Screen类（与用于显示的Screen实体不同！要区分开！Screen类只用于提供页面需要的元数据metaData：icon、title、"route"【用于导航】）
+ */
+sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
+    object TestPage :
+        Screen(route = "testing", title = "答题", icon = Icons.Filled.Edit)
+
+    object HistoryPage :
+        Screen(route = "testHistory", title = "答题历史", icon = Icons.Filled.List)
+
+    object UserPage :
+        Screen(route = "user", title = "个人信息", icon = Icons.Filled.AccountCircle)
+}
+
 @Composable
-fun TestScreen(userId: Int) {
+fun MainScreen(userId: Int) {
     val context = LocalContext.current
     val application = LocalContext.current.applicationContext as PsychologicalTestApp
     val recordViewModel = viewModel<RecordViewModel>(
@@ -44,7 +65,8 @@ fun TestScreen(userId: Int) {
         )
     )
     val records = recordViewModel.records.collectAsStateWithLifecycle()
-    demo(recordViewModel, records, userId)
+    // 测试跳转是否成功------------已成功
+//    demo(recordViewModel, records, userId)
 }
 
 @Composable
