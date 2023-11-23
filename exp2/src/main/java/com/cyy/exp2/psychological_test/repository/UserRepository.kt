@@ -41,4 +41,9 @@ class UserRepository(private val userDao: UserDao) {
     suspend fun getByUsername(username: String): User {
         return userDao.getByUsername(username)
     }
+
+    @WorkerThread
+    fun getById(id: Int): Flow<User> {
+        return userDao.getById(id)
+    }
 }

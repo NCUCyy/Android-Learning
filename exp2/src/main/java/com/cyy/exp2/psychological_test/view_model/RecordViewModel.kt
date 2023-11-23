@@ -23,6 +23,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import com.cyy.exp2.psychological_test.pojo.Record
+import com.cyy.exp2.psychological_test.pojo.User
+import com.cyy.exp2.psychological_test.repository.UserRepository
 import java.time.OffsetDateTime
 
 /**
@@ -35,8 +37,20 @@ import java.time.OffsetDateTime
  * 因此从这个角度来看，ViewModel 实际上充当了数据仓库和界面之间的通信中心。
  */
 // ViewModel 会在配置更改（如旋转设备）后继续存在。
-class RecordViewModel(private val repository: RecordRepository, private val loginUserId: Int) :
+class RecordViewModel(
+    private val repository: RecordRepository,
+    private val userRepository: UserRepository,
+    loginUserId: Int
+) :
     ViewModel() {
+    // 当前登录的用户
+    var loginUser: StateFlow<User> = userRepository.getById(loginUserId).stateIn(
+        initialValue = User("", "", ""),
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000)
+    )
+
+    // 用户的所有记录
     var records: StateFlow<List<Record>> = repository.getByUserId(loginUserId).stateIn(
         initialValue = emptyList(),
         scope = viewModelScope,
@@ -48,7 +62,6 @@ class RecordViewModel(private val repository: RecordRepository, private val logi
 //            repository.insert(Record(OffsetDateTime.now(), 100, 1))
 //            repository.insert(Record(OffsetDateTime.now(), 100, 1))
 //        }
-//
 //    }
 
     fun insert(vararg record: Record) = viewModelScope.launch {
@@ -69,12 +82,16 @@ class RecordViewModel(private val repository: RecordRepository, private val logi
 
 }
 
-class RecordViewModelFactory(private val repository: RecordRepository, private val userId: Int) :
+class RecordViewModelFactory(
+    private val repository: RecordRepository,
+    private val userRepository: UserRepository,
+    private val userId: Int
+) :
     ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(RecordViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return RecordViewModel(repository, userId) as T
+            return RecordViewModel(repository, userRepository, userId) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

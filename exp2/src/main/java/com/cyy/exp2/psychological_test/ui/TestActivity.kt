@@ -1,6 +1,7 @@
 package com.cyy.exp2.psychological_test.ui
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
@@ -18,10 +19,12 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.TextToolbar
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cyy.exp2.psychological_test.PsychologicalTestApp
 import com.cyy.exp2.psychological_test.pojo.Record
+import com.cyy.exp2.psychological_test.pojo.User
 import com.cyy.exp2.psychological_test.view_model.RecordViewModel
 import com.cyy.exp2.psychological_test.view_model.RecordViewModelFactory
 import com.cyy.exp2.psychological_test.view_model.UserViewModel
@@ -61,17 +64,25 @@ fun MainScreen(userId: Int) {
     val recordViewModel = viewModel<RecordViewModel>(
         factory = RecordViewModelFactory(
             application.recordRepository,
+            application.userRepository,
             userId
         )
     )
     val records = recordViewModel.records.collectAsStateWithLifecycle()
+    val loginUser = recordViewModel.loginUser.collectAsStateWithLifecycle()
     // 测试跳转是否成功------------已成功
-//    demo(recordViewModel, records, userId)
+    demo(recordViewModel, loginUser, records, userId)
 }
 
 @Composable
-fun demo(recordViewModel: RecordViewModel, records: State<List<Record>>, userId: Int) {
+fun demo(
+    recordViewModel: RecordViewModel,
+    loginUser: State<User>,
+    records: State<List<Record>>,
+    userId: Int
+) {
     Column {
+        Text(text = "欢迎回来，${loginUser.value}!")
         Button(onClick = {
             recordViewModel.insert(Record(OffsetDateTime.now(), 10, userId))
         }) {
@@ -84,6 +95,6 @@ fun demo(recordViewModel: RecordViewModel, records: State<List<Record>>, userId:
                 }
             }
         }
-    }
 
+    }
 }

@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.animation.EnterTransition.Companion.None
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -33,8 +34,8 @@ import kotlinx.coroutines.launch
 // ViewModel 会在配置更改（如旋转设备）后继续存在。
 class UserViewModel(private val repository: UserRepository) : ViewModel() {
 
-    private var _loginUser: MutableStateFlow<User?> = MutableStateFlow(null)
-    val loginUser = _loginUser.asStateFlow()
+    var loginUser: MutableState<User?> = mutableStateOf(null)
+
 
     val loginRes: MutableLiveData<Boolean> = MutableLiveData<Boolean>()
     val registerRes: MutableLiveData<Boolean> = MutableLiveData<Boolean>()
@@ -49,9 +50,11 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
 
     fun login(username: String, password: String) = viewModelScope.launch {
         var user = repository.getByUsername(username)
+
         if (user != null && user.password == password) {
+            loginUser.value = user
             loginRes.value = true
-            _loginUser.value = user
+//            Log.i("login", _loginUser.value.toString())
         } else {
             loginRes.value = false
         }

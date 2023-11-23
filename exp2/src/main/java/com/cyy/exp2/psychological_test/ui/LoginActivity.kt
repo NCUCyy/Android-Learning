@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -52,6 +53,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cyy.exp2.psychological_test.PsychologicalTestApp
 import com.cyy.exp2.psychological_test.pojo.User
@@ -87,7 +89,6 @@ class LoginActivity : ComponentActivity() {
  * 使用livedata进行监视：若数据发生改变，则执行操作
  */
 @SuppressLint("UnrememberedMutableState")
-@OptIn(ExperimentalMaterial3Api::class)
 // 登录界面
 @Composable
 fun LoginScreen(resultLauncher: ActivityResultLauncher<Intent>) {
@@ -103,7 +104,6 @@ fun LoginScreen(resultLauncher: ActivityResultLauncher<Intent>) {
             application.userRepository,
         )
     )
-    val loginUser = userViewModel.loginUser.collectAsState()
     // 监听登录状态！---使用LiveData而不是StateFlow
     userViewModel.loginRes.observe(context as ComponentActivity) {
         if (it) {
@@ -111,8 +111,9 @@ fun LoginScreen(resultLauncher: ActivityResultLauncher<Intent>) {
             // 登录成功后，将登录信息清空
             loginViewModel.afterLogin()
             // 跳转到TestActivity(并携带userId，表示登录的用户)
+//            Log.i("LoginActivity", "userId: ${userViewModel.value}")
             val intent = Intent(context as Activity, TestActivity::class.java)
-            intent.putExtra("userId", loginUser.value?.id)
+            intent.putExtra("userId", userViewModel.loginUser.value?.id)
             resultLauncher.launch(intent)
         } else {
             Toast.makeText(application, "用户名或密码错误", Toast.LENGTH_SHORT).show()
