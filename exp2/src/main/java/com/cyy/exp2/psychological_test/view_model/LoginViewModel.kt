@@ -17,6 +17,8 @@ class LoginViewModel : ViewModel() {
     val registerPassword = _registerPassword.asStateFlow()
     private val _registerSex = MutableStateFlow("男")
     val registerSex = _registerSex.asStateFlow()
+    private val _isRegister = MutableStateFlow(false)
+    val isRegister = _isRegister.asStateFlow()
 
     fun afterRegister() {
         // 完成注册后，将注册信息复制到登录信息
@@ -34,6 +36,10 @@ class LoginViewModel : ViewModel() {
         _registerUsername.value = ""
         _registerPassword.value = ""
         _registerSex.value = "男"
+    }
+
+    fun updateIsRegister(isRegister: Boolean) {
+        _isRegister.value = isRegister
     }
 
     fun updateUsername(username: String) {

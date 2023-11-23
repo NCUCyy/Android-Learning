@@ -13,7 +13,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,8 +21,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Button
@@ -38,7 +35,6 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -48,7 +44,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
@@ -101,7 +96,7 @@ fun LoginScreen(resultLauncher: ActivityResultLauncher<Intent>) {
     val loginViewModel: LoginViewModel = viewModel()
     var username = loginViewModel.username.collectAsState()
     var password = loginViewModel.password.collectAsState()
-    val showDialog = remember { mutableStateOf(false) }
+    val isRegister = loginViewModel.isRegister.collectAsState()
 
     val userViewModel = viewModel<UserViewModel>(
         factory = UserViewModelFactory(
@@ -126,7 +121,7 @@ fun LoginScreen(resultLauncher: ActivityResultLauncher<Intent>) {
     // 监听注册状态！---使用LiveData而不是StateFlow
     userViewModel.registerRes.observe(context as ComponentActivity) {
         if (it) {
-            showDialog.value = false
+            loginViewModel.updateIsRegister(false)
             // 注册成功后，将注册信息复制到登录信息
             loginViewModel.afterRegister()
             Toast.makeText(application, "注册成功", Toast.LENGTH_SHORT).show()
@@ -204,7 +199,7 @@ fun LoginScreen(resultLauncher: ActivityResultLauncher<Intent>) {
                         Button(
                             onClick = {
                                 /*TODO*/
-                                showDialog.value = true
+                                loginViewModel.updateIsRegister(true)
                             },
                             elevation = ButtonDefaults.elevatedButtonElevation(defaultElevation = 10.dp)
                         ) {
@@ -217,7 +212,7 @@ fun LoginScreen(resultLauncher: ActivityResultLauncher<Intent>) {
     }
     // 注册对话框---用showDialog控制是否显示
     RegisterScreen(
-        showDialog,
+        isRegister,
         loginViewModel
     ) { username, password, sex ->
         userViewModel.register(User(username, password, sex))
@@ -226,7 +221,7 @@ fun LoginScreen(resultLauncher: ActivityResultLauncher<Intent>) {
 
 @Composable
 fun RegisterScreen(
-    showDialog: MutableState<Boolean>,
+    showDialog: State<Boolean>,
     loginViewModel: LoginViewModel,
     onRegister: (username: String, password: String, sex: String) -> Unit
 ) {
@@ -235,10 +230,9 @@ fun RegisterScreen(
     var password = loginViewModel.registerPassword.collectAsState()
     var sex = loginViewModel.registerSex.collectAsState()
 
-
     if (showDialog.value) {
         Dialog(onDismissRequest = {
-            showDialog.value = false
+            loginViewModel.updateIsRegister(false)
         }) {
             Box(
                 modifier = Modifier
@@ -248,7 +242,7 @@ fun RegisterScreen(
                 Card(
                     elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFFC4E5F5),
+                        containerColor = Color.White,
                     ),
                 ) {
                     ScreenTitle(title = "注册")
