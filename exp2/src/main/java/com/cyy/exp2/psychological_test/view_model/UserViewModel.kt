@@ -47,7 +47,6 @@ class UserViewModel(private val repository: UserRepository) : ViewModel() {
 //        }
 //    }
 
-
     fun login(username: String, password: String) = viewModelScope.launch {
         var user = repository.getByUsername(username)
 

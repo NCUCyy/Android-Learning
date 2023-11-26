@@ -44,8 +44,8 @@ class RecordViewModel(
 ) :
     ViewModel() {
     // 当前登录的用户
-    var loginUser: StateFlow<User> = userRepository.getById(loginUserId).stateIn(
-        initialValue = User("", "", ""),
+    var loginUser: StateFlow<User?> = userRepository.getById(loginUserId).stateIn(
+        initialValue = null,
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000)
     )

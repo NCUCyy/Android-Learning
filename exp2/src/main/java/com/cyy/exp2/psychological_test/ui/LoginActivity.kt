@@ -37,11 +37,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -53,7 +50,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cyy.exp2.psychological_test.PsychologicalTestApp
 import com.cyy.exp2.psychological_test.pojo.User
@@ -111,8 +107,9 @@ fun LoginScreen(resultLauncher: ActivityResultLauncher<Intent>) {
             // 登录成功后，将登录信息清空
             loginViewModel.afterLogin()
             // 跳转到TestActivity(并携带userId，表示登录的用户)
-//            Log.i("LoginActivity", "userId: ${userViewModel.value}")
-            val intent = Intent(context as Activity, TestActivity::class.java)
+            Log.i("试试-LoginActivity", userViewModel.loginUser.value.toString())
+
+            val intent = Intent(context as Activity, MainActivity::class.java)
             intent.putExtra("userId", userViewModel.loginUser.value?.id)
             resultLauncher.launch(intent)
         } else {
@@ -148,7 +145,7 @@ fun LoginScreen(resultLauncher: ActivityResultLauncher<Intent>) {
             )
             Spacer(modifier = Modifier.width(8.dp)) // 添加一些间距
             Text(
-                text = "心理测试 App",
+                text = "每日单词 App",
                 fontWeight = FontWeight.Bold,
                 fontSize = 30.sp,
                 textAlign = TextAlign.Center,
@@ -176,9 +173,9 @@ fun LoginScreen(resultLauncher: ActivityResultLauncher<Intent>) {
                     color = Color(0xFFC4C4C4),
                 )
                 Spacer(modifier = Modifier.height(30.dp))
-                InputBox(username, "请输入用户名...", action = loginViewModel::updateUsername)
+                InputBox(username, "用户名", action = loginViewModel::updateUsername)
                 Spacer(modifier = Modifier.height(25.dp))
-                InputBox(password, "请输入密码...", action = loginViewModel::updatePassword)
+                InputBox(password, "密码", action = loginViewModel::updatePassword)
                 Spacer(modifier = Modifier.height(30.dp))
                 Box(
                     contentAlignment = Alignment.Center,
@@ -257,13 +254,13 @@ fun RegisterScreen(
                     Spacer(modifier = Modifier.height(30.dp))
                     InputBox(
                         input = username,
-                        placeHolder = "请输入用户名...",
+                        placeHolder = "用户名",
                         action = loginViewModel::updateRegisterUsername
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     InputBox(
                         input = password,
-                        placeHolder = "请输入密码...",
+                        placeHolder = "密码",
                         action = loginViewModel::updateRegisterPassword
                     )
                     Spacer(modifier = Modifier.height(16.dp))
@@ -276,7 +273,9 @@ fun RegisterScreen(
                             options.forEach {
                                 RadioButton(
                                     selected = (it == sex.value),
-                                    onClick = { loginViewModel.updateRegisterSex(it) }
+                                    onClick = {
+                                        loginViewModel.updateRegisterSex(it)
+                                    }
                                 )
                                 Text(
                                     fontSize = 16.sp,
@@ -329,7 +328,8 @@ fun InputBox(input: State<String>, placeHolder: String, action: (String) -> Unit
                 onValueChange = {
                     action(it)
                 },
-                placeholder = { Text(text = placeHolder) },
+                label = { Text(text = placeHolder) },
+                placeholder = { Text(text = "请输入${placeHolder}...") },
                 singleLine = true, // 单行文本框
                 shape = MaterialTheme.shapes.extraSmall, // 设置边框形状
                 textStyle = TextStyle.Default.copy(color = Color.Black), // 设置文本颜色

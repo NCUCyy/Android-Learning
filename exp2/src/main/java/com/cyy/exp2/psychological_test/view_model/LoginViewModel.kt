@@ -8,15 +8,19 @@ import kotlinx.coroutines.flow.asStateFlow
 class LoginViewModel : ViewModel() {
     private val _username = MutableStateFlow("")
     val username = _username.asStateFlow()
+
     private val _password = MutableStateFlow("")
     val password = _password.asStateFlow()
 
     private val _registerUsername = MutableStateFlow("")
     val registerUsername = _registerUsername.asStateFlow()
+
     private val _registerPassword = MutableStateFlow("")
     val registerPassword = _registerPassword.asStateFlow()
+
     private val _registerSex = MutableStateFlow("男")
     val registerSex = _registerSex.asStateFlow()
+
     private val _isRegister = MutableStateFlow(false)
     val isRegister = _isRegister.asStateFlow()
 

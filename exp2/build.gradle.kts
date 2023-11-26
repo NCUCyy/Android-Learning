@@ -5,6 +5,7 @@ plugins {
     id("kotlin-parcelize")
     // 启用ksp
     id("com.google.devtools.ksp")
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.8.10"
 }
 
 android {
@@ -54,16 +55,26 @@ android {
 }
 
 dependencies {
-        val roomVersion = "2.5.0"
+    // 加载网络图片
+    implementation("io.coil-kt:coil-compose:2.5.0")
 
+    // Net---发送网络请求的牛逼库
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1") // 协程(版本自定)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")// 要求OkHttp4以上
+    implementation("com.github.liangjingkanji:Net:3.6.4")
+    implementation ("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2") // JSON序列化库, 首选推荐使用
+
+    // Room持久化
+    val roomVersion = "2.5.0"
     implementation("androidx.room:room-runtime:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
 
-    // To use Kotlin Symbol Processing (KSP)
+    // KSP编译
     ksp("androidx.room:room-compiler:$roomVersion")
 
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
-    implementation ("androidx.fragment:fragment-ktx:1.5.6")
+    implementation("androidx.fragment:fragment-ktx:1.5.6")
     implementation("androidx.activity:activity-ktx:1.7.0")
     // 添加constraintlayout插件
     implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
