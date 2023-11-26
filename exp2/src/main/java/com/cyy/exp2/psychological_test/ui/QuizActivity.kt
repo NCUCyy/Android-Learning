@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
@@ -45,6 +46,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -61,6 +63,8 @@ import com.cyy.exp2.psychological_test.PsychologicalTestApp
 import com.cyy.exp2.psychological_test.pojo.Record as MyRecord
 import com.cyy.exp2.psychological_test.view_model.QuizViewModel
 import com.cyy.exp2.psychological_test.view_model.QuizViewModelFactory
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.time.OffsetDateTime
 
 class QuizActivity : ComponentActivity() {
@@ -71,14 +75,6 @@ class QuizActivity : ComponentActivity() {
         }
     }
 }
-
-//@Composable
-//fun MainScreen() {
-//    val context = LocalContext.current as Activity
-//    Button(onClick = { context.finish() }) {
-//        Text(text = "返回")
-//    }
-//}
 
 // 主界面
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "StateFlowValueCalledInComposition")
@@ -95,6 +91,7 @@ fun MainScreen() {
     val curQuizIdx = quizViewModel.curQuizIdx.collectAsState().value
     val showQuizzesDialog = remember { mutableStateOf(false) }
     val showResultDialog = remember { mutableStateOf(false) }
+    val showExitDialog = remember { mutableStateOf(false) }
     // 页面骨架的脚手架
     Scaffold(
         //定义头部
@@ -115,6 +112,7 @@ fun MainScreen() {
                 navigationIcon = {
                     IconButton(onClick = {
                         // TODO：返回MainActivity
+                        showExitDialog.value = true
                     }) {
                         Icon(Icons.Filled.KeyboardArrowLeft, contentDescription = null)
                     }
@@ -230,7 +228,7 @@ fun MainScreen() {
         content = {
             // 页面的主体部分
             Box(modifier = Modifier.padding(it)) {
-                QuizScreen(quizViewModel, showQuizzesDialog, showResultDialog)
+                QuizScreen(quizViewModel, showQuizzesDialog, showResultDialog, showExitDialog)
             }
         },
     )
@@ -241,8 +239,10 @@ fun MainScreen() {
 fun QuizScreen(
     quizViewModel: QuizViewModel,
     showQuizzesDialog: MutableState<Boolean>,
-    showResultDialog: MutableState<Boolean>
+    showResultDialog: MutableState<Boolean>,
+    showExitDialog: MutableState<Boolean>
 ) {
+    val context = LocalContext.current as Activity
     val curQuiz = quizViewModel.curQuiz.collectAsState().value
     Card(
         modifier = Modifier.fillMaxSize(),
@@ -273,10 +273,100 @@ fun QuizScreen(
     if (showResultDialog.value) {
         ResultDialog(showResultDialog, quizViewModel)
     }
+    if (showExitDialog.value) {
+        ConfirmExitDialog(showExitDialog)
+    }
+}
+
+@Composable
+fun ConfirmExitDialog(showExitDialog: MutableState<Boolean>) {
+    val context = LocalContext.current as Activity
+    Dialog(onDismissRequest = {
+        showExitDialog.value = false
+    }) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            Card(
+                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White,
+                ),
+                modifier = Modifier
+                    .fillMaxWidth(),
+            ) {
+                Spacer(modifier = Modifier.height(15.dp))
+                Text(
+                    text = "请确认是否退出",
+                    modifier = Modifier.fillMaxWidth(),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 25.sp,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(15.dp))
+                Text(
+                    fontSize = 20.sp,
+                    text = "退出后将不会保存答题记录",
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    color = Color(0xFFB1B3B3)
+                )
+                Spacer(modifier = Modifier.height(15.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Button(
+                        onClick = {
+                            showExitDialog.value = false
+                        },
+                        shape = RoundedCornerShape(15.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFFA85AD),
+                            contentColor = Color.Black
+                        ),
+                    ) {
+                        Text(text = "取消", fontSize = 18.sp)
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Icon(
+                            Icons.Filled.Close,
+                            contentDescription = null,
+                            modifier = Modifier.size(ButtonDefaults.IconSize)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(20.dp))
+                    Button(
+                        onClick = {
+                            showExitDialog.value = false
+                            context.finish()
+                        },
+                        shape = RoundedCornerShape(15.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF88D4F7),
+                            contentColor = Color.Black
+                        ),
+                    ) {
+                        Text(text = "确认", fontSize = 18.sp)
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Icon(
+                            Icons.Filled.Done,
+                            contentDescription = null,
+                            modifier = Modifier.size(ButtonDefaults.IconSize)
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(15.dp))
+            }
+        }
+
+    }
 }
 
 @Composable
 fun OptionCard(option: String, answer: String, quizViewModel: QuizViewModel) {
+    val scope = rememberCoroutineScope()
     val containColorState = remember { mutableStateOf(Color.White) }
     val curOption = quizViewModel.curOption.collectAsState().value
     LaunchedEffect(curOption) {
@@ -304,6 +394,11 @@ fun OptionCard(option: String, answer: String, quizViewModel: QuizViewModel) {
             .clickable {
                 if (curOption == "")
                     quizViewModel.setOption(option)
+                // 过两秒自动跳转到下一题
+                scope.launch {
+                    delay(1000)
+                    quizViewModel.nextQuiz()
+                }
             },
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
         colors = CardDefaults.cardColors(
@@ -443,68 +538,70 @@ fun ResultDialog(
                 colors = CardDefaults.cardColors(
                     containerColor = Color.White,
                 ),
+                modifier = Modifier
+                    .fillMaxWidth(),
             ) {
                 Spacer(modifier = Modifier.height(15.dp))
                 Text(
-                    text = "您的得分为：$score",
+                    text = "您答对的题数：$score/${quizViewModel.selected.value.size}",
                     modifier = Modifier.fillMaxWidth(),
                     fontWeight = FontWeight.Bold,
                     fontSize = 25.sp,
                     textAlign = TextAlign.Center
                 )
-                Row(
+                Spacer(modifier = Modifier.height(15.dp))
+                Button(
                     modifier = Modifier
-                        .padding(10.dp)
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                        .fillMaxWidth()
+                        .padding(start = 30.dp, end = 30.dp),
+                    onClick = {
+                        // TODO：重新开始
+                        quizViewModel.reset()
+                        showResultDialog.value = false
+                    },
+                    shape = RoundedCornerShape(15.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFFA85AD),
+                        contentColor = Color.Black
+                    ),
                 ) {
-                    Button(
-                        onClick = {
-                            // TODO：重新开始
-                            quizViewModel.reset()
-                            showResultDialog.value = false
-                        },
-                        shape = RoundedCornerShape(10.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF79C4E6),
-                            contentColor = Color.Black
-                        ),
-                    ) {
-                        Text(text = "重新开始", fontSize = 15.sp)
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Icon(
-                            Icons.Filled.Refresh,
-                            contentDescription = null,
-                            modifier = Modifier.size(ButtonDefaults.IconSize)
-                        )
-                    }
+                    Text(text = "重新开始", fontSize = 18.sp)
                     Spacer(modifier = Modifier.width(10.dp))
-                    Button(
-                        onClick = {
-                            // TODO：返回MainActivity
-                            showResultDialog.value = false
-                            var intent = Intent()
-                            intent.putExtra(
-                                "record",
-                                MyRecord(OffsetDateTime.now(), score = score!!)
-                            )
-                            context.setResult(Activity.RESULT_OK, intent)
-                            context.finish()
-                        },
-                        shape = RoundedCornerShape(10.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF79C4E6),
-                            contentColor = Color.Black
-                        ),
-                    ) {
-                        Text(text = "返回主页", fontSize = 15.sp)
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Icon(
-                            Icons.Filled.Home,
-                            contentDescription = null,
-                            modifier = Modifier.size(ButtonDefaults.IconSize)
+                    Icon(
+                        Icons.Filled.Refresh,
+                        contentDescription = null,
+                        modifier = Modifier.size(ButtonDefaults.IconSize)
+                    )
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+                Button(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 30.dp, end = 30.dp, bottom = 20.dp),
+                    onClick = {
+                        // TODO：返回MainActivity
+                        showResultDialog.value = false
+                        var intent = Intent()
+                        intent.putExtra(
+                            "record",
+                            MyRecord(OffsetDateTime.now(), score = score!!)
                         )
-                    }
+                        context.setResult(Activity.RESULT_OK, intent)
+                        context.finish()
+                    },
+                    shape = RoundedCornerShape(15.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF88D4F7),
+                        contentColor = Color.Black
+                    ),
+                ) {
+                    Text(text = "返回主页", fontSize = 18.sp)
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Icon(
+                        Icons.Filled.Home,
+                        contentDescription = null,
+                        modifier = Modifier.size(ButtonDefaults.IconSize)
+                    )
 
                 }
             }

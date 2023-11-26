@@ -18,6 +18,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -38,6 +39,9 @@ import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.DropdownMenu
@@ -48,6 +52,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.NavigationDrawerItemColors
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -66,6 +71,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -101,19 +107,21 @@ import kotlin.system.exitProcess
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val userId = intent.getIntExtra("userId", -1)
+        val userId = intent.getIntExtra("userId", 1)
         var record: MutableState<Record?> = mutableStateOf(null)
         // 使用ActivityResultLauncher进行意图跳转
         val resultLauncher: ActivityResultLauncher<Intent> = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult(),
             // 意图结束后，执行这个「回调函数」
             ActivityResultCallback {
-                if (it.resultCode == RESULT_OK) {
+                if (it.resultCode == RESULT_OK && it.data!!.hasExtra("record")) {
                     // 返回的data数据是个intent类型，里面存储了一段文本内容
-                    record.value = it.data?.getParcelableExtra("record", Record::class.java)!!
+                    record.value = it.data!!.getParcelableExtra("record", Record::class.java)!!
                     record.value!!.userId = userId
                     Toast.makeText(this, "完成测试！${record.value.toString()}", Toast.LENGTH_LONG)
                         .show()
+                } else {
+                    record.value = null
                 }
             }
         )
@@ -126,7 +134,11 @@ class MainActivity : ComponentActivity() {
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-fun NavigationGraphScreen(states: StateHolder, recordViewModel: RecordViewModel) {
+fun NavigationGraphScreen(
+    states: StateHolder,
+    recordViewModel: RecordViewModel,
+    userViewModel: UserViewModel
+) {
     // 定义宿主(需要：导航控制器、导航起点---String类型)
     NavHost(navController = states.navController, startDestination = states.startDestination) {
         // 定义有几个页面，就有几个composable(){...}
@@ -155,7 +167,10 @@ fun NavigationGraphScreen(states: StateHolder, recordViewModel: RecordViewModel)
             // 2、更新当前显示的Screen
             states.currentScreen.value = Screen.UserPage
             // 3、此语句处才会展示指定的Screen
-            UserScreen()
+            UserScreen(
+                recordViewModel.loginUser.collectAsStateWithLifecycle().value!!,
+                userViewModel
+            )
         }
     }
 }
@@ -249,12 +264,12 @@ fun MainScreen(
                             if (loginUser.value != null)
                                 Row(modifier = Modifier.fillMaxWidth()) {
                                     Text(
-                                        text = "欢迎回来👏🏻" + loginUser.value!!.username,
+                                        text = states.currentScreen.value.label + loginUser.value!!.username,
                                         textAlign = TextAlign.Center
                                     )
                                 }
                         } else
-                            // 非首页
+                        // 非首页
                             Text(
                                 text = states.currentScreen.value.title,
                                 textAlign = TextAlign.Center
@@ -318,12 +333,15 @@ fun MainScreen(
                         selected = it.route == states.currentScreen.value.route,
                         // 点击后更改当前的Screen
                         onClick = {
-                            states.currentScreen.value = it
-                            states.navController.navigate(states.currentScreen.value.route)
+                            states.scope.launch {
+                                states.currentScreen.value = it
+                                states.drawerState.close()
+                                states.navController.navigate(states.currentScreen.value.route)
+                            }
                         },
                         // 标签
                         label = {
-//                            Text(text = it.title)
+                            Text(text = it.label)
                         },
                         // 图标
                         icon = {
@@ -354,25 +372,29 @@ fun DrawView(
     userViewModel: UserViewModel,
     recordViewModel: RecordViewModel,
 ) {
+    val context = LocalContext.current as Activity
     // TODO：这里需要修改
     val user = recordViewModel.loginUser.collectAsStateWithLifecycle()
     ModalNavigationDrawer(
         // 抽屉是否可以通过手势进行交互
         gesturesEnabled = true,
         // 抽屉打开后，遮挡内容的蒙层的颜色
-        scrimColor = Color.Gray,
+        scrimColor = Color.Transparent,
         // 抽屉是否打开
         drawerState = states.drawerState,
         // 抽屉的内容
         drawerContent = {
-            Column(
+            Card(
+                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 200.dp),
+                shape = RoundedCornerShape(0.dp, 0.dp, 0.dp, 0.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White,
+                ),
                 modifier = Modifier
                     .fillMaxHeight()
-                    .width(360.dp)
-                    .background(Color.White)
-                    .padding(top = 100.dp)
+                    .width(260.dp)
             ) {
-                Row(modifier = Modifier.padding(bottom = 50.dp)) {
+                Row(modifier = Modifier.padding(top = 50.dp, start = 10.dp, bottom = 30.dp)) {
                     Image(
                         painter = painterResource(id = R.mipmap.sym_def_app_icon),
                         contentDescription = null,
@@ -383,36 +405,62 @@ fun DrawView(
                             states.navController.navigate(Screen.UserPage.route)
                         }
                     )
-//                    Text(text = user.value!!.username, fontSize = 30.sp)
+                    Spacer(modifier = Modifier.width(10.dp))
+                    if (user.value != null)
+                        Text(text = user.value!!.username, fontSize = 30.sp)
                 }
-                // 抽屉中要显示的内容
-                screens.forEach {
-                    NavigationDrawerItem(
-                        label = {
-                            Text(it.title, fontSize = 20.sp)
-                        },
-                        icon = {
-                            Icon(
-                                imageVector = it.icon,
-                                tint = Color.Green,
-                                contentDescription = it.title
-                            )
-                        },
-                        // 选中的按钮被高亮显示
-                        selected = it.route == states.currentScreen.value.route,
-                        onClick = {
-                            states.scope.launch {
-                                states.currentScreen.value = it
-                                states.navController.navigate(states.currentScreen.value.route)
-                                states.drawerState.close()
-                            }
-                        })
+                Card(
+                    modifier = Modifier.padding(10.dp),
+                    elevation = CardDefaults.elevatedCardElevation(defaultElevation = 200.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.Transparent,
+                    ),
+                ) {
+                    // 抽屉中要显示的内容
+                    screens.forEachIndexed { index, it ->
+                        NavigationDrawerItem(
+                            shape = RoundedCornerShape(0.dp, 0.dp, 0.dp, 0.dp),
+                            label = {
+                                Text(it.label, fontSize = 20.sp)
+                            },
+                            icon = {
+                                Icon(
+                                    imageVector = it.icon,
+                                    contentDescription = it.title
+                                )
+                            },
+                            // 选中的按钮被高亮显示
+                            selected = it.route == states.currentScreen.value.route,
+                            onClick = {
+                                states.scope.launch {
+                                    states.currentScreen.value = it
+                                    states.navController.navigate(states.currentScreen.value.route)
+                                    states.drawerState.close()
+                                }
+                            })
+                        if (index != screens.size - 1)
+                            Divider(thickness = 2.dp)
+                    }
+                }
+                Button(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 10.dp, end = 10.dp, top = 220.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFF10656),
+                        contentColor = Color.White
+                    ),
+                    elevation = ButtonDefaults.elevatedButtonElevation(defaultElevation = 10.dp),
+                    onClick = {
+                        context.finish()
+                    }) {
+                    Text(text = "退出登录", fontWeight = FontWeight.Bold, fontSize = 20.sp)
                 }
             }
         },
         content = {
             // 主体是导航图
-            NavigationGraphScreen(states, recordViewModel)
+            NavigationGraphScreen(states, recordViewModel, userViewModel)
         })
 }
 

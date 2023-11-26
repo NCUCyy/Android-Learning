@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import androidx.activity.result.ActivityResultLauncher
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,34 +38,29 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.cyy.exp2.R
-import com.cyy.exp2.memo.Memo
-import com.cyy.exp2.memo.MemoCard
-import com.cyy.exp2.memo.MemoViewModel
 import com.cyy.exp2.psychological_test.pojo.Record
+import com.cyy.exp2.psychological_test.pojo.User
 import com.cyy.exp2.psychological_test.view_model.SentenceViewModel
-import java.time.OffsetDateTime
+import com.cyy.exp2.psychological_test.view_model.UserViewModel
 import java.time.format.DateTimeFormatter
 
 val screens = listOf(Screen.HomePage, Screen.HistoryPage, Screen.UserPage)
@@ -72,15 +68,25 @@ val screens = listOf(Screen.HomePage, Screen.HistoryPage, Screen.UserPage)
 /**
  *Screen类（与用于显示的Screen实体不同！要区分开！Screen类只用于提供页面需要的元数据metaData：icon、title、"route"【用于导航】）
  */
-sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
+sealed class Screen(
+    val route: String,
+    val label: String,
+    val title: String,
+    val icon: ImageVector
+) {
     object HomePage :
-        Screen(route = "home", title = "", icon = Icons.Filled.Home)
+        Screen(route = "home", label = "首页", title = "欢迎回来👏🏻", icon = Icons.Filled.Home)
 
     object HistoryPage :
-        Screen(route = "testHistory", title = "答题记录", icon = Icons.Filled.List)
+        Screen(route = "testHistory", label = "历史", title = "答题记录", icon = Icons.Filled.List)
 
     object UserPage :
-        Screen(route = "user", title = "个人主页", icon = Icons.Filled.AccountCircle)
+        Screen(
+            route = "user",
+            label = "我的",
+            title = "个人主页",
+            icon = Icons.Filled.AccountCircle
+        )
 }
 
 @Preview
@@ -191,10 +197,10 @@ fun RecordCard(record: Record) {
     val containColorState = remember { mutableStateOf(Color.White) }
     val contentColorState = remember { mutableStateOf(Color.Black) }
     if (record.score < 10) {
-        containColorState.value = Color(0xFFDA4D7D)
+        containColorState.value = Color(0xFFF70F5E)
         contentColorState.value = Color.White
     } else {
-        containColorState.value = Color(0xFF66CDAA)
+        containColorState.value = Color(0xFF0DFCA9)
     }
     Card(
         modifier = Modifier
@@ -232,8 +238,9 @@ fun RecordCard(record: Record) {
                     }) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
-                        text = record.score.toString(),
-                        fontSize = 20.sp,
+                        text = "${record.score}/20",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
                     )
                 }
             }
@@ -252,8 +259,22 @@ fun RecordCard(record: Record) {
     }
 }
 
-
+// 3、用户界面
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun UserScreen() {
-
+fun UserScreen(loginUser: User, userViewModel: UserViewModel) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Image(
+            painter = painterResource(id = android.R.mipmap.sym_def_app_icon),
+            contentDescription = null,
+            modifier = Modifier
+                .size(100.dp)
+        )
+        Text(text = "用户名：" + loginUser.username, fontSize = 20.sp)
+        Text(text = "性别：" + loginUser.sex, fontSize = 20.sp)
+    }
 }

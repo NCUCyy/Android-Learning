@@ -53,11 +53,11 @@ class QuizViewModel(private val quizRepository: QuizRepository) : ViewModel() {
     }
 
     fun commit() {
-        var singleScore = 100 / quizRepository.quizzes.size
+//        var singleScore = 100 / quizRepository.quizzes.size
         var sum = 0
         _selected.value.forEachIndexed { idx, option ->
             if (option == quizzes[idx].answer) {
-                sum += singleScore
+                sum++
             }
         }
         score.value = sum
