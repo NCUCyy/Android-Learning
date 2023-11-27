@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Intent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -43,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -262,19 +264,30 @@ fun RecordCard(record: Record) {
 // 3、用户界面
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun UserScreen(loginUser: User, userViewModel: UserViewModel) {
+@Preview
+fun UserScreen(loginUser: User = User("cyy", "cyy", "男"), userViewModel: UserViewModel? = null) {
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
     ) {
-        Image(
-            painter = painterResource(id = android.R.mipmap.sym_def_app_icon),
-            contentDescription = null,
-            modifier = Modifier
-                .size(100.dp)
-        )
-        Text(text = "用户名：" + loginUser.username, fontSize = 20.sp)
-        Text(text = "性别：" + loginUser.sex, fontSize = 20.sp)
+
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
+            Image(
+                painter = painterResource(id = android.R.mipmap.sym_def_app_icon),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(100.dp)
+            )
+            Text(text = loginUser.username, fontSize = 50.sp)
+        }
+        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+            Card(
+                modifier = Modifier.fillMaxSize(),
+                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 1000.dp)
+            ) {
+                Text(text = "性别：" + loginUser.sex, fontSize = 20.sp)
+            }
+        }
     }
 }
