@@ -368,21 +368,28 @@ fun ConfirmExitDialog(showExitDialog: MutableState<Boolean>) {
 fun OptionCard(option: String, answer: String, quizViewModel: QuizViewModel) {
     val scope = rememberCoroutineScope()
     val containColorState = remember { mutableStateOf(Color.White) }
+    val contentColoState = remember { mutableStateOf(Color.Black) }
+
     val curOption = quizViewModel.curOption.collectAsState().value
+
     LaunchedEffect(curOption) {
         containColorState.value = Color.White
+        contentColoState.value = Color.Black
         if (curOption != "") {
             // 若当前选项为正确答案，则显示绿色
             if (answer == curOption) {
                 if (option == curOption) {
                     containColorState.value = Color(0xFF98FB98)
+                    contentColoState.value = Color.Black
                 }
             } else {
                 if (option == answer) {
                     containColorState.value = Color(0xFF98FB98)
+                    contentColoState.value = Color.Black
                 }
                 if (option == curOption) {
-                    containColorState.value = Color(0xFFDA4D7D)
+                    containColorState.value = Color(0xFFE90C57)
+                    contentColoState.value = Color.White
                 }
             }
         }
@@ -403,6 +410,7 @@ fun OptionCard(option: String, answer: String, quizViewModel: QuizViewModel) {
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
         colors = CardDefaults.cardColors(
             containerColor = containColorState.value,
+            contentColor = contentColoState.value
         )
     ) {
         Text(
@@ -589,10 +597,10 @@ fun ResultDialog(
                         contentColor = Color.Black
                     ),
                 ) {
-                    Text(text = "返回主页", fontSize = 18.sp)
+                    Text(text = "完成答题", fontSize = 18.sp)
                     Spacer(modifier = Modifier.width(10.dp))
                     Icon(
-                        Icons.Filled.Home,
+                        Icons.Filled.Done,
                         contentDescription = null,
                         modifier = Modifier.size(ButtonDefaults.IconSize)
                     )
