@@ -7,11 +7,15 @@ import com.cyy.exp2.psychological_test.repository.QuizRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class QuizViewModel(private val quizRepository: QuizRepository) : ViewModel() {
-    val quizzes = quizRepository.quizzes
+class QuizViewModel(
+    private val quizRepository: QuizRepository,
+    val category: String // 本次的测试题库
+) :
+    ViewModel() {
+    val quizzes = quizRepository.getQuiz(category)
 
     // 创建一个列表，用于存储用户选择的答案（大小为问题的个数，初始化为""空串）
-    private val _selected = MutableStateFlow(MutableList(quizRepository.quizzes.size) { "" })
+    private val _selected = MutableStateFlow(MutableList(quizzes.size) { "" })
     val selected = _selected.asStateFlow()
 
     // 当前的题目的编号（用于显示：1/20）
@@ -72,11 +76,12 @@ class QuizViewModel(private val quizRepository: QuizRepository) : ViewModel() {
     }
 }
 
-class QuizViewModelFactory(private val quizRepository: QuizRepository) : ViewModelProvider.Factory {
+class QuizViewModelFactory(private val quizRepository: QuizRepository, val category: String) :
+    ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(QuizViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return QuizViewModel(quizRepository) as T
+            return QuizViewModel(quizRepository, category) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

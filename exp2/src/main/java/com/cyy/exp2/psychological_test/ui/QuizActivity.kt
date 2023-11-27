@@ -70,8 +70,9 @@ import java.time.OffsetDateTime
 class QuizActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val category = intent.getStringExtra("category")!!
         setContent {
-            MainScreen()
+            MainScreen(category)
         }
     }
 }
@@ -80,12 +81,11 @@ class QuizActivity : ComponentActivity() {
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "StateFlowValueCalledInComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-@Preview
-fun MainScreen() {
+fun MainScreen(category: String) {
     val application = LocalContext.current.applicationContext as PsychologicalTestApp
     val quizViewModel = viewModel<QuizViewModel>(
         factory = QuizViewModelFactory(
-            application.quizRepository,
+            application.quizRepository, category
         )
     )
     val curQuizIdx = quizViewModel.curQuizIdx.collectAsState().value
@@ -103,7 +103,7 @@ fun MainScreen() {
                 // 左侧文本
                 title = {
                     Text(
-                        "单词测验",
+                        quizViewModel.category,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -268,7 +268,7 @@ fun QuizScreen(
         }
     }
     if (showQuizzesDialog.value) {
-        QuizzesDialog(showQuizzesDialog)
+        QuizzesDialog(showQuizzesDialog, quizViewModel)
     }
     if (showResultDialog.value) {
         ResultDialog(showResultDialog, quizViewModel)
@@ -417,13 +417,7 @@ fun OptionCard(option: String, answer: String, quizViewModel: QuizViewModel) {
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-fun QuizzesDialog(showQuizzesDialog: MutableState<Boolean>) {
-    val application = LocalContext.current.applicationContext as PsychologicalTestApp
-    val quizViewModel = viewModel<QuizViewModel>(
-        factory = QuizViewModelFactory(
-            application.quizRepository,
-        )
-    )
+fun QuizzesDialog(showQuizzesDialog: MutableState<Boolean>, quizViewModel: QuizViewModel) {
     val selected = quizViewModel.selected.collectAsState().value
     // 使用LazyColumn和LazyRow来布局
     val chunked = selected.chunked(5)
@@ -454,7 +448,7 @@ fun QuizzesDialog(showQuizzesDialog: MutableState<Boolean>) {
                     chunked.forEachIndexed { rIndex, rowLst ->
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceAround
+                            horizontalArrangement = Arrangement.Start
                         ) {
                             rowLst.forEachIndexed() { cIndex, item ->
                                 // 当前遍历到的题目序号(0开始)
@@ -584,7 +578,7 @@ fun ResultDialog(
                         var intent = Intent()
                         intent.putExtra(
                             "record",
-                            MyRecord(OffsetDateTime.now(), score = score!!, "TODO")
+                            MyRecord(OffsetDateTime.now(), score = score!!, quizViewModel.category)
                         )
                         context.setResult(Activity.RESULT_OK, intent)
                         context.finish()

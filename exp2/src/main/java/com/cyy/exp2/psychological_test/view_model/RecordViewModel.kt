@@ -65,7 +65,7 @@ class RecordViewModel(
 //    }
 
     // 当前选中题库
-    private val _curCategory = MutableStateFlow("")
+    private val _curCategory = MutableStateFlow("CET-4")
     val curCategory = _curCategory.asStateFlow()
 
     fun updateCurCategory(value: String) {

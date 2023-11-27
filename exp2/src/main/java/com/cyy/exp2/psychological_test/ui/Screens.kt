@@ -24,6 +24,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
@@ -65,6 +67,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import coil.compose.AsyncImage
+import coil.compose.AsyncImagePainter
 import com.cyy.exp2.R
 import com.cyy.exp2.psychological_test.PsychologicalTestApp
 import com.cyy.exp2.psychological_test.pojo.Record
@@ -107,7 +110,6 @@ fun CategorySelect(recordViewModel: RecordViewModel) {
     val categories = application.quizRepository.categories
     var expanded by remember { mutableStateOf(false) }
     val curSelect = recordViewModel.curCategory.collectAsState().value
-
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
         Column(
             modifier = Modifier
@@ -118,10 +120,16 @@ fun CategorySelect(recordViewModel: RecordViewModel) {
             OutlinedTextField(
                 value = curSelect,
                 onValueChange = {},
-                label = { Text("选择题库") },
+                label = {
+                    Text("选择题库")
+                },
                 trailingIcon = {
                     Icon(
-                        imageVector = Icons.Default.ArrowDropDown,
+                        imageVector = if (expanded) {
+                            Icons.Default.KeyboardArrowUp
+                        } else {
+                            Icons.Default.KeyboardArrowDown
+                        },
                         contentDescription = null,
                         modifier = Modifier.clickable {
                             expanded = true
@@ -220,7 +228,8 @@ fun HomeScreen(
             onClick = {
                 // Activity跳转到答题界面QuizActivity
                 val intent = Intent(context as Activity, QuizActivity::class.java)
-                resultLauncher!!.launch(intent)
+                intent.putExtra("category", recordViewModel.curCategory.value)
+                resultLauncher.launch(intent)
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -237,7 +246,6 @@ fun HomeScreen(
         CategorySelect(recordViewModel)
     }
 }
-
 
 @Composable
 fun HistoryScreen(records: State<List<Record>>) {
