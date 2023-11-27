@@ -22,6 +22,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Refresh
@@ -29,15 +30,21 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -89,6 +96,54 @@ sealed class Screen(
             title = "个人主页",
             icon = Icons.Filled.AccountCircle
         )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun QUizSelect() {
+    var expanded by remember { mutableStateOf(false) }
+    var selectedOption by remember { mutableStateOf("") }
+
+    Box {
+        Column {
+            // Display selected option
+            OutlinedTextField(
+                value = selectedOption,
+                onValueChange = {},
+                label = { Text("选择题库") },
+                trailingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.ArrowDropDown,
+                        contentDescription = null,
+                        modifier = Modifier.clickable {
+                            expanded = true
+                        }
+                    )
+                },
+                readOnly = true
+            )
+            // Dropdown menu
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+            ) {
+                // Dropdown items
+                DropdownMenuItem(onClick = {
+                    selectedOption = "Option 1"
+                    expanded = false
+                }, text = {
+                    Text("Option 1")
+                })
+                DropdownMenuItem(onClick = {
+                    selectedOption = "Option 2"
+                    expanded = false
+                }, text = {
+                    Text("Option 2")
+                })
+                // Add more items as needed
+            }
+        }
+    }
 }
 
 @Preview
@@ -157,6 +212,9 @@ fun HomeScreen(resultLauncher: ActivityResultLauncher<Intent>? = null) {
                 modifier = Modifier.padding(10.dp)
             )
         }
+        // 选择题库
+        QUizSelect()
+        // 开始按钮
         Button(
             onClick = {
                 val intent = Intent(context as Activity, QuizActivity::class.java)

@@ -521,7 +521,6 @@ fun MainScreen_Demo(userId: Int) {
     val loginUser = recordViewModel.loginUser.collectAsStateWithLifecycle()
     // 测试跳转是否成功------------已成功
     demo(recordViewModel, loginUser, records, userId)
-
 }
 
 @Composable
@@ -534,7 +533,7 @@ fun demo(
     Column {
         Text(text = "欢迎回来，${loginUser.value}!")
         Button(onClick = {
-            recordViewModel.insert(Record(OffsetDateTime.now(), 10, userId))
+            recordViewModel.insert(Record(OffsetDateTime.now(), 10, "category", userId))
         }) {
             Text(text = "添加Record")
         }

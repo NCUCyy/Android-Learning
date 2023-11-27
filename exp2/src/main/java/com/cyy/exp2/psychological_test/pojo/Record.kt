@@ -15,6 +15,7 @@ import java.time.format.DateTimeFormatter
 data class Record(
     val testTme: OffsetDateTime,
     val score: Int,
+    val category: String,
     var userId: Int = -1,// 用于查询
 ) : Parcelable {
     @PrimaryKey(autoGenerate = true)
