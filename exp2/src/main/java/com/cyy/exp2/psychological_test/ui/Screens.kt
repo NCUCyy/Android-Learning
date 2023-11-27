@@ -268,7 +268,7 @@ fun HistoryScreen(records: State<List<Record>>) {
 fun RecordCard(record: Record) {
     val containColorState = remember { mutableStateOf(Color.White) }
     val contentColorState = remember { mutableStateOf(Color.Black) }
-    if (record.score < 10) {
+    if (record.score < 5) {
         containColorState.value = Color(0xFFF70F5E)
         contentColorState.value = Color.White
     } else {
@@ -288,11 +288,11 @@ fun RecordCard(record: Record) {
         )
     ) {
         ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
-            var (scoreRef, timeRef) = remember {
+            var (scoreRef, categoryRef, timeRef) = remember {
                 createRefs()
             }
             val vGuideline = createGuidelineFromStart(0.3f)
-//            val hGuideline = createGuidelineFromTop(0.7f)
+            val hGuideline = createGuidelineFromTop(0.7f)
 
             Card(shape = RoundedCornerShape(40.dp),
                 colors = CardDefaults.cardColors(
@@ -316,17 +316,31 @@ fun RecordCard(record: Record) {
                     )
                 }
             }
+            Text(
+                text = record.category,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                modifier = Modifier
+                    .constrainAs(categoryRef) {
+                        start.linkTo(vGuideline)
+                        top.linkTo(parent.top)
+                        bottom.linkTo(hGuideline)
+                    }
+                    .padding(start = 32.dp)
+            )
             // 转化时间表示方式，用于显示
-            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd  HH:mm:ss")
+            val formatter = DateTimeFormatter.ofPattern("yyyy年MM月dd日  HH:mm:ss")
             val testTime = record.testTme.format(formatter)
-            Text(text = "答题时间：${testTime}", modifier = Modifier
-                .constrainAs(timeRef) {
-                    start.linkTo(vGuideline)
-                    end.linkTo(parent.end)
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                }
-                .padding(10.dp))
+            Text(
+                text = "答题时间：${testTime}",
+                color = Color.Gray,
+                modifier = Modifier
+                    .constrainAs(timeRef) {
+                        start.linkTo(vGuideline)
+                        end.linkTo(parent.end)
+                        top.linkTo(hGuideline)
+                        bottom.linkTo(parent.bottom)
+                    })
         }
     }
 }

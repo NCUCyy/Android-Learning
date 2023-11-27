@@ -264,7 +264,7 @@ fun MainScreen(
                             if (loginUser.value != null)
                                 Row(modifier = Modifier.fillMaxWidth()) {
                                     Text(
-                                        text = states.currentScreen.value.label + loginUser.value!!.username,
+                                        text = states.currentScreen.value.title + loginUser.value!!.username,
                                         textAlign = TextAlign.Center
                                     )
                                 }
