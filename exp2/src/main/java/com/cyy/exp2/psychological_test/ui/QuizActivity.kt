@@ -584,7 +584,7 @@ fun ResultDialog(
                         var intent = Intent()
                         intent.putExtra(
                             "record",
-                            MyRecord(OffsetDateTime.now(), score = score!!)
+                            MyRecord(OffsetDateTime.now(), score = score!!, "TODO")
                         )
                         context.setResult(Activity.RESULT_OK, intent)
                         context.finish()

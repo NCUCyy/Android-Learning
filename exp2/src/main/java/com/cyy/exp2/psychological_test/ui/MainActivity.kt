@@ -149,7 +149,7 @@ fun NavigationGraphScreen(
             // 2、更新当前显示的Screen
             states.currentScreen.value = Screen.HomePage
             // 3、此语句处才会展示指定的Screen
-            HomeScreen(states.resultLauncher)
+            HomeScreen(states.resultLauncher,recordViewModel)
         }
         // 页面2 History
         composable(route = Screen.HistoryPage.route) {

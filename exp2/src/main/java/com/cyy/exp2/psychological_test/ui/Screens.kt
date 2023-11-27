@@ -38,6 +38,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
@@ -51,7 +52,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -66,8 +66,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import coil.compose.AsyncImage
 import com.cyy.exp2.R
+import com.cyy.exp2.psychological_test.PsychologicalTestApp
 import com.cyy.exp2.psychological_test.pojo.Record
 import com.cyy.exp2.psychological_test.pojo.User
+import com.cyy.exp2.psychological_test.view_model.RecordViewModel
 import com.cyy.exp2.psychological_test.view_model.SentenceViewModel
 import com.cyy.exp2.psychological_test.view_model.UserViewModel
 import java.time.format.DateTimeFormatter
@@ -100,15 +102,21 @@ sealed class Screen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun QUizSelect() {
+fun CategorySelect(recordViewModel: RecordViewModel) {
+    val application = LocalContext.current.applicationContext as PsychologicalTestApp
+    val categories = application.quizRepository.categories
     var expanded by remember { mutableStateOf(false) }
-    var selectedOption by remember { mutableStateOf("") }
+    val curSelect = recordViewModel.curCategory.collectAsState().value
 
-    Box {
-        Column {
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp)
+        ) {
             // Display selected option
             OutlinedTextField(
-                value = selectedOption,
+                value = curSelect,
                 onValueChange = {},
                 label = { Text("选择题库") },
                 trailingIcon = {
@@ -127,28 +135,24 @@ fun QUizSelect() {
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
             ) {
-                // Dropdown items
-                DropdownMenuItem(onClick = {
-                    selectedOption = "Option 1"
-                    expanded = false
-                }, text = {
-                    Text("Option 1")
-                })
-                DropdownMenuItem(onClick = {
-                    selectedOption = "Option 2"
-                    expanded = false
-                }, text = {
-                    Text("Option 2")
-                })
-                // Add more items as needed
+                categories.forEach {
+                    DropdownMenuItem(onClick = {
+                        recordViewModel.updateCurCategory(it)
+                        expanded = false
+                    }, text = {
+                        Text(it)
+                    })
+                }
             }
         }
     }
 }
 
-@Preview
 @Composable
-fun HomeScreen(resultLauncher: ActivityResultLauncher<Intent>? = null) {
+fun HomeScreen(
+    resultLauncher: ActivityResultLauncher<Intent>,
+    recordViewModel: RecordViewModel
+) {
     // 永远获得同一个ViewModel----前提是在一个Activity之内
     // 创建一个 ViewModelProvider 实例
     val viewModelProvider = ViewModelProvider(LocalContext.current as ViewModelStoreOwner)
@@ -204,7 +208,6 @@ fun HomeScreen(resultLauncher: ActivityResultLauncher<Intent>? = null) {
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(start = 10.dp, end = 10.dp)
             )
-
             Text(
                 text = sentence.data.zh,
                 fontSize = 15.sp,
@@ -212,11 +215,10 @@ fun HomeScreen(resultLauncher: ActivityResultLauncher<Intent>? = null) {
                 modifier = Modifier.padding(10.dp)
             )
         }
-        // 选择题库
-        QUizSelect()
         // 开始按钮
         Button(
             onClick = {
+                // Activity跳转到答题界面QuizActivity
                 val intent = Intent(context as Activity, QuizActivity::class.java)
                 resultLauncher!!.launch(intent)
             },
@@ -231,6 +233,8 @@ fun HomeScreen(resultLauncher: ActivityResultLauncher<Intent>? = null) {
         ) {
             Text("Get Started", fontSize = 20.sp)
         }
+        // 选择题库
+        CategorySelect(recordViewModel)
     }
 }
 

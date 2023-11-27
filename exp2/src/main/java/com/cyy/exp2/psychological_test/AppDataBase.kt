@@ -42,9 +42,9 @@ abstract class AppDataBase : RoomDatabase() {
             return INSTANCE ?: synchronized(this) {
                 val dataBase = Room.databaseBuilder(
                     context.applicationContext,
-                    AppDataBase::class.java, "psy-1"
+                    // 若修改了pojo，则需要修改这里的数据库名称（即：创建一个新的SQLite数据库）
+                    AppDataBase::class.java, "psy-2-category"
                 )
-//                    .addMigrations(migration_1_2)
                     .build()
                 INSTANCE = dataBase
                 dataBase

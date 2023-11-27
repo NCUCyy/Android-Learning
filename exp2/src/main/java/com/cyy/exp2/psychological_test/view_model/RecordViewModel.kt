@@ -64,6 +64,14 @@ class RecordViewModel(
 //        }
 //    }
 
+    // 当前选中题库
+    private val _curCategory = MutableStateFlow("")
+    val curCategory = _curCategory.asStateFlow()
+
+    fun updateCurCategory(value: String) {
+        _curCategory.value = value
+    }
+
     fun insert(vararg record: Record) = viewModelScope.launch {
         repository.insert(*record)
     }
