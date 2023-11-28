@@ -5,7 +5,9 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
@@ -22,7 +24,7 @@ class ResultActivity : ComponentActivity() {
 }
 
 @Composable
-fun ResultScreen(record: Record) {
+fun TestJump(record: Record) {
     val context = LocalContext.current as Activity
     Button(onClick = {
         val intent = Intent()
@@ -32,4 +34,8 @@ fun ResultScreen(record: Record) {
     }) {
         Text(text = "返回")
     }
+}
+
+@Composable
+fun ResultScreen(record: Record) {
 }

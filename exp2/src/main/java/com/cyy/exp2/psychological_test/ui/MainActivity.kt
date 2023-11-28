@@ -536,7 +536,7 @@ fun demo(
     Column {
         Text(text = "欢迎回来，${loginUser.value}!")
         Button(onClick = {
-            recordViewModel.insert(Record(OffsetDateTime.now(), 10, "category", userId))
+//            recordViewModel.insert(Record(testTime = OffsetDateTime.now(), category = "", "category", userId))
         }) {
             Text(text = "添加Record")
         }

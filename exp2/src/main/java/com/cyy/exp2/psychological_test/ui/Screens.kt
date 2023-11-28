@@ -275,7 +275,7 @@ fun HistoryScreen(records: State<List<Record>>) {
 fun RecordCard(record: Record) {
     val containColorState = remember { mutableStateOf(Color.White) }
     val contentColorState = remember { mutableStateOf(Color.Black) }
-    if (record.score < 5) {
+    if (record.right < 5) {
         containColorState.value = Color(0xFFF70F5E)
         contentColorState.value = Color.White
     } else {
@@ -317,7 +317,7 @@ fun RecordCard(record: Record) {
                     }) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
-                        text = "${record.score}/20",
+                        text = "${record.right}/20",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                     )
@@ -337,7 +337,7 @@ fun RecordCard(record: Record) {
             )
             // 转化时间表示方式，用于显示
             val formatter = DateTimeFormatter.ofPattern("yyyy年MM月dd日  HH:mm:ss")
-            val testTime = record.testTme.format(formatter)
+            val testTime = record.testTime.format(formatter)
             Text(
                 text = "答题时间：${testTime}",
                 color = Color.Gray,

@@ -97,6 +97,9 @@ class QuizActivity : ComponentActivity() {
         setContent {
             if (returnToMain.value) {
                 val context = LocalContext.current as Activity
+                val intent = Intent()
+                intent.putExtra("record", record.value)
+                context.setResult(Activity.RESULT_OK, intent)
                 context.finish()
             } else {
                 MainScreen(category, resultLauncher)
@@ -148,7 +151,6 @@ fun MainScreen(category: String, resultLauncher: ActivityResultLauncher<Intent>)
                 // 右侧按钮————按行处理的交互
                 actions = {
                     IconButton(onClick = {
-                        quizViewModel.commit()
                         showResultDialog.value = true
                     }) {
                         Icon(
@@ -204,7 +206,6 @@ fun MainScreen(category: String, resultLauncher: ActivityResultLauncher<Intent>)
                                 modifier = Modifier.padding(10.dp),
                                 onClick = {
                                     // TODO：提交答案
-                                    quizViewModel.commit()
                                     showResultDialog.value = true
                                 },
                                 shape = RoundedCornerShape(10.dp),
@@ -561,8 +562,10 @@ fun ResultDialog(
     quizViewModel: QuizViewModel,
     resultLauncher: ActivityResultLauncher<Intent>
 ) {
-    val score = quizViewModel.score.value
     val context = LocalContext.current as Activity
+    val right = quizViewModel.right.collectAsState()
+    val undo = quizViewModel.undo.collectAsState()
+    val wrong = quizViewModel.wrong.collectAsState()
     Dialog(onDismissRequest = {
         showResultDialog.value = false
     }) {
@@ -581,7 +584,7 @@ fun ResultDialog(
             ) {
                 Spacer(modifier = Modifier.height(15.dp))
                 Text(
-                    text = "您答对的题数：$score/${quizViewModel.selected.value.size}",
+                    text = "您答对的题数：${right.value}/${quizViewModel.selected.value.size}",
                     modifier = Modifier.fillMaxWidth(),
                     fontWeight = FontWeight.Bold,
                     fontSize = 25.sp,
@@ -619,11 +622,20 @@ fun ResultDialog(
                     onClick = {
                         // TODO：跳转到ResultActivity
                         showResultDialog.value = false
+                        val testDuration = quizViewModel.getTestDuration()
                         var intent = Intent(context, ResultActivity::class.java)
                         intent.putExtra(
                             "record",
-                            Record(OffsetDateTime.now(), score = score!!, quizViewModel.category)
+                            Record(
+                                testTime = OffsetDateTime.now(),
+                                right = right.value,
+                                wrong = wrong.value,
+                                undo = undo.value,
+                                duration = testDuration,
+                                category = quizViewModel.category
+                            )
                         )
+
                         context.setResult(Activity.RESULT_OK, intent)
                         resultLauncher.launch(intent)
                     },
@@ -640,7 +652,6 @@ fun ResultDialog(
                         contentDescription = null,
                         modifier = Modifier.size(ButtonDefaults.IconSize)
                     )
-
                 }
             }
         }

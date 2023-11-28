@@ -13,9 +13,12 @@ import java.time.format.DateTimeFormatter
 @Parcelize
 @Entity(tableName = "t_record")
 data class Record(
-    val testTme: OffsetDateTime,
-    val score: Int,
+    val testTime: OffsetDateTime,
     val category: String,
+    val right:Int = 0,
+    val wrong:Int = 0,
+    val undo:Int = 0,
+    val duration: String = "",
     var userId: Int = -1,// 用于查询
 ) : Parcelable {
     @PrimaryKey(autoGenerate = true)

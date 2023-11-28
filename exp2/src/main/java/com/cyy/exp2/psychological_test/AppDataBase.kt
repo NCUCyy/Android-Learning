@@ -43,7 +43,7 @@ abstract class AppDataBase : RoomDatabase() {
                 val dataBase = Room.databaseBuilder(
                     context.applicationContext,
                     // 若修改了pojo，则需要修改这里的数据库名称（即：创建一个新的SQLite数据库）
-                    AppDataBase::class.java, "psy-3-testTurns"
+                    AppDataBase::class.java, "psy-4-right-wrong-undo"
                 )
                     .build()
                 INSTANCE = dataBase
