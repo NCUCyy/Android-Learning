@@ -10,12 +10,9 @@ data class User(
     val username: String,// 唯一
     val password: String,
     val sex: String,
+    var testTurns: Int = 0,// 测试次数
 ) {
     @PrimaryKey(autoGenerate = true)
     // 自增的主键，在类内部定义，不要出现在构造函数的参数中，这样在实例化时才不需要设置该值
     var id: Int = 0
-
-    @Ignore
-    // 对于有@Ignore注解的属性，需要提供一个构造函数（不包含它）
-    var records: MutableList<Record> = mutableListOf()
 }

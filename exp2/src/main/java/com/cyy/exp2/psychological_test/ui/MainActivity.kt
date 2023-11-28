@@ -96,6 +96,7 @@ import com.cyy.exp2.psychological_test.view_model.UserViewModelFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.time.OffsetDateTime
+import kotlin.math.log
 import kotlin.system.exitProcess
 
 /**
@@ -107,6 +108,7 @@ import kotlin.system.exitProcess
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // 默认登录：id为1的用户
         val userId = intent.getIntExtra("userId", 1)
         var record: MutableState<Record?> = mutableStateOf(null)
         // 使用ActivityResultLauncher进行意图跳转
@@ -149,7 +151,7 @@ fun NavigationGraphScreen(
             // 2、更新当前显示的Screen
             states.currentScreen.value = Screen.HomePage
             // 3、此语句处才会展示指定的Screen
-            HomeScreen(states.resultLauncher,recordViewModel)
+            HomeScreen(states.resultLauncher, recordViewModel)
         }
         // 页面2 History
         composable(route = Screen.HistoryPage.route) {
@@ -238,20 +240,21 @@ fun MainScreen(
             userId
         )
     )
-    // 添加答题记录
-    if (record.value != null) {
-        recordViewModel.insert(record.value!!)
-        record.value = null
-        Toast.makeText(context, "添加答题记录成功！", Toast.LENGTH_LONG).show()
-    }
-//    val loginUser = recordViewModel.loginUser.collectAsStateWithLifecycle()
-//    Log.i("用户创建了吗", loginUser.value.toString())
     val userViewModel = viewModel<UserViewModel>(
         factory = UserViewModelFactory(
             application.userRepository
         )
     )
     var loginUser = recordViewModel.loginUser.collectAsStateWithLifecycle()
+    // 添加答题记录
+    if (record.value != null) {
+        recordViewModel.insert(record.value!!)
+        loginUser.value!!.testTurns++
+        userViewModel.update(loginUser.value!!)
+        record.value = null
+        Toast.makeText(context, "添加答题记录成功！", Toast.LENGTH_LONG).show()
+    }
+
     // 脚手架
     Scaffold(
         topBar = {

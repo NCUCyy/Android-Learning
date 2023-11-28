@@ -14,8 +14,9 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/Theme.Chenyi">
-
-
+        <activity
+                android:name=".psychological_test.ui.ResultActivity"
+                android:exported="true" />
         <activity
                 android:name=".psychological_test.ui.DemoActivity"
                 android:exported="true" />

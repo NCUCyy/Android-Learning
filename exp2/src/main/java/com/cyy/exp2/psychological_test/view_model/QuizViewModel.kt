@@ -33,6 +33,13 @@ class QuizViewModel(
     // 总分
     val score = MutableLiveData(0)
 
+    private val _curRecord: MutableStateFlow<Record?> = MutableStateFlow(null)
+    val curRecord = _curRecord.asStateFlow()
+
+    fun setCurRecord(record: Record) {
+        _curRecord.value = record
+    }
+
     fun setCurQuizIdx(idx: Int) {
         _curQuizIdx.value = idx
         _curQuiz.value = quizzes[_curQuizIdx.value]

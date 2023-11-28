@@ -4,8 +4,12 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -60,7 +64,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cyy.exp2.psychological_test.PsychologicalTestApp
-import com.cyy.exp2.psychological_test.pojo.Record as MyRecord
+import com.cyy.exp2.psychological_test.pojo.Record
 import com.cyy.exp2.psychological_test.view_model.QuizViewModel
 import com.cyy.exp2.psychological_test.view_model.QuizViewModelFactory
 import kotlinx.coroutines.delay
@@ -68,11 +72,35 @@ import kotlinx.coroutines.launch
 import java.time.OffsetDateTime
 
 class QuizActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // 从MainActivity中传过来的：题库种类
         val category = intent.getStringExtra("category")!!
+        // 从ResultActivity中传过来的：用于判断是否需要直接返回主界面
+        val returnToMain = mutableStateOf(false)
+        // 从ResultActivity中传过来的：用于存储返回的答题记录
+        val record: MutableState<Record?> = mutableStateOf(null)
+
+        // 使用ActivityResultLauncher进行意图跳转
+        val resultLauncher: ActivityResultLauncher<Intent> = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult(),
+            // 意图结束后，执行这个「回调函数」
+            ActivityResultCallback {
+                if (it.resultCode == RESULT_OK && it.data?.hasExtra("record")!!) {
+                    // 返回的data数据是个intent类型，里面存储了一段文本内容
+                    record.value = it.data?.getParcelableExtra("record", Record::class.java)
+                    returnToMain.value = true
+                }
+            }
+        )
         setContent {
-            MainScreen(category)
+            if (returnToMain.value) {
+                val context = LocalContext.current as Activity
+                context.finish()
+            } else {
+                MainScreen(category, resultLauncher)
+            }
         }
     }
 }
@@ -81,7 +109,7 @@ class QuizActivity : ComponentActivity() {
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "StateFlowValueCalledInComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(category: String) {
+fun MainScreen(category: String, resultLauncher: ActivityResultLauncher<Intent>) {
     val application = LocalContext.current.applicationContext as PsychologicalTestApp
     val quizViewModel = viewModel<QuizViewModel>(
         factory = QuizViewModelFactory(
@@ -228,7 +256,13 @@ fun MainScreen(category: String) {
         content = {
             // 页面的主体部分
             Box(modifier = Modifier.padding(it)) {
-                QuizScreen(quizViewModel, showQuizzesDialog, showResultDialog, showExitDialog)
+                QuizScreen(
+                    quizViewModel,
+                    showQuizzesDialog,
+                    showResultDialog,
+                    showExitDialog,
+                    resultLauncher
+                )
             }
         },
     )
@@ -240,7 +274,8 @@ fun QuizScreen(
     quizViewModel: QuizViewModel,
     showQuizzesDialog: MutableState<Boolean>,
     showResultDialog: MutableState<Boolean>,
-    showExitDialog: MutableState<Boolean>
+    showExitDialog: MutableState<Boolean>,
+    resultLauncher: ActivityResultLauncher<Intent>
 ) {
     val context = LocalContext.current as Activity
     val curQuiz = quizViewModel.curQuiz.collectAsState().value
@@ -271,7 +306,7 @@ fun QuizScreen(
         QuizzesDialog(showQuizzesDialog, quizViewModel)
     }
     if (showResultDialog.value) {
-        ResultDialog(showResultDialog, quizViewModel)
+        ResultDialog(showResultDialog, quizViewModel, resultLauncher)
     }
     if (showExitDialog.value) {
         ConfirmExitDialog(showExitDialog)
@@ -523,7 +558,8 @@ fun QuizCard(index: Int, answer: String, quizViewModel: QuizViewModel, onClicked
 @Composable
 fun ResultDialog(
     showResultDialog: MutableState<Boolean>,
-    quizViewModel: QuizViewModel
+    quizViewModel: QuizViewModel,
+    resultLauncher: ActivityResultLauncher<Intent>
 ) {
     val score = quizViewModel.score.value
     val context = LocalContext.current as Activity
@@ -581,15 +617,15 @@ fun ResultDialog(
                         .fillMaxWidth()
                         .padding(start = 30.dp, end = 30.dp, bottom = 20.dp),
                     onClick = {
-                        // TODO：返回MainActivity
+                        // TODO：跳转到ResultActivity
                         showResultDialog.value = false
-                        var intent = Intent()
+                        var intent = Intent(context, ResultActivity::class.java)
                         intent.putExtra(
                             "record",
-                            MyRecord(OffsetDateTime.now(), score = score!!, quizViewModel.category)
+                            Record(OffsetDateTime.now(), score = score!!, quizViewModel.category)
                         )
                         context.setResult(Activity.RESULT_OK, intent)
-                        context.finish()
+                        resultLauncher.launch(intent)
                     },
                     shape = RoundedCornerShape(15.dp),
                     colors = ButtonDefaults.buttonColors(

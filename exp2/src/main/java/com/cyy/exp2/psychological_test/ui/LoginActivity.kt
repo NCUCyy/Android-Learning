@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -139,7 +140,7 @@ fun LoginScreen(resultLauncher: ActivityResultLauncher<Intent>) {
             horizontalArrangement = Arrangement.Center
         ) {
             Icon(
-                imageVector = Icons.Filled.FavoriteBorder,
+                imageVector = Icons.Filled.Notifications,
                 contentDescription = "App Icon",
                 modifier = Modifier.size(40.dp)
             )

@@ -12,11 +12,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,6 +42,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -66,6 +69,7 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
 import com.cyy.exp2.R
@@ -74,7 +78,10 @@ import com.cyy.exp2.psychological_test.pojo.Record
 import com.cyy.exp2.psychological_test.pojo.User
 import com.cyy.exp2.psychological_test.view_model.RecordViewModel
 import com.cyy.exp2.psychological_test.view_model.SentenceViewModel
+import com.cyy.exp2.psychological_test.view_model.UserScreenViewModel
+import com.cyy.exp2.psychological_test.view_model.UserScreenViewModelFactory
 import com.cyy.exp2.psychological_test.view_model.UserViewModel
+import com.cyy.exp2.psychological_test.view_model.UserViewModelFactory
 import java.time.format.DateTimeFormatter
 
 val screens = listOf(Screen.HomePage, Screen.HistoryPage, Screen.UserPage)
@@ -346,16 +353,30 @@ fun RecordCard(record: Record) {
 }
 
 // 3、用户界面
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 @Preview
 fun UserScreen(loginUser: User = User("cyy", "cyy", "男"), userViewModel: UserViewModel? = null) {
+    val application = LocalContext.current.applicationContext as PsychologicalTestApp
+    // 用于存储页面数据
+    val userScreenViewModel = viewModel<UserScreenViewModel>(
+        factory = UserScreenViewModelFactory(
+            loginUser
+        )
+    )
+    // 用于持久化修改后的数据
+    val userViewModel = viewModel<UserViewModel>(
+        factory = UserViewModelFactory(
+            application.userRepository
+        )
+    )
+    val username = userScreenViewModel.username.collectAsState().value
+    val password = userScreenViewModel.password.collectAsState().value
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
     ) {
-
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
             Image(
                 painter = painterResource(id = android.R.mipmap.sym_def_app_icon),
@@ -363,14 +384,70 @@ fun UserScreen(loginUser: User = User("cyy", "cyy", "男"), userViewModel: UserV
                 modifier = Modifier
                     .size(100.dp)
             )
-            Text(text = loginUser.username, fontSize = 50.sp)
+            Text(
+                text = loginUser.username,
+                fontSize = 50.sp,
+                modifier = Modifier.padding(top = 10.dp)
+            )
         }
-        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-            Card(
-                modifier = Modifier.fillMaxSize(),
-                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 1000.dp)
-            ) {
-                Text(text = "性别：" + loginUser.sex, fontSize = 20.sp)
+        Card(
+            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 1000.dp),
+            shape = RoundedCornerShape(0.dp, 0.dp, 0.dp, 0.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = Color.White,
+            ),
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Column(verticalArrangement = Arrangement.Center) {
+                    Row() {
+                        Text(
+                            text = "用户名：",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(end = 10.dp)
+                        )
+                        TextField(
+                            value = username,
+                            onValueChange = { userScreenViewModel.updatePassword(it) },
+                            modifier = Modifier.padding(end = 10.dp)
+                        )
+                    }
+                    Row() {
+                        Text(
+                            text = "密码：",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(end = 10.dp)
+                        )
+                        TextField(
+                            value = password,
+                            onValueChange = { userScreenViewModel.updatePassword(it) },
+                            modifier = Modifier.padding(end = 10.dp)
+                        )
+                    }
+                    Row {
+                        Text(
+                            text = "性别：",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(end = 10.dp)
+                        )
+                        Text(text = loginUser.sex, modifier = Modifier.padding(end = 10.dp))
+                    }
+                    Row {
+                        Text(
+                            text = "答题次数：",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(end = 10.dp)
+                        )
+                        Text(
+                            text = loginUser.testTurns.toString(),
+                            modifier = Modifier.padding(end = 10.dp)
+                        )
+                    }
+                }
             }
         }
     }
