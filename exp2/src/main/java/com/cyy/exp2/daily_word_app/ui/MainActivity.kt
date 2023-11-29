@@ -14,23 +14,30 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -57,14 +64,17 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -82,6 +92,7 @@ import com.cyy.exp2.daily_word_app.view_model.UserViewModel
 import com.cyy.exp2.daily_word_app.view_model.UserViewModelFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import java.time.OffsetDateTime
 import kotlin.system.exitProcess
 
 /**
@@ -170,6 +181,18 @@ fun MenuView(states: StateHolder) {
             // 点击其他地方，则关闭下拉框
             states.dropState.value = false
         }) {
+        DropdownMenuItem(
+            // 在前面的Icon
+            leadingIcon = {
+                Icon(imageVector = Icons.Filled.Info, contentDescription = null)
+            },
+            text = {
+                Text(text = "关于App", fontSize = 20.sp)
+            }, onClick = {
+                // 点击完之后，关闭下拉框
+                states.dropState.value = false
+                states.showInfoDialog.value = true
+            })
         DropdownMenuItem(
             // 在前面的Icon
             leadingIcon = {
@@ -349,6 +372,80 @@ fun MainScreen(
         floatingActionButton = {
             // TODO：点击按钮后显示当前的答题情况---showCurRecord来控制
         })
+
+}
+
+@Composable
+fun InfoDialog(states: StateHolder) {
+    Dialog(onDismissRequest = {
+        states.showInfoDialog.value = false
+    }) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            Card(
+                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White,
+                ),
+                modifier = Modifier
+                    .fillMaxWidth(),
+            ) {
+                Spacer(modifier = Modifier.height(15.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        painter = painterResource(id = com.cyy.exp2.R.drawable.spell),
+                        contentDescription = "App Icon",
+                        modifier = Modifier.size(40.dp)
+                    )
+                    Spacer(modifier = Modifier.width(5.dp)) // 添加一些间距
+                    Text(
+                        text = "每日单词App",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 25.sp,
+                        textAlign = TextAlign.Center
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(15.dp))
+                Text(
+                    text = "一款简约的背单词软件💪🏻",
+                    modifier = Modifier.fillMaxWidth(),
+                    fontSize = 18.sp,
+                    textAlign = TextAlign.Center,
+                    color = Color.Gray
+                )
+                Spacer(modifier = Modifier.height(15.dp))
+                Text(
+                    text = "联系电话：15157982271",
+                    modifier = Modifier.fillMaxWidth(),
+                    fontSize = 18.sp,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(15.dp))
+                Text(
+                    text = "开发者：曹义扬",
+                    modifier = Modifier.fillMaxWidth(),
+                    fontSize = 18.sp,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(15.dp))
+                Text(
+                    text = "Copyright © 2023 NCU Edu.",
+                    modifier = Modifier.fillMaxWidth(),
+                    fontSize = 12.sp,
+                    textAlign = TextAlign.Center,
+                    color = Color.Gray
+                )
+                Spacer(modifier = Modifier.height(15.dp))
+            }
+        }
+    }
 }
 
 /**
@@ -364,6 +461,8 @@ fun DrawView(
     val context = LocalContext.current as Activity
     // TODO：这里需要修改
     val user = recordViewModel.loginUser.collectAsStateWithLifecycle()
+    if (states.showInfoDialog.value)
+        InfoDialog(states)
     ModalNavigationDrawer(
         // 抽屉是否可以通过手势进行交互
         gesturesEnabled = true,
@@ -383,7 +482,13 @@ fun DrawView(
                     .fillMaxHeight()
                     .width(260.dp)
             ) {
-                Row(modifier = Modifier.padding(top = 50.dp, start = 10.dp, bottom = 30.dp)) {
+                Row(
+                    modifier = Modifier.padding(
+                        top = 50.dp,
+                        start = 10.dp,
+                        bottom = 30.dp
+                    )
+                ) {
                     Image(
                         painter = painterResource(id = R.mipmap.sym_def_app_icon),
                         contentDescription = null,
@@ -469,7 +574,8 @@ class StateHolder(
     // 用于判断Drawer 是否打开
     val drawerState: DrawerState,
     val dropState: MutableState<Boolean>,
-    val resultLauncher: ActivityResultLauncher<Intent>
+    val resultLauncher: ActivityResultLauncher<Intent>,
+    val showInfoDialog: MutableState<Boolean>
 )
 
 /**
@@ -484,7 +590,8 @@ fun rememberStates(
     scope: CoroutineScope = rememberCoroutineScope(),
     drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
     dropState: MutableState<Boolean> = mutableStateOf(false),
-    resultLauncher: ActivityResultLauncher<Intent>
+    resultLauncher: ActivityResultLauncher<Intent>,
+    showInfoDialog: MutableState<Boolean> = mutableStateOf(false)
 ) = StateHolder(
     currentScreen,
     navController,
@@ -492,7 +599,8 @@ fun rememberStates(
     scope,
     drawerState,
     dropState,
-    resultLauncher
+    resultLauncher,
+    showInfoDialog
 )
 
 @Composable

@@ -197,15 +197,11 @@ fun HomeScreen(
                     fontSize = 40.sp,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(start = 10.dp, top = 10.dp),
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontSize = 40.sp,
-                        fontStyle = FontStyle.Italic
-                    ),
                 )
                 IconButton(modifier = Modifier.padding(top = 20.dp), onClick = {
                     sentenceViewModel.shuffleSentence()
                 }) {
-                    Icon(imageVector = Icons.Filled.Refresh, contentDescription = null)
+                    Icon(painter = painterResource(id = R.drawable.sync), contentDescription = null)
                 }
             }
             AsyncImage(

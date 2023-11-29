@@ -94,10 +94,16 @@ class QuizViewModel(
     }
 
     fun nextQuiz() {
+        if (_curQuizIdx.value == quizzes.size - 1) {
+            return
+        }
         setCurQuizIdx(_curQuizIdx.value + 1)
     }
 
     fun lastQuiz() {
+        if (_curQuizIdx.value == 0) {
+            return
+        }
         setCurQuizIdx(_curQuizIdx.value - 1)
     }
 

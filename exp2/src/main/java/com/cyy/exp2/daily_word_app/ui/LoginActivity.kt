@@ -43,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -51,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.cyy.exp2.R
 import com.cyy.exp2.daily_word_app.PsychologicalTestApp
 import com.cyy.exp2.daily_word_app.pojo.User
 import com.cyy.exp2.daily_word_app.view_model.LoginViewModel
@@ -139,11 +141,11 @@ fun LoginScreen(resultLauncher: ActivityResultLauncher<Intent>) {
             horizontalArrangement = Arrangement.Center
         ) {
             Icon(
-                imageVector = Icons.Filled.Notifications,
+                painter = painterResource(id = R.drawable.spell),
                 contentDescription = "App Icon",
                 modifier = Modifier.size(40.dp)
             )
-            Spacer(modifier = Modifier.width(8.dp)) // 添加一些间距
+            Spacer(modifier = Modifier.width(5.dp)) // 添加一些间距
             Text(
                 text = "每日单词 App",
                 fontWeight = FontWeight.Bold,
