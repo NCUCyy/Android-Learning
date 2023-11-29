@@ -11,7 +11,8 @@ import java.time.Instant
 
 class QuizViewModel(
     private val quizRepository: QuizRepository,
-    val category: String // 本次的测试题库
+    val category: String, // 本次的测试题库
+    val username: String // 答题人
 ) :
     ViewModel() {
     // 当前的题库
@@ -124,12 +125,16 @@ class QuizViewModel(
     }
 }
 
-class QuizViewModelFactory(private val quizRepository: QuizRepository, val category: String) :
+class QuizViewModelFactory(
+    private val quizRepository: QuizRepository,
+    private val category: String,
+    private val username: String
+) :
     ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(QuizViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return QuizViewModel(quizRepository, category) as T
+            return QuizViewModel(quizRepository, category, username) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

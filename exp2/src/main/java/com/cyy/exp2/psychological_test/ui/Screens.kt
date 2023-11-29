@@ -236,6 +236,7 @@ fun HomeScreen(
                 // Activity跳转到答题界面QuizActivity
                 val intent = Intent(context as Activity, QuizActivity::class.java)
                 intent.putExtra("category", recordViewModel.curCategory.value)
+                intent.putExtra("username", recordViewModel.loginUser.value!!.username)
                 resultLauncher.launch(intent)
             },
             modifier = Modifier

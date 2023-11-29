@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultCallback
@@ -29,7 +28,6 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.BottomAppBar
@@ -58,7 +56,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -77,6 +74,8 @@ class QuizActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         // 从MainActivity中传过来的：题库种类
         val category = intent.getStringExtra("category")!!
+        val username = intent.getStringExtra("username")!!
+
         // 从ResultActivity中传过来的：用于判断是否需要直接返回主界面
         val returnToMain = mutableStateOf(false)
         // 从ResultActivity中传过来的：用于存储返回的答题记录
@@ -102,7 +101,7 @@ class QuizActivity : ComponentActivity() {
                 context.setResult(Activity.RESULT_OK, intent)
                 context.finish()
             } else {
-                MainScreen(category, resultLauncher)
+                MainScreen(category, username, resultLauncher)
             }
         }
     }
@@ -112,11 +111,11 @@ class QuizActivity : ComponentActivity() {
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "StateFlowValueCalledInComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(category: String, resultLauncher: ActivityResultLauncher<Intent>) {
+fun MainScreen(category: String, username: String, resultLauncher: ActivityResultLauncher<Intent>) {
     val application = LocalContext.current.applicationContext as PsychologicalTestApp
     val quizViewModel = viewModel<QuizViewModel>(
         factory = QuizViewModelFactory(
-            application.quizRepository, category
+            application.quizRepository, category, username
         )
     )
     val curQuizIdx = quizViewModel.curQuizIdx.collectAsState().value
@@ -624,17 +623,16 @@ fun ResultDialog(
                         showResultDialog.value = false
                         val testDuration = quizViewModel.getTestDuration()
                         var intent = Intent(context, ResultActivity::class.java)
-                        intent.putExtra(
-                            "record",
-                            Record(
-                                testTime = OffsetDateTime.now(),
-                                right = right.value,
-                                wrong = wrong.value,
-                                undo = undo.value,
-                                duration = testDuration,
-                                category = quizViewModel.category
-                            )
+                        val record = Record(
+                            testTime = OffsetDateTime.now(),
+                            right = right.value,
+                            wrong = wrong.value,
+                            undo = undo.value,
+                            duration = testDuration,
+                            category = quizViewModel.category
                         )
+                        intent.putExtra("record", record)
+                        intent.putExtra("username", quizViewModel.username)
 
                         context.setResult(Activity.RESULT_OK, intent)
                         resultLauncher.launch(intent)
