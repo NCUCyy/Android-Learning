@@ -60,7 +60,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.cyy.exp2.daily_word_app.PsychologicalTestApp
+import com.cyy.exp2.daily_word_app.DailyWordApp
 import com.cyy.exp2.daily_word_app.pojo.Record
 import com.cyy.exp2.daily_word_app.view_model.QuizViewModel
 import com.cyy.exp2.daily_word_app.view_model.QuizViewModelFactory
@@ -112,7 +112,7 @@ class QuizActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(category: String, username: String, resultLauncher: ActivityResultLauncher<Intent>) {
-    val application = LocalContext.current.applicationContext as PsychologicalTestApp
+    val application = LocalContext.current.applicationContext as DailyWordApp
     val quizViewModel = viewModel<QuizViewModel>(
         factory = QuizViewModelFactory(
             application.quizRepository, category, username

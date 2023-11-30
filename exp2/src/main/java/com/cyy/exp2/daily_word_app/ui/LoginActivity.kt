@@ -22,8 +22,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -53,7 +51,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cyy.exp2.R
-import com.cyy.exp2.daily_word_app.PsychologicalTestApp
+import com.cyy.exp2.daily_word_app.DailyWordApp
 import com.cyy.exp2.daily_word_app.pojo.User
 import com.cyy.exp2.daily_word_app.view_model.LoginViewModel
 import com.cyy.exp2.daily_word_app.view_model.UserViewModel
@@ -91,7 +89,7 @@ class LoginActivity : ComponentActivity() {
 @Composable
 fun LoginScreen(resultLauncher: ActivityResultLauncher<Intent>) {
     val context = LocalContext.current
-    val application = LocalContext.current.applicationContext as PsychologicalTestApp
+    val application = LocalContext.current.applicationContext as DailyWordApp
     val loginViewModel: LoginViewModel = viewModel()
     var username = loginViewModel.username.collectAsState()
     var password = loginViewModel.password.collectAsState()

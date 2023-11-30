@@ -11,7 +11,7 @@ import com.drake.net.okhttp.setConverter
 import com.drake.net.okhttp.setDebug
 import java.util.concurrent.TimeUnit
 
-class PsychologicalTestApp : Application() {
+class DailyWordApp : Application() {
     // 通过 lazy，数据库和存储库只在需要时创建，而不是在应用程序启动时创建
     private val database by lazy { AppDataBase.getDatabase(this) }
 

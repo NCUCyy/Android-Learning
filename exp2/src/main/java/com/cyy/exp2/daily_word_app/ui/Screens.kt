@@ -23,10 +23,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -36,14 +34,12 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -55,12 +51,10 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.ModifierInfo
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -72,7 +66,7 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.cyy.exp2.R
-import com.cyy.exp2.daily_word_app.PsychologicalTestApp
+import com.cyy.exp2.daily_word_app.DailyWordApp
 import com.cyy.exp2.daily_word_app.pojo.Record
 import com.cyy.exp2.daily_word_app.pojo.User
 import com.cyy.exp2.daily_word_app.view_model.RecordViewModel
@@ -112,7 +106,7 @@ sealed class Screen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategorySelect(recordViewModel: RecordViewModel) {
-    val application = LocalContext.current.applicationContext as PsychologicalTestApp
+    val application = LocalContext.current.applicationContext as DailyWordApp
     val categories = application.quizRepository.categories
     var expanded by remember { mutableStateOf(false) }
     val curSelect = recordViewModel.curCategory.collectAsState().value
@@ -276,6 +270,7 @@ fun RecordCard(record: Record) {
         contentColorState.value = Color.White
     } else {
         containColorState.value = Color(0xFF0DFCA9)
+        contentColorState.value = Color.Black
     }
     Card(
         modifier = Modifier
@@ -353,7 +348,7 @@ fun RecordCard(record: Record) {
 @Composable
 @Preview
 fun UserScreen(loginUser: User = User("cyy", "cyy", "男"), userViewModel: UserViewModel? = null) {
-    val application = LocalContext.current.applicationContext as PsychologicalTestApp
+    val application = LocalContext.current.applicationContext as DailyWordApp
     val context = LocalContext.current as ComponentActivity
     // 用于存储页面数据
     val userScreenViewModel = viewModel<UserScreenViewModel>(

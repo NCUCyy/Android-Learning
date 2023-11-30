@@ -29,15 +29,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -71,7 +68,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -83,7 +79,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 
-import com.cyy.exp2.daily_word_app.PsychologicalTestApp
+import com.cyy.exp2.daily_word_app.DailyWordApp
 import com.cyy.exp2.daily_word_app.pojo.Record
 import com.cyy.exp2.daily_word_app.pojo.User
 import com.cyy.exp2.daily_word_app.view_model.RecordViewModel
@@ -92,7 +88,6 @@ import com.cyy.exp2.daily_word_app.view_model.UserViewModel
 import com.cyy.exp2.daily_word_app.view_model.UserViewModelFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import java.time.OffsetDateTime
 import kotlin.system.exitProcess
 
 /**
@@ -240,7 +235,7 @@ fun MainScreen(
     // 当前应用的上下文
     val context = LocalContext.current as Activity
 
-    val application = LocalContext.current.applicationContext as PsychologicalTestApp
+    val application = LocalContext.current.applicationContext as DailyWordApp
     val recordViewModel = viewModel<RecordViewModel>(
         factory = RecordViewModelFactory(
             application.recordRepository,
@@ -422,14 +417,14 @@ fun InfoDialog(states: StateHolder) {
                 )
                 Spacer(modifier = Modifier.height(15.dp))
                 Text(
-                    text = "联系电话：15157982271",
+                    text = "开发者：曹义扬",
                     modifier = Modifier.fillMaxWidth(),
                     fontSize = 18.sp,
                     textAlign = TextAlign.Center
                 )
-                Spacer(modifier = Modifier.height(15.dp))
+                Spacer(modifier = Modifier.height(10.dp))
                 Text(
-                    text = "开发者：曹义扬",
+                    text = "联系电话：15157982271",
                     modifier = Modifier.fillMaxWidth(),
                     fontSize = 18.sp,
                     textAlign = TextAlign.Center
@@ -606,7 +601,7 @@ fun rememberStates(
 @Composable
 fun MainScreen_Demo(userId: Int) {
     val context = LocalContext.current
-    val application = LocalContext.current.applicationContext as PsychologicalTestApp
+    val application = LocalContext.current.applicationContext as DailyWordApp
     val recordViewModel = viewModel<RecordViewModel>(
         factory = RecordViewModelFactory(
             application.recordRepository,
