@@ -58,7 +58,12 @@ android {
     }
 }
 
-dependencies {//Room
+dependencies {
+    //viewModel
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+    //使用coil显示在线的图片
+    implementation("io.coil-kt:coil-compose:2.4.0")
+//Room
     val roomVersion = "2.5.0"
 
     implementation("androidx.room:room-runtime:$roomVersion")

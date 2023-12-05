@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
             android:name=".room.MyApp"
             android:allowBackup="true"
@@ -13,6 +15,12 @@
             android:supportsRtl="true"
             android:theme="@style/Theme.Exp"
             tools:targetApi="31">
+        <activity
+                android:name=".ch05.ClockActivity"
+                android:exported="true" />
+        <activity
+                android:name=".ch05.MainActivity"
+                android:exported="true" />
         <activity
                 android:name=".room.UserListActivity"
                 android:exported="true" />
