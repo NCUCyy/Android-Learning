@@ -59,6 +59,7 @@ android {
 }
 
 dependencies {
+    implementation("androidx.compose.foundation:foundation-android:1.5.4")
     //viewModel
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
     //使用coil显示在线的图片
