@@ -7,13 +7,16 @@
             tools:ignore="WrongManifestParent" />
 
     <application
-            android:name=".daily_word_app.DailyWordApp"
+        android:name=".test_handler.MyApplication"
             android:allowBackup="true"
             android:icon="@mipmap/ic_launcher"
             android:label="@string/app_name"
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/Theme.Chenyi">
+        <activity
+                android:name=".test_handler.MainActivity"
+                android:exported="true" />
         <activity
                 android:name=".daily_word_app.ui.ResultActivity"
                 android:exported="true" />
