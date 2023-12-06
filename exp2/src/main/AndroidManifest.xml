@@ -7,7 +7,7 @@
             tools:ignore="WrongManifestParent" />
 
     <application
-        android:name=".Model_Handler_Image.MyApplication"
+        android:name=".Model_Handler_Pool_Net.MyApplication"
             android:allowBackup="true"
             android:icon="@mipmap/ic_launcher"
             android:label="@string/app_name"
@@ -15,7 +15,10 @@
             android:supportsRtl="true"
             android:theme="@style/Theme.Chenyi">
         <activity
-                android:name=".Model_Handler_Image.MainActivity"
+                android:name=".Model_Handler_Pool_Net.MainActivity2"
+                android:exported="true" />
+        <activity
+                android:name=".Model_Handler_Pool_Net.MainActivity"
                 android:exported="true" />
         <activity
                 android:name=".daily_word_app.ui.ResultActivity"
