@@ -20,7 +20,7 @@
                 android:name=".ch06.LaunchedEffectTest"
                 android:exported="true" />
         <activity
-                android:name=".ch06.MainActivity"
+                android:name=".ch06.ClockActivity"
                 android:exported="true" />
         <activity
                 android:name=".ch05.ClockActivity"
