@@ -6,9 +6,6 @@ import android.os.Handler
 import android.os.Looper
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -40,30 +38,26 @@ import kotlinx.coroutines.flow.asStateFlow
 import java.util.concurrent.Executor
 
 sealed class Result<out R> {
+    object NotBegin : Result<Nothing>()
+
     // 成功时，返回图片的URL
     data class Success<out T>(val data: T) : Result<T>()
+
     // 错误时，返回报错信息errorDesc
     data class Error<out T>(val errorDesc: T) : Result<T>()
+    object Loading : Result<Nothing>()
 }
 
 /**
  * 定义图形仓库
  * @property executor Executor
  * @property resultHandler Handler
- * @property imageLst List<String>
  * @constructor
  */
 class ImageRepository(
     private val executor: Executor,
     private val resultHandler: Handler
 ) {
-    val imageLst: List<String> = listOf(
-        "https://img0.baidu.com/it/u=3368678403,249914024&fm=253&fmt=auto&app=138&f=JPEG?w=889&h=500",
-        "https://img1.baidu.com/it/u=1586503404,2024787974&fm=253&app=120&size=w931&n=0&f=JPEG&fmt=auto?sec=1701882000&t=d5aac50f5ea61054720081dd478a7939",
-        "https://img0.baidu.com/it/u=678433132,1708154179&fm=253&app=138&size=w931&n=0&f=JPEG&fmt=auto?sec=1701882000&t=efaa22401649b017f82e9666a6cd72bb",
-    )
-
-
     /**
      * 请求加载数据
      * @param callBack Function1<Result<String>, Unit> 回调
@@ -101,8 +95,9 @@ class ImageRepository(
 }
 
 class LoadImageViewModel(private val imageRepository: ImageRepository) : ViewModel() {
-    private val _currentImageURL = MutableStateFlow("")
-    val currentImageURL = _currentImageURL.asStateFlow()
+    // 图片的请求结果（4个：未请求、请求中、请求成功、请求失败）
+    private val _requestState = MutableStateFlow<Result<Any>>(Result.NotBegin)
+    val requestState = _requestState.asStateFlow()
 
     /**
      * Request image
@@ -110,14 +105,18 @@ class LoadImageViewModel(private val imageRepository: ImageRepository) : ViewMod
      */
     fun requestImage() {
         // TODO：在ViewModel中修改页面的状态值
-        // 修改页面的显示文本为"正在加载"
-        _currentImageURL.value = "等待加载图片~"
+        _requestState.value = Result.Loading
         imageRepository.loadImage { it: Result<String> ->
             when (it) {
                 //获取成功，修改在线图片的url
-                is Result.Success<String> -> _currentImageURL.value = it.data
+                is Result.Success<String> -> {
+                    _requestState.value = Result.Success(it.data)
+                }
                 //获取失败，提供失败的描述信息
-                is Result.Error<String> -> _currentImageURL.value = it.errorDesc
+                is Result.Error<String> -> _requestState.value = Result.Error(it.errorDesc)
+                else -> {
+                    _requestState.value = Result.Error("加载在线图片失败！")
+                }
             }
         }
     }
@@ -150,13 +149,12 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun ImageScreen(imageViewModel: LoadImageViewModel) {
     // 获取当前图片状态————由ViewModel管理状态值的变化
-    val imageURLState = imageViewModel.currentImageURL.collectAsState()
+    val requestState = imageViewModel.requestState.collectAsState()
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(20.dp)
-            .background(Color.Black),
+            .padding(20.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -164,16 +162,32 @@ fun ImageScreen(imageViewModel: LoadImageViewModel) {
             verticalArrangement = Arrangement.Center
         ) {
             // TODO：动态显示请求结果（正在：加载中/成功：URL/失败：加载在线图片资源失败）
-            Text(imageURLState.value, fontSize = 20.sp, color = Color.White)
-            if (imageURLState.value.isNotBlank()) {
-                AsyncImage(
-                    modifier = Modifier
-                        .width(400.dp)
-                        .height(400.dp)
-                        .border(BorderStroke(1.dp, Color.Blue)),
-                    model = imageURLState.value,
-                    contentDescription = null
-                )
+//            Text(requestState.value.toString(), fontSize = 20.sp)
+            when (requestState.value) {
+                is Result.Loading -> {
+                    CircularProgressIndicator()
+                }
+
+                is Result.Success<Any> -> {
+                    AsyncImage(
+                        modifier = Modifier
+                            .width(400.dp)
+                            .height(400.dp),
+                        model = (requestState.value as Result.Success).data,
+                        contentDescription = null
+                    )
+                }
+
+                is Result.Error -> {
+                    Text(
+                        text = (requestState.value as Result.Error).errorDesc.toString(),
+                        fontSize = 16.sp
+                    )
+                }
+
+                is Result.NotBegin -> {
+                    Text(text = "点击按钮加载图片", fontSize = 16.sp)
+                }
             }
             Row(
                 modifier = Modifier

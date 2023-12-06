@@ -24,6 +24,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,6 +44,7 @@ class LaunchedEffectTest : ComponentActivity() {
 //全局变量，在MainScreen作用域外
 val timer2 = mutableIntStateOf(0)
 
+// -------------------------------------LaunchedEffect-------------------------------------
 /**
  * LaunchedEffect函数可以在某个可组合项的作用域内运行挂起函数时，它会启动内部的代码块到协程上下文CoroutineContext中。
  * 当函数的key1的值发生变化，会重构LaunchedEffect。这时，LaunchedEffect原来启动的协程会被取消然后又重新启动。
@@ -50,12 +52,15 @@ val timer2 = mutableIntStateOf(0)
  * 1. key1：表示关键字可以是任何类型，如果是可变的状态值时，可以根据可变状态值的变化，取消原有协程并启动新的协程。
  *      - 当key1为Unit或true时，LaunchedEffect函数将与当前重组函数保持一致的生命周期。
  * 2. block:表示要调用的挂起函数。需要在协程范围中运行；
+ *
+ * 注意点：LaunchedEffect函数中的键参数为Unit/True时，这表示在MainScreen函数被调用时或重新组合时，才会加载LaunchedEffect函数。
+ * 并不存在【键参数值的变化】重新加载协程代码的可能。
  */
 @Composable
 fun MainScreen2() {
+    Log.d("TAG------------->", "MainScreen2")
     //函数作用域内的变量
     var runningState = remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
 
     /**
      * 两种方案：
@@ -87,6 +92,76 @@ fun MainScreen2() {
         ) {
             Text(text = "计时器", fontSize = 30.sp, color = MaterialTheme.colorScheme.primary)
             Text(text = "${timer2.value}秒", fontSize = 24.sp)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                IconButton(modifier = Modifier.width(100.dp),
+                    onClick = {
+                        runningState.value = true
+                    }) {
+                    Row {
+                        Icon(
+                            imageVector = Icons.Filled.PlayArrow,
+                            tint = Color.Green,
+                            contentDescription = null
+                        )
+                        Text("计时")
+                    }
+                }
+                IconButton(modifier = Modifier.width(100.dp),
+                    onClick = {
+                        runningState.value = false
+                    }) {
+                    Row {
+                        Icon(
+                            imageVector = Icons.Filled.Delete,
+                            tint = Color.Green, contentDescription = null
+                        )
+                        Text("停止")
+                    }
+                }
+            }
+        }
+    }
+}
+
+// -------------------------------------rememberUpdatedState-------------------------------------
+/**
+ * 1、LaunchedEffect函数中的键参数为Unit，这表示在MainScreen函数被调用时或重新组合时，才会加载LaunchedEffect函数。并不存在键参数值的变化重新加载协程代码的可能。
+ * 2、但是，通过rememberUpdatedState(newValue = timer)函数，一致可以通过timerState.value来获取变化的状态timer.
+ * 3、在上述代码中，由于runningState.value初始值为true,因此一启动MainScreen，就会显示显示动态计时的效果。
+ * 但是，当点击停止按钮runningState.value的值设置为false，导致代码段停止运行。然后再点击"计时“按钮，可以发现，LaunchedEffect函数并没有重启。
+ */
+@Composable
+fun MainScreen3() {
+    //函数作用域内
+    var runningState = remember { mutableStateOf(true) }
+    val timerState = rememberUpdatedState(newValue = timer2)
+
+    /**
+     * 每隔一秒组合函数都会重启一次
+     */
+    LaunchedEffect(Unit) {
+
+        while (runningState.value) {
+            delay(1000)
+            timerState.value.value += 1
+            Log.d("TAG", "${timer2.value} m")
+        }
+
+    }
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(text = "计时器", fontSize = 30.sp, color = MaterialTheme.colorScheme.primary)
+            Text(text = "${timerState.value.value}秒", fontSize = 24.sp)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center
