@@ -38,6 +38,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import java.util.concurrent.Executor
 
 sealed class Result2<out R> {
+    // 未开始请求
     object NotBegin : Result2<Nothing>()
 
     // 成功时，返回图片的URL
@@ -45,6 +46,8 @@ sealed class Result2<out R> {
 
     // 错误时，返回报错信息errorDesc
     data class Error<out T>(val errorDesc: T) : Result2<T>()
+
+    // 请求中
     object Loading : Result2<Nothing>()
 }
 
