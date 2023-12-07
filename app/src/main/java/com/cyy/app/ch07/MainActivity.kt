@@ -25,12 +25,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    /**
-     * 大致流程是：
-     * MainActivity发送有序广播：
-     * 02先接收到(有msg数据，无received数据)，执行完后，
-     * 01接收到(有msg数据，有received数据【来自01的数据】)，执行完后，再回到MainActivity
-     */
     private fun registerBroadCast() {
         receiver01 = MyReceiver01()
         receiver02 = MyReceiver02()
@@ -47,15 +41,24 @@ class MainActivity : ComponentActivity() {
         registerReceiver(receiver02, intentFilter2, RECEIVER_EXPORTED)
     }
 
+    /**
+     * 标准广播和有序广播的区别（示例的大致流程）
+     * ①MainActivity发送有序广播：
+     * 02先接收到(有msg数据，无received数据)，执行完后，
+     * 01接收到(有msg数据，有received数据【来自01的数据】)，执行完后，再回到MainActivity
+     *
+     * ②MainActivity发送标准广播：
+     * 01和02同时收到，所以都只有msg数据，而没有received数据（即：都为null）
+     */
     private fun sendAction() {
         val intent = Intent("receiver-test")
         intent.putExtra("msg", "来自MainActivity的广播")
         // 注意：必须设置包名！！！
         intent.setPackage(packageName)
         // 1.标准广播
-//        sendBroadcast(intent)
+        sendBroadcast(intent)
         // 2.有序广播
-        sendOrderedBroadcast(intent, null)
+//        sendOrderedBroadcast(intent, null)
     }
 
     override fun onDestroy() {
