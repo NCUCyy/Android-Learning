@@ -26,4 +26,3 @@ class PowerReceiver(val powerState: MutableState<Int>) : BroadcastReceiver() {
         Toast.makeText(context, info, Toast.LENGTH_SHORT).show()
     }
 }
-
