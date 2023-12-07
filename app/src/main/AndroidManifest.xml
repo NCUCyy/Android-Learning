@@ -15,6 +15,10 @@
             android:supportsRtl="true"
             android:theme="@style/Theme.Exp"
             tools:targetApi="31">
+        <activity
+                android:name=".ch08.MainActivity"
+                android:exported="true" />
+
         <receiver
                 android:name=".ch07.MyReceiver02"
                 android:enabled="true"
@@ -23,9 +27,11 @@
                 android:name=".ch07.MyReceiver01"
                 android:enabled="true"
                 android:exported="true" />
+
         <activity
                 android:name=".ch07.MainActivity"
                 android:exported="true" />
+
         <receiver
                 android:name=".ch07.PowerReceiver"
                 android:enabled="true"
