@@ -97,18 +97,8 @@ class LoadImageViewModel2(private val imageRepository: ImageRepository2) : ViewM
     fun requestImage() {
         // TODO：在ViewModel中修改页面的状态值
         _requestState.value = Result2.Loading
-        imageRepository.loadImage { it: Result2<String> ->
-            when (it) {
-                //获取成功，修改在线图片的url
-                is Result2.Success<String> -> {
-                    _requestState.value = Result2.Success(it.data)
-                }
-                //获取失败，提供失败的描述信息
-                is Result2.Error<String> -> _requestState.value = Result2.Error(it.errorDesc)
-                else -> {
-                    _requestState.value = Result2.Error("加载在线图片失败！")
-                }
-            }
+        imageRepository.loadImage { it: Result2<Any> ->
+            _requestState.value = it
         }
     }
 }

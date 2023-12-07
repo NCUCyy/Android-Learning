@@ -29,6 +29,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -67,10 +68,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.cyy.exp2.R
 import com.cyy.exp2.daily_word_app.DailyWordApp
+import com.cyy.exp2.daily_word_app.model.OpResult
+import com.cyy.exp2.daily_word_app.model.SentenceModel
 import com.cyy.exp2.daily_word_app.pojo.Record
 import com.cyy.exp2.daily_word_app.pojo.User
 import com.cyy.exp2.daily_word_app.view_model.RecordViewModel
 import com.cyy.exp2.daily_word_app.view_model.SentenceViewModel
+import com.cyy.exp2.daily_word_app.view_model.SentenceViewModelFactory
 import com.cyy.exp2.daily_word_app.view_model.UserScreenViewModel
 import com.cyy.exp2.daily_word_app.view_model.UserScreenViewModelFactory
 import com.cyy.exp2.daily_word_app.view_model.UserViewModel
@@ -118,6 +122,7 @@ fun CategorySelect(recordViewModel: RecordViewModel) {
         ) {
             // Display selected option
             OutlinedTextField(
+                textStyle = TextStyle.Default.copy(color = Color.Black, fontSize = 16.sp, fontWeight = FontWeight.Bold),
                 value = curSelect,
                 onValueChange = {},
                 label = {
@@ -148,7 +153,7 @@ fun CategorySelect(recordViewModel: RecordViewModel) {
                         recordViewModel.updateCurCategory(it)
                         expanded = false
                     }, text = {
-                        Text(it)
+                        Text(it, fontSize = 16.sp, fontWeight = FontWeight.Bold)
                     })
                 }
             }
@@ -161,13 +166,15 @@ fun HomeScreen(
     resultLauncher: ActivityResultLauncher<Intent>,
     recordViewModel: RecordViewModel
 ) {
+    val application = LocalContext.current.applicationContext as DailyWordApp
     // 永远获得同一个ViewModel----前提是在一个Activity之内
-    // 创建一个 ViewModelProvider 实例
-    val viewModelProvider = ViewModelProvider(LocalContext.current as ViewModelStoreOwner)
-    // 获取指定类型的 ViewModel
-    val sentenceViewModel = viewModelProvider[SentenceViewModel::class.java]
+    val sentenceViewModel = viewModel<SentenceViewModel>(
+        factory = SentenceViewModelFactory(
+            application.sentenceRepository,
+        )
+    )
 
-    val sentence = sentenceViewModel.sentence.collectAsState().value
+    val sentenceState = sentenceViewModel.sentenceState.collectAsState().value
 
     val context = LocalContext.current
     Column(
@@ -178,7 +185,9 @@ fun HomeScreen(
     ) {
         Card(
             modifier = Modifier
-                .padding(10.dp),
+                .padding(10.dp)
+                .fillMaxWidth()
+                .height(440.dp),
             elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
             colors = CardDefaults.cardColors(
                 containerColor = Color.White,
@@ -193,31 +202,37 @@ fun HomeScreen(
                     modifier = Modifier.padding(start = 10.dp, top = 10.dp),
                 )
                 IconButton(modifier = Modifier.padding(top = 20.dp), onClick = {
-                    sentenceViewModel.shuffleSentence()
+                    sentenceViewModel.loadSentence()
                 }) {
                     Icon(painter = painterResource(id = R.drawable.sync), contentDescription = null)
                 }
             }
-            AsyncImage(
-                model = sentence.data.pic,
-                placeholder = painterResource(R.drawable.ic_launcher_background),
-                contentDescription = stringResource(R.string.app_name),
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.padding(10.dp)
-            )
-            Spacer(modifier = Modifier.height(20.dp))
-            Text(
-                text = sentence.data.en,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(start = 10.dp, end = 10.dp)
-            )
-            Text(
-                text = sentence.data.zh,
-                fontSize = 15.sp,
-                color = Color.Gray,
-                modifier = Modifier.padding(10.dp)
-            )
+            when (sentenceState) {
+                is OpResult.Loading -> {
+                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                        CircularProgressIndicator()
+                    }
+                }
+
+                is OpResult.Success<Any> -> {
+                    SentenceView(sentenceState)
+                }
+
+                is OpResult.Error -> {
+                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                        Text(
+                            text = sentenceState.errorDesc.toString(),
+                            fontSize = 20.sp,
+                            textAlign = TextAlign.Center,
+                            color = Color.Gray
+                        )
+                    }
+                }
+
+                is OpResult.NotBegin -> {
+                    Text(text = "点击按钮加载图片", fontSize = 16.sp)
+                }
+            }
         }
         // 开始按钮
         Button(
@@ -245,15 +260,51 @@ fun HomeScreen(
 }
 
 @Composable
+fun SentenceView(sentenceState: OpResult.Success<Any>) {
+    val sentenceModel = sentenceState.data as SentenceModel
+    AsyncImage(
+        model = sentenceModel.data.pic,
+        placeholder = painterResource(R.drawable.ic_launcher_background),
+        contentDescription = stringResource(R.string.app_name),
+        contentScale = ContentScale.Crop,
+        modifier = Modifier.padding(10.dp)
+    )
+    Spacer(modifier = Modifier.height(20.dp))
+    Text(
+        text = sentenceModel.data.en,
+        fontSize = 20.sp,
+        fontWeight = FontWeight.Bold,
+        modifier = Modifier.padding(start = 10.dp, end = 10.dp)
+    )
+    Text(
+        text = sentenceModel.data.zh,
+        fontSize = 15.sp,
+        color = Color.Gray,
+        modifier = Modifier.padding(10.dp)
+    )
+}
+
+@Composable
 fun HistoryScreen(records: State<List<Record>>) {
     Card(
         colors = CardDefaults.cardColors(
             containerColor = Color.Transparent,
         )
     ) {
-        LazyColumn {
-            items(records.value.reversed()) { record ->
-                RecordCard(record)
+        if (records.value.isEmpty()) {
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                Text(
+                    text = "暂无答题记录哟 👊",
+                    fontSize = 20.sp,
+                    textAlign = TextAlign.Center,
+                    color = Color.Gray
+                )
+            }
+        } else {
+            LazyColumn {
+                items(records.value.reversed()) { record ->
+                    RecordCard(record)
+                }
             }
         }
     }

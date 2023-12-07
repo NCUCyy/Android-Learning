@@ -1,36 +1,37 @@
 package com.cyy.exp2.daily_word_app.view_model
 
 import androidx.lifecycle.ViewModel
-import com.cyy.exp2.daily_word_app.model.SentenceModel
-import com.cyy.exp2.daily_word_app.network.SerializationConverter
-import com.drake.net.Get
-import com.drake.net.utils.scopeNet
+import androidx.lifecycle.ViewModelProvider
+import com.cyy.exp2.daily_word_app.model.OpResult
+import com.cyy.exp2.daily_word_app.repository.SentenceRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class SentenceViewModel : ViewModel() {
-    private var _sentence = MutableStateFlow(SentenceModel())
-    var sentence = _sentence.asStateFlow()
+class SentenceViewModel(private val sentenceRepository: SentenceRepository) : ViewModel() {
+    private val _sentenceState = MutableStateFlow<OpResult<Any>>(OpResult.NotBegin)
+    val sentenceState = _sentenceState.asStateFlow()
 
     init {
-        shuffleSentence()
+        loadSentence()
     }
 
-    fun shuffleSentence() {
-        scopeNet {
-            _sentence.value = Get<SentenceModel>("https://api.vvhan.com/api/en?type=sj") {
-                converter = SerializationConverter()
-            }.await()
+    fun loadSentence() {
+        // TODO：在ViewModel中修改页面的状态值
+        _sentenceState.value = OpResult.Loading
+        sentenceRepository.requestSentence { it: OpResult<Any> ->
+            _sentenceState.value = it
         }
     }
 }
 
-//class SenSentenceViewModel() : ViewModelProvider.Factory {
-//    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-//        if (modelClass.isAssignableFrom(SentenceViewModel::class.java)) {
-//            @Suppress("UNCHECKED_CAST")
-//            return SentenceViewModel() as T
-//        }
-//        throw IllegalArgumentException("Unknown ViewModel class")
-//    }
-//}
+
+class SentenceViewModelFactory(private val sentenceRepository: SentenceRepository) :
+    ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(SentenceViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return SentenceViewModel(sentenceRepository) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}

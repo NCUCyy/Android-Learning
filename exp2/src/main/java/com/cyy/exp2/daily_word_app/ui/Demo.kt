@@ -132,17 +132,17 @@ class DemoActivity : ComponentActivity() {
 @Composable
 @Preview
 fun NetLibTest() {
-    val sentenceViewModel = viewModel<SentenceViewModel>()
-    val sentence = sentenceViewModel.sentence.collectAsState().value
-    Column {
-        TextButton(onClick = {
-            sentenceViewModel.shuffleSentence()
-        }) {
-            Text(text = "刷新")
-        }
-        Text(text = sentence.data.en, fontSize = 20.sp)
-        Text(text = sentence.data.zh, fontSize = 20.sp)
-    }
+//    val sentenceViewModel = viewModel<SentenceViewModel>()
+//    val sentence = sentenceViewModel.sentenceState.collectAsState().value
+//    Column {
+//        TextButton(onClick = {
+//            sentenceViewModel.loadSentence()
+//        }) {
+//            Text(text = "刷新")
+//        }
+//        Text(text = sentence.data.en, fontSize = 20.sp)
+//        Text(text = sentence.data.zh, fontSize = 20.sp)
+//    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

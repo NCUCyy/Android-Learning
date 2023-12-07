@@ -4,6 +4,7 @@ import android.app.Application
 import com.cyy.exp2.daily_word_app.network.SerializationConverter
 import com.cyy.exp2.daily_word_app.repository.QuizRepository
 import com.cyy.exp2.daily_word_app.repository.RecordRepository
+import com.cyy.exp2.daily_word_app.repository.SentenceRepository
 import com.cyy.exp2.daily_word_app.repository.UserRepository
 import com.drake.net.BuildConfig
 import com.drake.net.NetConfig
@@ -19,6 +20,7 @@ class DailyWordApp : Application() {
 
     val recordRepository by lazy { RecordRepository(database.getRecordDao()) }
     val quizRepository by lazy { QuizRepository() }
+    val sentenceRepository by lazy { SentenceRepository() }
     override fun onCreate() {
         NetConfig.initialize("", this) {
             // 超时配置, 默认是10秒, 设置太长时间会导致用户等待过久
