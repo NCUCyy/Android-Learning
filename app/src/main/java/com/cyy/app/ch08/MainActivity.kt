@@ -9,6 +9,7 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.os.Message
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
@@ -18,7 +19,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.material3.Button
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -28,13 +28,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.unit.sp
 import kotlin.concurrent.thread
 
 class MainActivity : ComponentActivity() {
     private lateinit var serviceIntent: Intent
     private lateinit var conn: ServiceConnection
+    // 控制线程B的运行
     var running = false
 
 
@@ -47,7 +47,7 @@ class MainActivity : ComponentActivity() {
             val timerState = remember { mutableStateOf("") }
 
 
-            var handler = object : Handler(Looper.getMainLooper()) {
+            val handler = object : Handler(Looper.getMainLooper()) {
                 override fun handleMessage(msg: Message) {
                     super.handleMessage(msg)
                     if (msg.what == 0x123) {
@@ -56,13 +56,18 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
-
             // 用于数据交换
             conn = object : ServiceConnection {
                 override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+                    // TODO：注意该函数只在绑定的时候执行一次（注意📢：传递过来的Service对象本身不变，但是它内部的属性一在onBind定义的线程中被修改！！！）
+                    // 接收Service传递过来的Binder对象
+                    // TODO：（核心思想）其中的两个属性（timer,musicProgress）的值一直在Service中定义的那个thread中每隔一秒被修改！
+                    // 这里return得到的这个Binder对象，就是Service中的ProgressBinder对象，因此也会同步被修改！！！
                     val binder = service as MusicService.ProgressBinder
+                    // TODO：开启一个新线程B，用来时时刻刻的【读取】ProgressBinder对象中的两个属性当前的值（注意：值在Service中的线程A中被每隔一秒的修改！）
                     thread {
                         while (running) {
+                            Thread.sleep(100)
                             val msg = Message.obtain()
                             msg.what = 0x123
                             msg.arg1 = binder.getMusicProgress()
