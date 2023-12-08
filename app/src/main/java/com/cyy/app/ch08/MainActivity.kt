@@ -12,6 +12,7 @@ import android.os.Message
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,8 +35,15 @@ import kotlin.concurrent.thread
 class MainActivity : ComponentActivity() {
     private lateinit var serviceIntent: Intent
     private lateinit var conn: ServiceConnection
+
     // 控制线程B的运行
     var running = false
+
+    // 当前播放到的百分比 = 100 * ( 当前位置 / 总时长 )
+    var musicProgress = 0
+
+    // 已经播放的秒数
+    var timer = 0
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,8 +75,11 @@ class MainActivity : ComponentActivity() {
                     // TODO：开启一个新线程B，用来时时刻刻的【读取】ProgressBinder对象中的两个属性当前的值（注意：值在Service中的线程A中被每隔一秒的修改！）
                     thread {
                         while (running) {
+                            // 注意这边也需要sleep一下才能正常显示时间
                             Thread.sleep(100)
                             val msg = Message.obtain()
+                            musicProgress = binder.getMusicProgress()
+                            timer = binder.getTimer()
                             msg.what = 0x123
                             msg.arg1 = binder.getMusicProgress()
                             // 把秒转换为时:分的形式
@@ -93,12 +104,19 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun playMusic() {
+        // 开启线程B
         running = true
+        // 传入上次播放到的时刻
+        serviceIntent.putExtra("timer", timer)
+        serviceIntent.putExtra("musicProgress", musicProgress)
+        // 绑定服务
         bindService(serviceIntent, conn, Context.BIND_AUTO_CREATE)
     }
 
     private fun stopMusic() {
+        // 结束线程B
         running = false
+        // 解绑服务
         unbindService(conn)
     }
 
