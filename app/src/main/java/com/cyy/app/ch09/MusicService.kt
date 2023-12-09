@@ -3,10 +3,7 @@ package com.cyy.app.ch09
 import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.app.Service
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.media.MediaPlayer
 import android.os.Binder
 import android.os.IBinder
@@ -18,23 +15,27 @@ import kotlin.concurrent.thread
 class MusicService : Service() {
     private lateinit var mediaPlayer: MediaPlayer
     private lateinit var notificationBuilder: NotificationCompat.Builder
-    private lateinit var playReceiver: BroadcastReceiver
-    private lateinit var stopReceiver: BroadcastReceiver
 
+    // 音频资源（int类型）
+    private var resource: Int = 0
+
+    // 控制暂停和播放
     private var running = true
+
+    // raw data
     var timer = 0
     var musicProgress = 0
 
     inner class ProgressBinder : Binder() {
         fun getMusicProgress() = musicProgress
         fun getTimer() = timer
-        fun getRunning() = running
     }
 
     override fun onCreate() {
         super.onCreate()
+        resource = R.raw.hcy
         createNotificationBuilder()
-        mediaPlayer = MediaPlayer.create(this, R.raw.hcy)
+        mediaPlayer = MediaPlayer.create(this, resource)
     }
 
     override fun onBind(intent: Intent): IBinder? {
@@ -47,8 +48,6 @@ class MusicService : Service() {
 
     override fun onUnbind(intent: Intent?): Boolean {
         stopMusic()
-        unregisterReceiver(playReceiver)
-        unregisterReceiver(stopReceiver)
         return super.onUnbind(intent)
     }
 
@@ -61,9 +60,12 @@ class MusicService : Service() {
         mediaPlayer.setOnCompletionListener {
             mediaPlayer.release()
         }
+        // 更新进度条
         changeProgress()
+        // 刷新通知栏
         postNotification()
     }
+
 
     private fun changeProgress() {
         thread {
@@ -126,22 +128,17 @@ class MusicService : Service() {
                     notify(1, notificationBuilder.build())
                 }
                 notificationBuilder
-                    .setContentText("播放完成")
+                    .setContentText("播放暂停")
                     .setProgress(0, 0, false)
                 notify(1, notificationBuilder.build())
             }
         }
     }
 
+    /**
+     * 获得播放意图---悬挂意图
+     */
     private fun getPlayPendingIntent(): PendingIntent {
-        val intentFilter = IntentFilter()
-        intentFilter.addAction("PLAT_ACTION")
-        playReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                playMusic()
-            }
-        }
-        registerReceiver(playReceiver, intentFilter, RECEIVER_EXPORTED)
         val intent = Intent("PLAT_ACTION")
         return PendingIntent.getBroadcast(
             this,
@@ -151,15 +148,10 @@ class MusicService : Service() {
         )
     }
 
+    /**
+     * 获得停止意图---悬挂意图
+     */
     private fun getStopPendingIntent(): PendingIntent {
-        val intentFilter = IntentFilter()
-        intentFilter.addAction("STOP_ACTION")
-        stopReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                stopMusic()
-            }
-        }
-        registerReceiver(stopReceiver, intentFilter, RECEIVER_EXPORTED)
         val intent = Intent("STOP_ACTION")
         return PendingIntent.getBroadcast(
             this,
@@ -169,6 +161,9 @@ class MusicService : Service() {
         )
     }
 
+    /**
+     * 获得详情意图---点击通知意图
+     */
     private fun getDescPendingIntent(): PendingIntent {
         //定义启动服务的意图
         val intent = Intent(this, this::class.java)
