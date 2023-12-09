@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.kapt3.base.Kapt.kapt
-
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -7,6 +5,7 @@ plugins {
     id("kotlin-parcelize")
     // 启用ksp
     id("com.google.devtools.ksp")
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.8.10"
 }
 
 android {
@@ -59,6 +58,7 @@ android {
 }
 
 dependencies {
+    implementation ("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2") // JSON序列化库, 首选推荐使用
     implementation("androidx.compose.foundation:foundation-android:1.5.4")
     //viewModel
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")

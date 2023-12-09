@@ -17,8 +17,21 @@
             android:theme="@style/Theme.Exp"
             tools:targetApi="31">
         <activity
+                android:name=".ch09.NextActivity"
+                android:exported="true" />
+
+        <service
+                android:name=".ch09.MusicService"
+                android:enabled="true"
+                android:exported="true" />
+
+        <activity
+                android:name=".ch09.MusicActivity"
+                android:exported="true" />
+        <activity
                 android:name=".ch09.MainActivity"
                 android:exported="true" />
+
         <service
                 android:name=".ch08.MusicService"
                 android:enabled="true"
