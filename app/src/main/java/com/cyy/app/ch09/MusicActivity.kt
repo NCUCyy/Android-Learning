@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
@@ -28,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
 import kotlin.concurrent.thread
 
 class MusicActivity : ComponentActivity() {
@@ -47,6 +49,7 @@ class MusicActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         serviceIntent = Intent(this, MusicService::class.java)
+        requestNotificationPermission()
 
         setContent {
             val progressState = remember { mutableStateOf(0.0f) }
@@ -64,17 +67,13 @@ class MusicActivity : ComponentActivity() {
             // 用于数据交换
             conn = object : ServiceConnection {
                 override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-                    // TODO：注意该函数只在绑定的时候执行一次（注意📢：传递过来的Service对象本身不变，但是它内部的属性一在onBind定义的线程中被修改！！！）
-                    // 接收Service传递过来的Binder对象
-                    // TODO：（核心思想）其中的两个属性（timer,musicProgress）的值一直在Service中定义的那个thread中每隔一秒被修改！
-                    // 这里return得到的这个Binder对象，就是Service中的ProgressBinder对象，因此也会同步被修改！！！
                     val binder = service as MusicService.ProgressBinder
-                    // TODO：开启一个新线程B，用来时时刻刻的【读取】ProgressBinder对象中的两个属性当前的值（注意：值在Service中的线程A中被每隔一秒的修改！）
                     thread {
                         while (running) {
                             // 注意这边也需要sleep一下才能正常显示时间
                             Thread.sleep(100)
                             val msg = Message.obtain()
+                            running = binder.getRunning()
                             musicProgress = binder.getMusicProgress()
                             timer = binder.getTimer()
                             msg.what = 0x123
@@ -87,7 +86,6 @@ class MusicActivity : ComponentActivity() {
                 }
 
                 override fun onServiceDisconnected(name: ComponentName?) {
-                    TODO("Not yet implemented")
                 }
             }
 
@@ -96,6 +94,19 @@ class MusicActivity : ComponentActivity() {
                 progressState = progressState,
                 playAction = ::playMusic,
                 stopAction = ::stopMusic
+            )
+        }
+    }
+
+    /**
+     * 请求通知权限
+     */
+    private fun requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
+                0
             )
         }
     }
