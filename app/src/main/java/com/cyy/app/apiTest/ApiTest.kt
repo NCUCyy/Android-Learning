@@ -29,6 +29,7 @@ object TranslateDemo {
         if (result != null) {
             println(String(result, StandardCharsets.UTF_8))
         }
+        // TODO：JSON解析较好的解决方案————没有值的属性为[]
         val res = Json.decodeFromJsonElement(TransRes.serializer(), Json.parseToJsonElement(String(result!!, StandardCharsets.UTF_8)))
         println(res)
         System.exit(1)
