@@ -16,7 +16,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -25,8 +24,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
@@ -57,7 +54,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -78,10 +74,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-
 import com.cyy.exp2.daily_word_app.DailyWordApp
 import com.cyy.exp2.daily_word_app.pojo.Record
-import com.cyy.exp2.daily_word_app.pojo.User
 import com.cyy.exp2.daily_word_app.view_model.RecordViewModel
 import com.cyy.exp2.daily_word_app.view_model.RecordViewModelFactory
 import com.cyy.exp2.daily_word_app.view_model.UserViewModel
@@ -597,44 +591,3 @@ fun rememberStates(
     resultLauncher,
     showInfoDialog
 )
-
-@Composable
-fun MainScreen_Demo(userId: Int) {
-    val context = LocalContext.current
-    val application = LocalContext.current.applicationContext as DailyWordApp
-    val recordViewModel = viewModel<RecordViewModel>(
-        factory = RecordViewModelFactory(
-            application.recordRepository,
-            application.userRepository,
-            userId
-        )
-    )
-    val records = recordViewModel.records.collectAsStateWithLifecycle()
-    val loginUser = recordViewModel.loginUser.collectAsStateWithLifecycle()
-    // 测试跳转是否成功------------已成功
-    demo(recordViewModel, loginUser, records, userId)
-}
-
-@Composable
-fun demo(
-    recordViewModel: RecordViewModel,
-    loginUser: State<User?>,
-    records: State<List<Record>>,
-    userId: Int
-) {
-    Column {
-        Text(text = "欢迎回来，${loginUser.value}!")
-        Button(onClick = {
-//            recordViewModel.insert(Record(testTime = OffsetDateTime.now(), category = "", "category", userId))
-        }) {
-            Text(text = "添加Record")
-        }
-        LazyColumn {
-            items(records.value) {
-                Row {
-                    Text(text = it.toString())
-                }
-            }
-        }
-    }
-}

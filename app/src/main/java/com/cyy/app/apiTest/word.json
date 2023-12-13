@@ -1,0 +1,103 @@
+{
+  "returnPhrase": [
+    "cycle"
+  ],
+  "query": "cycle",
+  "errorCode": "0",
+  "l": "en2zh-CHS",
+  "tSpeakUrl": "https://openapi.youdao.com/ttsapi?q=%E5%91%A8%E6%9C%9F&langType=zh-CHS&sign=562034504A71F33B37F7BA23CF671FE0&salt=1702458119144&voice=4&format=mp3&appKey=6c2ee08f4ca04995&ttsVoiceStrict=false&osType=api",
+  "web": [
+    {
+      "value": [
+        "周期",
+        "循环",
+        "套曲",
+        "骑自行车"
+      ],
+      "key": "Cycle"
+    },
+    {
+      "value": [
+        "生命周期",
+        "生活史",
+        "生活周期",
+        "生命期"
+      ],
+      "key": "life cycle"
+    },
+    {
+      "value": [
+        "商业周期",
+        "经济周期",
+        "景气循环",
+        "商业循环"
+      ],
+      "key": "business cycle"
+    }
+  ],
+  "requestId": "885bad12-5ca0-4861-a4e8-d6d72cd1e4d5",
+  "translation": [
+    "周期"
+  ],
+  "mTerminalDict": {
+    "url": "https://m.youdao.com/m/result?lang=en&word=cycle"
+  },
+  "dict": {
+    "url": "yddict://m.youdao.com/dict?le=eng&q=cycle"
+  },
+  "webdict": {
+    "url": "http://mobile.youdao.com/dict?le=eng&q=cycle"
+  },
+  "basic": {
+    "exam_type": [
+      "高中",
+      "CET4",
+      "CET6",
+      "考研",
+      "商务英语"
+    ],
+    "us-phonetic": "ˈsaɪk(ə)l",
+    "phonetic": "ˈsaɪk(ə)l",
+    "uk-phonetic": "ˈsaɪk(ə)l",
+    "wfs": [
+      {
+        "wf": {
+          "name": "复数",
+          "value": "cycles"
+        }
+      },
+      {
+        "wf": {
+          "name": "第三人称单数",
+          "value": "cycles"
+        }
+      },
+      {
+        "wf": {
+          "name": "现在分词",
+          "value": "cycling"
+        }
+      },
+      {
+        "wf": {
+          "name": "过去式",
+          "value": "cycled"
+        }
+      },
+      {
+        "wf": {
+          "name": "过去分词",
+          "value": "cycled"
+        }
+      }
+    ],
+    "uk-speech": "https://openapi.youdao.com/ttsapi?q=cycle&langType=en&sign=5B31CB955C6915829018A69678925C88&salt=1702458119144&voice=5&format=mp3&appKey=6c2ee08f4ca04995&ttsVoiceStrict=false&osType=api",
+    "explains": [
+      "n. 自行车，摩托车；循环，周期；组诗，组歌；整套，系列；自行车骑行；一段时间",
+      "v. 骑自行车；循环"
+    ],
+    "us-speech": "https://openapi.youdao.com/ttsapi?q=cycle&langType=en&sign=5B31CB955C6915829018A69678925C88&salt=1702458119144&voice=6&format=mp3&appKey=6c2ee08f4ca04995&ttsVoiceStrict=false&osType=api"
+  },
+  "isWord": true,
+  "speakUrl": "https://openapi.youdao.com/ttsapi?q=cycle&langType=en-USA&sign=5B31CB955C6915829018A69678925C88&salt=1702458119144&voice=4&format=mp3&appKey=6c2ee08f4ca04995&ttsVoiceStrict=false&osType=api"
+}

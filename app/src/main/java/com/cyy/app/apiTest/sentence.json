@@ -1,0 +1,30 @@
+{
+  "query": "What a sunny day!",
+  "isDomainSupport": false,
+  "errorCode": "0",
+  "l": "en2zh-CHS",
+  "tSpeakUrl": "https://openapi.youdao.com/ttsapi?q=%E5%A4%9A%E4%B9%88%E6%99%B4%E6%9C%97%E7%9A%84%E4%B8%80%E5%A4%A9%E5%95%8A%21&langType=zh-CHS&sign=81EA1D95B6B304B059F6099B9EB8CB82&salt=1702453588941&voice=4&format=mp3&appKey=6c2ee08f4ca04995&ttsVoiceStrict=false&osType=api",
+  "web": [
+    {
+      "value": [
+        "天气真晴朗"
+      ],
+      "key": "What a sunny day"
+    }
+  ],
+  "requestId": "e6cd524a-7891-4948-989e-c2ff06389971",
+  "translation": [
+    "多么晴朗的一天啊!"
+  ],
+  "mTerminalDict": {
+    "url": "https://m.youdao.com/m/result?lang=en&word=What+a+sunny+day%21"
+  },
+  "dict": {
+    "url": "yddict://m.youdao.com/dict?le=eng&q=What+a+sunny+day%21"
+  },
+  "webdict": {
+    "url": "http://mobile.youdao.com/dict?le=eng&q=What+a+sunny+day%21"
+  },
+  "isWord": false,
+  "speakUrl": "https://openapi.youdao.com/ttsapi?q=What+a+sunny+day%21&langType=en-USA&sign=4385AD122C8447E0C68E8015C333D9E6&salt=1702453588941&voice=4&format=mp3&appKey=6c2ee08f4ca04995&ttsVoiceStrict=false&osType=api"
+}

@@ -1,6 +1,5 @@
 package com.cyy.exp2.daily_word_app.repository
 
-import com.cyy.exp2.Model_Handler_Pool_Net.Result2
 import com.cyy.exp2.daily_word_app.model.OpResult
 import com.cyy.exp2.daily_word_app.model.SentenceModel
 import com.cyy.exp2.daily_word_app.network.SerializationConverter
