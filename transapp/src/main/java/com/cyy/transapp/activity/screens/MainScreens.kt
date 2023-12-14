@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cyy.transapp.R
 import com.cyy.transapp.TransApp
@@ -54,7 +55,7 @@ fun QueryScreen(states: StateHolder) {
     val application = LocalContext.current.applicationContext as TransApp
     val queryViewModel = viewModel<QueryViewModel>(
         factory = QueryViewModelFactory(
-            application.queryRepository,
+            application.transRepository
         )
     )
     val query = queryViewModel.query.collectAsState()
@@ -74,7 +75,7 @@ fun QueryScreen(states: StateHolder) {
                 },
                 placeholder = { Text(text = "查询单词或句子") },
                 shape = MaterialTheme.shapes.extraSmall, // 设置边框形状
-                textStyle = TextStyle.Default.copy(color = Color.Black), // 设置文本颜色
+                textStyle = TextStyle.Default.copy(color = Color.Black, fontSize = 16.sp), // 设置文本颜色
                 colors = TextFieldDefaults.textFieldColors(
                     containerColor = Color.Transparent,
                     focusedIndicatorColor = Color.Transparent,

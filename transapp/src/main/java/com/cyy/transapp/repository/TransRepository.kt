@@ -1,13 +1,19 @@
 package com.cyy.transapp.repository
 
+import androidx.annotation.WorkerThread
+import com.cyy.transapp.dao.TransRecordDao
 import com.cyy.transapp.model.OpResult
 import com.cyy.transapp.model.trans.TransRes
 import com.cyy.transapp.network.AuthV3Util
 import com.cyy.transapp.network.HttpUtil
+import com.cyy.transapp.pojo.TransRecord
 import kotlinx.serialization.json.Json
 import java.nio.charset.StandardCharsets
 
-class TransRepository {
+class TransRepository(
+    private val transRecordDao: TransRecordDao
+) {
+    // ----------------------------------------1、From Net----------------------------------------
     private val APP_KEY = "6c2ee08f4ca04995" // 您的应用ID
     private val APP_SECRET = "VICd82fdy7GVQ3fYKcbXwFFgWEc7qsE8" // 您的应用密钥
 
@@ -56,4 +62,32 @@ class TransRepository {
             }
         }
     }
+
+    // ----------------------------------------2、From Room----------------------------------------
+    @WorkerThread
+    suspend fun insert(vararg transRecord: TransRecord) {
+        transRecordDao.insert(*transRecord)
+    }
+
+    @WorkerThread
+    suspend fun update(vararg transRecord: TransRecord) {
+        transRecordDao.update(*transRecord)
+    }
+
+    @WorkerThread
+    suspend fun delete(vararg transRecord: TransRecord) {
+        transRecordDao.delete(*transRecord)
+    }
+
+    @WorkerThread
+    suspend fun deleteAll() {
+        transRecordDao.deleteAll()
+    }
+
+    @WorkerThread
+    suspend fun getByWord(word: String): TransRecord {
+        return transRecordDao.getByWord(word)
+    }
+
+    fun getAllTransRecords() = transRecordDao.getAllTransRecords()
 }

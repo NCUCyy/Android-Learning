@@ -52,8 +52,12 @@ import com.cyy.transapp.TransApp
 import com.cyy.transapp.model.OpResult
 import com.cyy.transapp.model.trans.TransRes
 import com.cyy.transapp.model.trans.Web
+import com.cyy.transapp.pojo.TransRecord
+import com.cyy.transapp.view_model.TransRecordViewModel
+import com.cyy.transapp.view_model.TransRecordViewModelFactory
 import com.cyy.transapp.view_model.TransViewModel
 import com.cyy.transapp.view_model.TransViewModelFactory
+import java.time.OffsetDateTime
 
 class TransActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -78,7 +82,7 @@ fun TransScreen(query: String = "cycle") {
             TopAppBar(
                 title = {
                     // TODO：显示查询的词汇
-                    Text(text = query, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                    Text(text = query, fontWeight = FontWeight.Bold, fontSize = 25.sp)
                 },
                 // 左侧图标
                 navigationIcon = {
@@ -99,8 +103,10 @@ fun TransScreen(query: String = "cycle") {
                         /*TODO*/
                     }, modifier = Modifier.padding(end = 16.dp)) {
                         Icon(
-                            painter = painterResource(id = R.drawable.to_like),
+                            painter = painterResource(id = R.drawable.star_fill),
                             contentDescription = null,
+                            Modifier.size(30.dp),
+                            tint = Color(0xFFE8C11C)
                         )
                     }
 
@@ -121,7 +127,15 @@ fun TransScreen(query: String = "cycle") {
 fun ContentScreen(query: String) {
     val application = LocalContext.current.applicationContext as TransApp
     val transViewModel =
-        viewModel<TransViewModel>(factory = TransViewModelFactory(application.transRepository))
+        viewModel<TransViewModel>(
+            factory = TransViewModelFactory(application.transRepository)
+        )
+    val transRecordViewModel =
+        viewModel<TransRecordViewModel>(
+            factory = TransRecordViewModelFactory(
+                application.transRepository
+            )
+        )
     LaunchedEffect(key1 = query) {
         transViewModel.translate(query)
     }
@@ -130,7 +144,13 @@ fun ContentScreen(query: String) {
         when (transState.value) {
             is OpResult.Success -> {
                 // TODO：显示翻译结果
-//                Text(text = (transState.value as OpResult.Success<*>).data.toString())
+                val transRecord = TransRecord(
+                    word = query,
+                    trans = ((transState.value as OpResult.Success<*>).data as TransRes).translation[0],
+                    freq = 1,
+                    lastQueryTime = OffsetDateTime.now()
+                )
+                transRecordViewModel.updateHistory(transRecord)
                 TransDetailScreen((transState.value as OpResult.Success<*>).data as TransRes)
             }
 
@@ -225,29 +245,31 @@ fun TransDetailScreen(transRes: TransRes) {
                 }
             }
         }
-        // 3、基本释义
         Spacer(modifier = Modifier.height(10.dp))
-        Text(
-            text = "基本释义",
-            fontWeight = FontWeight.Bold,
-            fontSize = 22.sp,
-            modifier = Modifier.padding(start = 25.dp)
-        )
-        TitleBodyDivider()
-        BasicExplains(explains)
-
+        if (transRes.isWord) {
+            // 3、基本释义
+            Text(
+                text = "基本释义",
+                fontWeight = FontWeight.Bold,
+                fontSize = 22.sp,
+                modifier = Modifier.padding(start = 25.dp)
+            )
+            TitleBodyDivider()
+            BasicExplains(explains)
+        }
 
         // 4、网络释义---web
-
-        Text(
-            text = "网络释义",
-            fontWeight = FontWeight.Bold,
-            fontSize = 22.sp,
-            modifier = Modifier.padding(start = 25.dp)
-        )
-        TitleBodyDivider()
-        WebExplains(web)
-        Spacer(modifier = Modifier.height(20.dp))
+        if (web.isNotEmpty()) {
+            Text(
+                text = "网络释义",
+                fontWeight = FontWeight.Bold,
+                fontSize = 22.sp,
+                modifier = Modifier.padding(start = 25.dp)
+            )
+            TitleBodyDivider()
+            WebExplains(web)
+            Spacer(modifier = Modifier.height(20.dp))
+        }
     }
 }
 
@@ -266,10 +288,15 @@ fun BasicExplains(explains: List<String>) {
     // 3、翻译结果---explains
     // .分割类型和解释/;分割多个解释
     val explainMap = mutableMapOf<String, List<String>>()
-    for (explain in explains) {
+    for (i in explains.indices) {
         // lst[0] = "v."
         // lst[1] = ["自行车，摩托车；循环，周期；组诗，组歌；整套，系列；自行车骑行；一段时间"]
-        val lst = explain.split(" ")
+        val lst = explains[i].split(" ")
+        // 特殊情况：虽然是句子但是iwWord为True，此时explains中没有类型（所以lst只有一个元素）
+        if (lst.size == 1) {
+            explainMap["${i + 1}."] = listOf(lst[0])
+            continue
+        }
         val singleExplains = lst[1].split("；")
         explainMap[lst[0]] = singleExplains
     }
@@ -280,7 +307,7 @@ fun BasicExplains(explains: List<String>) {
                 ConstraintLayout {
                     val (typeRef, explainRef) = createRefs()
                     val typeBeginGuideline = createGuidelineFromStart(55.dp)
-                    val explainBeginGuideline = createGuidelineFromStart(100.dp)
+                    val explainBeginGuideline = createGuidelineFromStart(105.dp)
                     Card(
                         colors = CardDefaults.cardColors(
                             containerColor = Color.Black,
@@ -310,7 +337,7 @@ fun BasicExplains(explains: List<String>) {
                             Text(
                                 text = it,
                                 fontSize = 18.sp,
-                                modifier = Modifier.padding(bottom = 5.dp)
+                                modifier = Modifier.padding(bottom = 5.dp, end = 5.dp),
                             )
                         }
                     }
@@ -352,7 +379,8 @@ fun WebExplains(web: List<Web>) {
                 }
                 Text(
                     text = it.value.joinToString(";"),
-                    modifier = Modifier.padding(start = 5.dp, bottom = 5.dp), fontSize = 18.sp
+                    modifier = Modifier.padding(start = 5.dp, bottom = 5.dp, end = 5.dp),
+                    fontSize = 18.sp
                 )
             }
         }

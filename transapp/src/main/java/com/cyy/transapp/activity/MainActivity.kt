@@ -73,6 +73,7 @@ import kotlin.system.exitProcess
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         // 使用ActivityResultLauncher进行意图跳转
         val resultLauncher: ActivityResultLauncher<Intent> = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult(),
@@ -163,6 +164,7 @@ fun MainScreen(resultLauncher: ActivityResultLauncher<Intent>) {
                         // 点击后更改当前的Screen
                         onClick = {
                             states.currentScreen.value = it
+                            states.navController.navigate(it.route)
                         },
                         // 标签
                         label = {
