@@ -1,6 +1,7 @@
 package com.cyy.transapp.activity
 
 import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -53,6 +54,7 @@ import com.cyy.transapp.model.OpResult
 import com.cyy.transapp.model.trans.TransRes
 import com.cyy.transapp.model.trans.Web
 import com.cyy.transapp.pojo.TransRecord
+import com.cyy.transapp.service.VoiceService
 import com.cyy.transapp.view_model.TransRecordViewModel
 import com.cyy.transapp.view_model.TransRecordViewModelFactory
 import com.cyy.transapp.view_model.TransViewModel
@@ -423,9 +425,12 @@ fun ExamTypeCard(type: String) {
 
 @Composable
 fun VoiceItem(type: String, phonetic: String, url: String) {
+    val context = LocalContext.current as Activity
     Button(
         onClick = {
-            // TODO：播放发音---url
+            val intent = Intent(context, VoiceService::class.java)
+            intent.putExtra("url", url)
+            context.startService(intent)
         },
         colors = ButtonDefaults.buttonColors(
             containerColor = Color.Transparent,
