@@ -46,7 +46,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cyy.transapp.R
 import com.cyy.transapp.TransApp
@@ -74,7 +73,7 @@ class TransActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
-fun TransScreen(query: String = "cycle") {
+fun TransScreen(query: String = "Dec") {
     // 当前应用的上下文
     val context = LocalContext.current as Activity
 
@@ -269,7 +268,7 @@ fun TransDetailScreen(transRes: TransRes) {
                 )
             }
         }
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(40.dp))
         if (transRes.isWord) {
             // 3、基本释义
             Text(
@@ -281,7 +280,7 @@ fun TransDetailScreen(transRes: TransRes) {
             TitleBodyDivider()
             BasicExplains(explains)
         }
-
+        Spacer(modifier = Modifier.height(30.dp))
         // 4、网络释义---web
         if (web.isNotEmpty()) {
             Text(
@@ -328,67 +327,16 @@ fun BasicExplains(explains: List<String>) {
     Column {
         explainMap.forEach { (type: String, singleExplains: List<String>) ->
             Row(modifier = Modifier.padding(bottom = 20.dp)) {
-                ConstraintLayout {
-                    val (typeRef, explainRef) = createRefs()
-                    val typeBeginGuideline = createGuidelineFromStart(startBorder)
-                    val explainBeginGuideline = createGuidelineFromStart(75.dp)
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color.Black,
-                            contentColor = Color.White
-                        ), modifier = Modifier.constrainAs(typeRef) {
-                            start.linkTo(typeBeginGuideline)
-                        }, shape = RoundedCornerShape(5.dp)
-                    ) {
-                        Text(
-                            text = type,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(
-                                start = 5.dp,
-                                end = 5.dp,
-                                bottom = 2.dp
-                            ),
-                            style = MaterialTheme.typography.bodyLarge.copy(
-                                fontStyle = FontStyle.Italic
-                            )
-                        )
-                    }
-                    Column(modifier = Modifier.constrainAs(explainRef) {
-                        start.linkTo(explainBeginGuideline)
-                    }) {
-                        singleExplains.forEach {
-                            Text(
-                                text = it,
-                                fontSize = 18.sp,
-                                modifier = Modifier.padding(bottom = 5.dp, end = 10.dp),
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun WebExplains(web: List<Web>) {
-    web.forEach {
-        ConstraintLayout {
-            val (columnRef) = createRefs()
-            val beginGuideline = createGuidelineFromStart(startBorder)
-            Column(modifier = Modifier.constrainAs(columnRef) {
-                start.linkTo(beginGuideline)
-            }) {
                 Card(
                     colors = CardDefaults.cardColors(
                         containerColor = Color.Black,
                         contentColor = Color.White
-                    ), shape = RoundedCornerShape(5.dp),
-                    modifier = Modifier.padding(5.dp)
+                    ),
+                    modifier = Modifier.padding(start = startBorder),
+                    shape = RoundedCornerShape(5.dp)
                 ) {
                     Text(
-                        text = it.key,
+                        text = type,
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(
@@ -401,12 +349,51 @@ fun WebExplains(web: List<Web>) {
                         )
                     )
                 }
+                Column(modifier = Modifier.padding(start = startBorder)) {
+                    singleExplains.forEach {
+                        Text(
+                            text = it,
+                            fontSize = 18.sp,
+                            modifier = Modifier.padding(bottom = 5.dp, end = 10.dp),
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun WebExplains(web: List<Web>) {
+    web.forEach {
+        Column(modifier = Modifier.padding(start = startBorder)) {
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.Black,
+                    contentColor = Color.White
+                ), shape = RoundedCornerShape(5.dp),
+                modifier = Modifier.padding(5.dp)
+            ) {
                 Text(
-                    text = it.value.joinToString(";"),
-                    modifier = Modifier.padding(start = 5.dp, bottom = 5.dp, end = 10.dp),
-                    fontSize = 18.sp
+                    text = it.key,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(
+                        start = 5.dp,
+                        end = 5.dp,
+                        bottom = 2.dp
+                    ),
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontStyle = FontStyle.Italic
+                    )
                 )
             }
+            Text(
+                text = it.value.joinToString(";"),
+                modifier = Modifier.padding(start = 5.dp, bottom = 10.dp, end = 10.dp),
+                fontSize = 18.sp
+            )
         }
     }
 }
