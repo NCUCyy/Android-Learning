@@ -176,6 +176,7 @@ fun QueryScreen(states: StateHolder) {
                 }
             }
         }
+        Spacer(modifier = Modifier.height(15.dp))
         // 3、查词历史
         Column(modifier = Modifier.verticalScroll(scrollState)) {
             transRecords.value.forEachIndexed { idx: Int, transRecord: TransRecord ->

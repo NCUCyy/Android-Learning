@@ -198,6 +198,8 @@ fun ContentScreen(query: String) {
     }
 }
 
+val startBorder = 25.dp
+
 @Composable
 fun TransDetailScreen(transRes: TransRes) {
     // 7个为一行
@@ -234,7 +236,7 @@ fun TransDetailScreen(transRes: TransRes) {
         }
         Spacer(modifier = Modifier.height(10.dp))
         // 2、考试类型
-        Column(modifier = Modifier.padding(start = 18.dp, end = 10.dp)) {
+        Column(modifier = Modifier.padding(start = startBorder, end = startBorder)) {
             examTypes.forEach { row: List<String> ->
                 Row(
                     modifier = Modifier
@@ -253,7 +255,7 @@ fun TransDetailScreen(transRes: TransRes) {
             text = "简明",
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(start = 25.dp)
+            modifier = Modifier.padding(start = startBorder)
         )
         TitleBodyDivider()
         Column {
@@ -261,18 +263,18 @@ fun TransDetailScreen(transRes: TransRes) {
                 Text(
                     text = it,
                     fontSize = 18.sp,
-                    modifier = Modifier.padding(start = 25.dp)
+                    modifier = Modifier.padding(start = startBorder)
                 )
             }
         }
-        Spacer(modifier = Modifier.height(15.dp))
+        Spacer(modifier = Modifier.height(20.dp))
         if (transRes.isWord) {
             // 3、基本释义
             Text(
                 text = "基本释义",
                 fontWeight = FontWeight.Bold,
                 fontSize = 22.sp,
-                modifier = Modifier.padding(start = 25.dp)
+                modifier = Modifier.padding(start = startBorder)
             )
             TitleBodyDivider()
             BasicExplains(explains)
@@ -284,7 +286,7 @@ fun TransDetailScreen(transRes: TransRes) {
                 text = "网络释义",
                 fontWeight = FontWeight.Bold,
                 fontSize = 22.sp,
-                modifier = Modifier.padding(start = 25.dp)
+                modifier = Modifier.padding(start = startBorder)
             )
             TitleBodyDivider()
             WebExplains(web)
@@ -326,7 +328,7 @@ fun BasicExplains(explains: List<String>) {
             Row(modifier = Modifier.padding(bottom = 20.dp)) {
                 ConstraintLayout {
                     val (typeRef, explainRef) = createRefs()
-                    val typeBeginGuideline = createGuidelineFromStart(25.dp)
+                    val typeBeginGuideline = createGuidelineFromStart(startBorder)
                     val explainBeginGuideline = createGuidelineFromStart(75.dp)
                     Card(
                         colors = CardDefaults.cardColors(
@@ -372,7 +374,7 @@ fun WebExplains(web: List<Web>) {
     web.forEach {
         ConstraintLayout {
             val (columnRef) = createRefs()
-            val beginGuideline = createGuidelineFromStart(25.dp)
+            val beginGuideline = createGuidelineFromStart(startBorder)
             Column(modifier = Modifier.constrainAs(columnRef) {
                 start.linkTo(beginGuideline)
             }) {
@@ -412,10 +414,10 @@ fun ExamTypeCard(type: String) {
     Card(
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 5.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White, contentColor = Color.Gray),
-        modifier = Modifier.padding(start = 15.dp),
+        modifier = Modifier.padding(end = 15.dp),
         shape = RoundedCornerShape(5.dp)
     ) {
-        Text(text = type, fontSize = 10.sp, modifier = Modifier.padding(5.dp))
+        Text(text = type, fontSize = 12.sp, modifier = Modifier.padding(5.dp))
     }
 }
 
