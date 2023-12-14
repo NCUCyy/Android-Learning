@@ -1,5 +1,7 @@
 package com.cyy.transapp.activity.screens
 
+import android.app.Activity
+import android.content.Intent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,11 +22,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cyy.transapp.R
 import com.cyy.transapp.TransApp
+import com.cyy.transapp.activity.StateHolder
+import com.cyy.transapp.activity.TransActivity
 import com.cyy.transapp.view_model.QueryViewModel
 import com.cyy.transapp.view_model.QueryViewModelFactory
 
@@ -45,9 +48,9 @@ sealed class Screen(val route: String, val title: String, val icon: Int) {
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Preview
 @Composable
-fun QueryScreen() {
+fun QueryScreen(states: StateHolder) {
+    val context = LocalContext.current as Activity
     val application = LocalContext.current.applicationContext as TransApp
     val queryViewModel = viewModel<QueryViewModel>(
         factory = QueryViewModelFactory(
@@ -83,6 +86,9 @@ fun QueryScreen() {
                 ),
                 keyboardActions = KeyboardActions(onSearch = {
                     // TODO:跳转到TransActivity
+                    val intent = Intent(context, TransActivity::class.java)
+                    intent.putExtra("query", query.value)
+                    states.resultLauncher.launch(intent)
                 })
             )
         }

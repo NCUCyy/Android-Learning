@@ -11,6 +11,7 @@ class TransRepository {
     private val APP_KEY = "6c2ee08f4ca04995" // 您的应用ID
     private val APP_SECRET = "VICd82fdy7GVQ3fYKcbXwFFgWEc7qsE8" // 您的应用密钥
 
+    // ViewModel中调用该方法，发起翻译请求
     fun translate(
         query: String,
         callBack: (OpResult<Any>) -> Unit
@@ -27,7 +28,7 @@ class TransRepository {
         val result: ByteArray? =
             HttpUtil.doPost("https://openapi.youdao.com/api", null, params, "application/json")
         if (result == null)
-            callBack(OpResult.Error("翻译失败！请检查网络设置 😵"))
+            callBack(OpResult.Error("请检查网络设置"))
         else {
             val res = Json.decodeFromJsonElement(
                 TransRes.serializer(),

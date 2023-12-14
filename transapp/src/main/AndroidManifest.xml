@@ -13,9 +13,14 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/Theme.Chenyi">
+        <service
+                android:name=".service.VoiceService"
+                android:enabled="true"
+                android:exported="true"></service>
+
         <activity
                 android:name=".activity.UserActivity"
-                android:exported="false" />
+                android:exported="true" />
         <activity
                 android:name=".activity.LearnActivity"
                 android:exported="true" />
@@ -24,7 +29,7 @@
                 android:exported="true" />
         <activity
                 android:name=".activity.IndexActivity"
-                android:exported="false" />
+                android:exported="true" />
         <activity
                 android:name=".activity.MainActivity"
                 android:exported="true" />

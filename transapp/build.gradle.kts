@@ -1,7 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-     // @Parcelize注解
+    // @Parcelize注解
     id("kotlin-parcelize")
     // 启用ksp
     id("com.google.devtools.ksp")
@@ -56,6 +56,8 @@ android {
 }
 
 dependencies {
+    implementation("com.google.accompanist:accompanist-swiperefresh:0.28.0")
+
     // 加载网络图片
     implementation("io.coil-kt:coil-compose:2.5.0")
 

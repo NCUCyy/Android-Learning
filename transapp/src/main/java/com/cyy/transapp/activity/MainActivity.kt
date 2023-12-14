@@ -3,10 +3,14 @@ package com.cyy.transapp.activity
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -46,7 +50,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat.finishAffinity
@@ -59,6 +62,7 @@ import androidx.navigation.compose.rememberNavController
 import com.cyy.transapp.R
 import com.cyy.transapp.activity.screens.LearnScreen
 import com.cyy.transapp.activity.screens.ListenScreen
+import com.cyy.transapp.activity.screens.QueryScreen
 import com.cyy.transapp.activity.screens.Screen
 import com.cyy.transapp.activity.screens.screens
 import kotlinx.coroutines.CoroutineScope
@@ -69,80 +73,21 @@ import kotlin.system.exitProcess
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        /**
-         * 获得当前Activity的ViewModel---方法一
-         */
+        // 使用ActivityResultLauncher进行意图跳转
+        val resultLauncher: ActivityResultLauncher<Intent> = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult(),
+            // 意图结束后，执行这个「回调函数」
+            ActivityResultCallback {
+                if (it.resultCode == RESULT_OK) {
+                    // 返回的data数据是个intent类型，里面存储了一段文本内容
+                    val username = it.data?.getStringExtra("username")
+                    Toast.makeText(this, "回到MainActivity", Toast.LENGTH_LONG).show()
+                }
+            }
+        )
         setContent {
-            MainScreen()
+            MainScreen(resultLauncher)
         }
-    }
-}
-
-@SuppressLint("StateFlowValueCalledInComposition")
-@Composable
-fun NavigationGraphScreen(states: StateHolder) {
-    // 定义宿主(需要：导航控制器、导航起点---String类型)
-    NavHost(navController = states.navController, startDestination = states.startDestination) {
-        // 定义有几个页面，就有几个composable(){...}
-        // 根据route进行页面的匹配
-        // 页面1：翻译
-        composable(route = Screen.QueryPage.route) {
-            // 1、更新当前显示的Screen
-            states.currentScreen.value = Screen.QueryPage
-            // 2、此语句处才会展示指定的Screen
-            TransScreen()
-        }
-        // 页面2：听力
-        composable(route = Screen.ListenPage.route) {
-            // 1、更新当前显示的Screen
-            states.currentScreen.value = Screen.ListenPage
-            // 2、此语句处才会展示指定的Screen
-            ListenScreen()
-        }
-        // 页面3
-        composable(route = Screen.LearnPage.route) {
-            // 1、更新当前显示的Screen
-            states.currentScreen.value = Screen.LearnPage
-            // 2、此语句处才会展示指定的Screen
-            LearnScreen()
-        }
-    }
-}
-
-
-@Composable
-fun MenuView(states: StateHolder) {
-    val context = LocalContext.current as Activity
-    DropdownMenu(expanded = states.dropState.value,
-        onDismissRequest = {
-            // 点击其他地方，则关闭下拉框
-            states.dropState.value = false
-        }) {
-        DropdownMenuItem(
-            // 在前面的Icon
-            leadingIcon = {
-                Icon(imageVector = Icons.Filled.Star, contentDescription = null)
-            },
-            text = {
-                Text(text = "点赞App", fontSize = 20.sp)
-            }, onClick = {
-                // 点击完之后，关闭下拉框
-                states.dropState.value = false
-                Toast.makeText(context, "感谢支持！", Toast.LENGTH_LONG).show()
-            })
-        DropdownMenuItem(
-            // 在前面的Icon
-            leadingIcon = {
-                Icon(imageVector = Icons.Filled.ExitToApp, contentDescription = null)
-            },
-            text = {
-                Text(text = "退出App", fontSize = 20.sp)
-            }, onClick = {
-                // 点击完之后，关闭下拉框
-                states.dropState.value = false
-                finishAffinity(context)
-                exitProcess(-1)
-            })
     }
 }
 
@@ -150,14 +95,13 @@ fun MenuView(states: StateHolder) {
 /**
  * 主界面---Scaffold骨架
  */
-@Preview
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen() {
+fun MainScreen(resultLauncher: ActivityResultLauncher<Intent>) {
     // 1、定义状态集合————直接把这个状态集合作为compose组件之间传参的媒介
     // 2、状态定义到顶层————单一数据流
-    val states = rememberStates()
+    val states = rememberStates(resultLauncher)
     // 当前应用的上下文
     val context = LocalContext.current as Activity
 
@@ -218,6 +162,7 @@ fun MainScreen() {
                         selected = it.route == states.currentScreen.value.route,
                         // 点击后更改当前的Screen
                         onClick = {
+                            states.currentScreen.value = it
                         },
                         // 标签
                         label = {
@@ -268,7 +213,7 @@ fun DrawView(states: StateHolder) {
             ) {
                 Row(modifier = Modifier.padding(bottom = 50.dp)) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_launcher_background),
+                        painter = painterResource(id = R.drawable.user),
                         contentDescription = null,
                         modifier = Modifier.clickable {
                             states.scope.launch {
@@ -281,7 +226,7 @@ fun DrawView(states: StateHolder) {
                     Text(text = "用户名", fontSize = 30.sp)
                 }
                 // 抽屉中要显示的内容
-                screens.forEach {
+                screens.forEach { it: Screen ->
                     NavigationDrawerItem(
                         label = {
                             Text(it.title, fontSize = 20.sp)
@@ -311,11 +256,79 @@ fun DrawView(states: StateHolder) {
         })
 }
 
+@SuppressLint("StateFlowValueCalledInComposition")
+@Composable
+fun NavigationGraphScreen(states: StateHolder) {
+    // 定义宿主(需要：导航控制器、导航起点---String类型)
+    NavHost(navController = states.navController, startDestination = states.startDestination) {
+        // 定义有几个页面，就有几个composable(){...}
+        // 根据route进行页面的匹配
+        // 页面1：翻译
+        composable(route = Screen.QueryPage.route) {
+            // 1、更新当前显示的Screen
+            states.currentScreen.value = Screen.QueryPage
+            // 2、此语句处才会展示指定的Screen
+            QueryScreen(states)
+        }
+        // 页面2：听力
+        composable(route = Screen.ListenPage.route) {
+            // 1、更新当前显示的Screen
+            states.currentScreen.value = Screen.ListenPage
+            // 2、此语句处才会展示指定的Screen
+            ListenScreen()
+        }
+        // 页面3
+        composable(route = Screen.LearnPage.route) {
+            // 1、更新当前显示的Screen
+            states.currentScreen.value = Screen.LearnPage
+            // 2、此语句处才会展示指定的Screen
+            LearnScreen()
+        }
+    }
+}
+
+@Composable
+fun MenuView(states: StateHolder) {
+    val context = LocalContext.current as Activity
+    DropdownMenu(expanded = states.dropState.value,
+        onDismissRequest = {
+            // 点击其他地方，则关闭下拉框
+            states.dropState.value = false
+        }) {
+        DropdownMenuItem(
+            // 在前面的Icon
+            leadingIcon = {
+                Icon(imageVector = Icons.Filled.Star, contentDescription = null)
+            },
+            text = {
+                Text(text = "点赞App", fontSize = 20.sp)
+            }, onClick = {
+                // 点击完之后，关闭下拉框
+                states.dropState.value = false
+                Toast.makeText(context, "感谢支持！", Toast.LENGTH_LONG).show()
+            })
+        DropdownMenuItem(
+            // 在前面的Icon
+            leadingIcon = {
+                Icon(imageVector = Icons.Filled.ExitToApp, contentDescription = null)
+            },
+            text = {
+                Text(text = "退出App", fontSize = 20.sp)
+            }, onClick = {
+                // 点击完之后，关闭下拉框
+                states.dropState.value = false
+                finishAffinity(context)
+                exitProcess(-1)
+            })
+    }
+}
+
 /**
  * 状态集合（对状态的统一管理）
  */
 @OptIn(ExperimentalMaterial3Api::class)
 class StateHolder(
+    val resultLauncher: ActivityResultLauncher<Intent>,
     // 当前页面是谁（只用于：bottomBar的selected中底部导航栏高亮显示当前页面的选项）
     val currentScreen: MutableState<Screen>,
     // 导航控制器：宿主、点击动作都需要用到
@@ -335,6 +348,7 @@ class StateHolder(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun rememberStates(
+    resultLauncher: ActivityResultLauncher<Intent>,
     currentScreen: MutableState<Screen> = remember { mutableStateOf(Screen.QueryPage) },
     navController: NavHostController = rememberNavController(),
     startDestination: String = Screen.QueryPage.route,
@@ -342,6 +356,7 @@ fun rememberStates(
     drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
     dropState: MutableState<Boolean> = mutableStateOf(false)
 ) = StateHolder(
+    resultLauncher,
     currentScreen,
     navController,
     startDestination,
