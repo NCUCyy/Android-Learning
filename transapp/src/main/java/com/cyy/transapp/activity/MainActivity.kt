@@ -13,19 +13,27 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.DropdownMenu
@@ -45,26 +53,33 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.core.app.ActivityCompat.finishAffinity
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.cyy.transapp.R
+import com.cyy.transapp.TransApp
 import com.cyy.transapp.activity.screens.LearnScreen
 import com.cyy.transapp.activity.screens.ListenScreen
 import com.cyy.transapp.activity.screens.QueryScreen
 import com.cyy.transapp.activity.screens.Screen
 import com.cyy.transapp.activity.screens.screens
+import com.cyy.transapp.view_model.QueryViewModel
+import com.cyy.transapp.view_model.QueryViewModelFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlin.system.exitProcess
@@ -105,7 +120,18 @@ fun MainScreen(resultLauncher: ActivityResultLauncher<Intent>) {
     val states = rememberStates(resultLauncher)
     // 当前应用的上下文
     val context = LocalContext.current as Activity
-
+    val application = context.application as TransApp
+    val queryViewModel =
+        viewModel<QueryViewModel>(
+            factory = QueryViewModelFactory(
+                application.transRepository,
+                application.queryRepository
+            )
+        )
+    val showDeleteDialog = remember { mutableStateOf(false) }
+    if (showDeleteDialog.value) {
+        DeleteDialog(showDeleteDialog, queryViewModel::clearAllTransRecords)
+    }
     // 脚手架
     Scaffold(
         topBar = {
@@ -144,6 +170,15 @@ fun MainScreen(resultLauncher: ActivityResultLauncher<Intent>) {
                 },
                 actions = {
                     if (states.currentScreen.value.route == Screen.QueryPage.route) {
+                        IconButton(onClick = {
+                            showDeleteDialog.value = true
+                        }) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.delete_history),
+                                contentDescription = null
+                            )
+                        }
+                    } else if (states.currentScreen.value.route == Screen.ListenPage.route) {
                         IconButton(onClick = {
                             states.dropState.value = !states.dropState.value
                         }) {
@@ -186,6 +221,95 @@ fun MainScreen(resultLauncher: ActivityResultLauncher<Intent>) {
         },
         floatingActionButton = {
         })
+}
+
+@Composable
+fun DeleteDialog(showDeleteDialog: MutableState<Boolean>, action: () -> Unit) {
+    Dialog(onDismissRequest = {
+        showDeleteDialog.value = false
+    }) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            Card(
+                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White,
+                ),
+                modifier = Modifier
+                    .fillMaxWidth(),
+            ) {
+                Text(
+                    text = "确定是否清空？",
+                    fontSize = 21.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(15.dp)
+                )
+                Text(
+                    text = "删除后将无法恢复哦~",
+                    fontSize = 15.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp),
+                    color = Color.Gray
+                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    DialogButton(
+                        color = Color(0xFFFA85AD),
+                        text = "取消",
+                        icon = R.drawable.cancel
+                    ) {
+                        showDeleteDialog.value = false
+                    }
+                    Spacer(
+                        modifier = Modifier.width(20.dp)
+                    )
+                    DialogButton(
+                        color = Color(0xFF88D4F7),
+                        text = "确认",
+                        icon = R.drawable.check
+                    ) {
+                        action.invoke()
+                        showDeleteDialog.value = false
+                    }
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+            }
+        }
+    }
+}
+
+@Composable
+fun DialogButton(color: Color, text: String, icon: Int, action: () -> Unit) {
+    Button(
+        onClick = {
+            action.invoke()
+        },
+        shape = RoundedCornerShape(15.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = color,
+            contentColor = Color.Black
+        ),
+    ) {
+        Text(text = text, fontSize = 18.sp)
+        Spacer(modifier = Modifier.width(10.dp))
+        Icon(
+            painter = painterResource(id = icon),
+            contentDescription = null,
+            modifier = Modifier.size(ButtonDefaults.IconSize)
+        )
+    }
 }
 
 /**
