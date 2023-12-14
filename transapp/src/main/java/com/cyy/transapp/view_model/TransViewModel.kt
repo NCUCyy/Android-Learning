@@ -8,6 +8,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlin.concurrent.thread
 
+/**
+ * 用于TransActivity
+ * 1. 用于联网翻译
+ */
 class TransViewModel(private val transRepository: TransRepository) : ViewModel() {
 
     private val _transState = MutableStateFlow<OpResult<Any>>(OpResult.NotBegin)

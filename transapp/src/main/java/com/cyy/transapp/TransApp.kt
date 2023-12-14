@@ -2,6 +2,7 @@ package com.cyy.transapp
 
 import android.app.Application
 import com.cyy.transapp.network.SerializationConverter
+import com.cyy.transapp.repository.QueryRepository
 import com.cyy.transapp.repository.TransRepository
 import com.drake.net.BuildConfig
 import com.drake.net.NetConfig
@@ -15,6 +16,7 @@ class TransApp : Application() {
 
 
     val transRepository by lazy { TransRepository(database.getTransRecordDao()) }
+    val queryRepository by lazy { QueryRepository() }
     override fun onCreate() {
         NetConfig.initialize("", this) {
             // 超时配置, 默认是10秒, 设置太长时间会导致用户等待过久

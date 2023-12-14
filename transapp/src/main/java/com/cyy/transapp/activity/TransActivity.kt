@@ -82,7 +82,7 @@ fun TransScreen(query: String = "cycle") {
             TopAppBar(
                 title = {
                     // TODO：显示查询的词汇
-                    Text(text = query, fontWeight = FontWeight.Bold, fontSize = 25.sp)
+                    Text(text = query, fontWeight = FontWeight.Bold, fontSize = 25.sp, maxLines = 1)
                 },
                 // 左侧图标
                 navigationIcon = {
@@ -201,6 +201,7 @@ fun ContentScreen(query: String) {
 @Composable
 fun TransDetailScreen(transRes: TransRes) {
     // 7个为一行
+    val translation = transRes.translation
     val examTypes = transRes.basic.examType.chunked(7)
     val explains = transRes.basic.explains
     val web = transRes.web
@@ -218,16 +219,18 @@ fun TransDetailScreen(transRes: TransRes) {
             // 保持水平
             verticalAlignment = Alignment.CenterVertically
         ) {
-            VoiceItem(
-                type = "美",
-                phonetic = transRes.basic.usPhonetic,
-                url = transRes.basic.usSpeech
-            )
-            VoiceItem(
-                type = "英",
-                phonetic = transRes.basic.ukPhonetic,
-                url = transRes.basic.ukSpeech
-            )
+            if (transRes.basic.usPhonetic.isNotEmpty())
+                VoiceItem(
+                    type = "美",
+                    phonetic = transRes.basic.usPhonetic,
+                    url = transRes.basic.usSpeech
+                )
+            if (transRes.basic.ukPhonetic.isNotEmpty())
+                VoiceItem(
+                    type = "英",
+                    phonetic = transRes.basic.ukPhonetic,
+                    url = transRes.basic.ukSpeech
+                )
         }
         Spacer(modifier = Modifier.height(10.dp))
         // 2、考试类型
@@ -246,6 +249,23 @@ fun TransDetailScreen(transRes: TransRes) {
             }
         }
         Spacer(modifier = Modifier.height(10.dp))
+        Text(
+            text = "简明",
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(start = 25.dp)
+        )
+        TitleBodyDivider()
+        Column {
+            translation.forEach {
+                Text(
+                    text = it,
+                    fontSize = 18.sp,
+                    modifier = Modifier.padding(start = 25.dp)
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(15.dp))
         if (transRes.isWord) {
             // 3、基本释义
             Text(
@@ -306,8 +326,8 @@ fun BasicExplains(explains: List<String>) {
             Row(modifier = Modifier.padding(bottom = 20.dp)) {
                 ConstraintLayout {
                     val (typeRef, explainRef) = createRefs()
-                    val typeBeginGuideline = createGuidelineFromStart(55.dp)
-                    val explainBeginGuideline = createGuidelineFromStart(105.dp)
+                    val typeBeginGuideline = createGuidelineFromStart(25.dp)
+                    val explainBeginGuideline = createGuidelineFromStart(75.dp)
                     Card(
                         colors = CardDefaults.cardColors(
                             containerColor = Color.Black,
@@ -337,7 +357,7 @@ fun BasicExplains(explains: List<String>) {
                             Text(
                                 text = it,
                                 fontSize = 18.sp,
-                                modifier = Modifier.padding(bottom = 5.dp, end = 5.dp),
+                                modifier = Modifier.padding(bottom = 5.dp, end = 10.dp),
                             )
                         }
                     }
@@ -352,7 +372,7 @@ fun WebExplains(web: List<Web>) {
     web.forEach {
         ConstraintLayout {
             val (columnRef) = createRefs()
-            val beginGuideline = createGuidelineFromStart(55.dp)
+            val beginGuideline = createGuidelineFromStart(25.dp)
             Column(modifier = Modifier.constrainAs(columnRef) {
                 start.linkTo(beginGuideline)
             }) {
@@ -379,7 +399,7 @@ fun WebExplains(web: List<Web>) {
                 }
                 Text(
                     text = it.value.joinToString(";"),
-                    modifier = Modifier.padding(start = 5.dp, bottom = 5.dp, end = 5.dp),
+                    modifier = Modifier.padding(start = 5.dp, bottom = 5.dp, end = 10.dp),
                     fontSize = 18.sp
                 )
             }

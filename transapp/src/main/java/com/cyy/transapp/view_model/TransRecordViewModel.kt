@@ -7,6 +7,10 @@ import com.cyy.transapp.pojo.TransRecord
 import com.cyy.transapp.repository.TransRepository
 import kotlinx.coroutines.launch
 
+/**
+ * 用于TransActivity
+ * 1. 更新查词历史
+ */
 class TransRecordViewModel(private val transRecordRepository: TransRepository) : ViewModel() {
     fun updateHistory(cur: TransRecord) = viewModelScope.launch {
         val last = transRecordRepository.getByWord(cur.word)

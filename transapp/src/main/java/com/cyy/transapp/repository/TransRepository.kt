@@ -10,6 +10,11 @@ import com.cyy.transapp.pojo.TransRecord
 import kotlinx.serialization.json.Json
 import java.nio.charset.StandardCharsets
 
+/**
+ * 翻译模块的数据仓库
+ * 1.Net网络请求
+ * 2.Room本地存储
+ */
 class TransRepository(
     private val transRecordDao: TransRecordDao
 ) {
