@@ -66,7 +66,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
     implementation("com.squareup.okhttp3:okhttp:4.11.0")// 要求OkHttp4以上
     implementation("com.github.liangjingkanji:Net:3.6.4")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2") // JSON序列化库, 首选推荐使用
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
+    implementation("com.google.android.engage:engage-core:1.3.1") // JSON序列化库, 首选推荐使用
 
     // Room持久化
     val roomVersion = "2.5.0"

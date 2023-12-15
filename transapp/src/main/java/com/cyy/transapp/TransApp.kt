@@ -1,7 +1,12 @@
 package com.cyy.transapp
 
 import android.app.Application
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
+import android.os.Build
 import com.cyy.transapp.network.SerializationConverter
+import com.cyy.transapp.repository.ListenRepository
 import com.cyy.transapp.repository.QueryRepository
 import com.cyy.transapp.repository.TransRepository
 import com.drake.net.BuildConfig
@@ -17,7 +22,10 @@ class TransApp : Application() {
 
     val transRepository by lazy { TransRepository(database.getTransRecordDao()) }
     val queryRepository by lazy { QueryRepository() }
+    val listenRepository by lazy { ListenRepository() }
     override fun onCreate() {
+        super.onCreate()
+        // Net设置
         NetConfig.initialize("", this) {
             // 超时配置, 默认是10秒, 设置太长时间会导致用户等待过久
             connectTimeout(30, TimeUnit.SECONDS)
@@ -26,6 +34,24 @@ class TransApp : Application() {
             setDebug(BuildConfig.DEBUG)
             setConverter(SerializationConverter())
         }
-        super.onCreate()
+        // 通知设置
+         //从API 26开始使用通知渠道
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            //定义通知管理器
+            val notificationManager: NotificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            //定义通知渠道的标识
+            val channelId = "com.cyy.transapp"
+            //定义通知渠道的名称
+            val channelName = "翻译应用"
+            //定义通知渠道:指定通知渠道的标识、名称和通知渠道的重要级别
+            val channel = NotificationChannel(
+                channelId,
+                channelName,
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
+            //创建并配置通知渠道
+            notificationManager.createNotificationChannel(channel)
+        }
     }
 }

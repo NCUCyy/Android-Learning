@@ -252,7 +252,7 @@ fun DeleteDialog(showDeleteDialog: MutableState<Boolean>, action: () -> Unit) {
                         .padding(top = 15.dp, bottom = 5.dp)
                 )
                 Text(
-                    text = "删除后将无法恢复哦~",
+                    text = "清空后将无法恢复哦~",
                     fontSize = 15.sp,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
@@ -402,7 +402,7 @@ fun NavigationGraphScreen(states: StateHolder) {
             // 1、更新当前显示的Screen
             states.currentScreen.value = Screen.ListenPage
             // 2、此语句处才会展示指定的Screen
-            ListenScreen()
+            ListenScreen(states)
         }
         // 页面3
         composable(route = Screen.LearnPage.route) {

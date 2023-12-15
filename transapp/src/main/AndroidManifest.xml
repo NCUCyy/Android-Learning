@@ -13,10 +13,21 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/Theme.Chenyi">
+        <activity
+                android:name=".activity.ListenActivity"
+                android:exported="true" />
+        <activity
+                android:name=".test.TestActivity"
+                android:exported="true" />
+
+        <service
+                android:name=".service.ListenService"
+                android:enabled="true"
+                android:exported="true" />
         <service
                 android:name=".service.VoiceService"
                 android:enabled="true"
-                android:exported="true"></service>
+                android:exported="true" />
 
         <activity
                 android:name=".activity.UserActivity"
