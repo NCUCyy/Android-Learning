@@ -175,7 +175,8 @@ fun MainScreen(resultLauncher: ActivityResultLauncher<Intent>) {
                         }) {
                             Icon(
                                 painter = painterResource(id = R.drawable.delete_history),
-                                contentDescription = null
+                                contentDescription = null,
+                                modifier = Modifier.size(30.dp)
                             )
                         }
                     } else if (states.currentScreen.value.route == Screen.ListenPage.route) {
@@ -248,7 +249,7 @@ fun DeleteDialog(showDeleteDialog: MutableState<Boolean>, action: () -> Unit) {
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(15.dp)
+                        .padding(top = 15.dp, bottom = 5.dp)
                 )
                 Text(
                     text = "删除后将无法恢复哦~",

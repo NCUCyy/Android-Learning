@@ -6,6 +6,10 @@ import com.cyy.transapp.network.SerializationConverter
 import com.drake.net.Get
 import com.drake.net.utils.scopeNet
 
+/**
+ * 查询模块的数据仓库
+ * 1. 每日一句
+ */
 class QueryRepository {
     /**
      * 请求加载数据

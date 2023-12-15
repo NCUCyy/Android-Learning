@@ -44,8 +44,10 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cyy.transapp.R
 import com.cyy.transapp.TransApp
@@ -63,7 +65,7 @@ import java.time.OffsetDateTime
 class TransActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val query = intent.getStringExtra("query")!!
+        val query = intent.getStringExtra("query")!!.trim()
         setContent {
             TransScreen(query)
         }
@@ -200,12 +202,13 @@ fun ContentScreen(query: String) {
 }
 
 val startBorder = 25.dp
+var maxWidth = 260.dp
 
 @Composable
 fun TransDetailScreen(transRes: TransRes) {
     // 7个为一行
     val translation = transRes.translation
-    val examTypes = transRes.basic.examType.chunked(7)
+    val examTypes = transRes.basic.examType.chunked(6)
     val explains = transRes.basic.explains
     val web = transRes.web
     val scrollState = rememberScrollState()
@@ -314,48 +317,60 @@ fun BasicExplains(explains: List<String>) {
     for (i in explains.indices) {
         // lst[0] = "v."
         // lst[1] = ["自行车，摩托车；循环，周期；组诗，组歌；整套，系列；自行车骑行；一段时间"]
-        val lst = explains[i].split(" ")
+        val lst = explains[i].split(".")
         // 特殊情况：虽然是句子但是iwWord为True，此时explains中没有类型（所以lst只有一个元素）
         if (lst.size == 1) {
-            explainMap["${i + 1}."] = listOf(lst[0])
+            explainMap["${i + 1}"] = listOf(lst[0])
             continue
+        } else {
+            val singleExplains = lst[1].trim().split("；")
+            explainMap[lst[0]] = singleExplains
         }
-        val singleExplains = lst[1].split("；")
-        explainMap[lst[0]] = singleExplains
     }
     // 得到的explainMap的格式为：{"v.", ["自行车, 摩托车", "循环, 周期"]}
     Column {
         explainMap.forEach { (type: String, singleExplains: List<String>) ->
             Row(modifier = Modifier.padding(bottom = 20.dp)) {
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color.Black,
-                        contentColor = Color.White
-                    ),
-                    modifier = Modifier.padding(start = startBorder),
-                    shape = RoundedCornerShape(5.dp)
-                ) {
-                    Text(
-                        text = type,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(
-                            start = 5.dp,
-                            end = 5.dp,
-                            bottom = 2.dp
+                ConstraintLayout {
+                    val (typeRef, explainsRef) = createRefs()
+                    val vGuideline = createGuidelineFromStart(startBorder)
+                    val vGuideline2 = createGuidelineFromStart(startBorder + 65.dp)
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color.Black,
+                            contentColor = Color.White
                         ),
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            fontStyle = FontStyle.Italic
-                        )
-                    )
-                }
-                Column(modifier = Modifier.padding(start = startBorder)) {
-                    singleExplains.forEach {
+                        modifier = Modifier.constrainAs(typeRef) {
+                            start.linkTo(vGuideline)
+                        },
+                        shape = RoundedCornerShape(5.dp)
+                    ) {
                         Text(
-                            text = it,
-                            fontSize = 18.sp,
-                            modifier = Modifier.padding(bottom = 5.dp, end = 10.dp),
+                            text = "$type.",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(
+                                start = 5.dp,
+                                end = 5.dp,
+                                bottom = 2.dp
+                            ),
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                fontStyle = FontStyle.Italic
+                            )
                         )
+                    }
+                    Column(modifier = Modifier.constrainAs(explainsRef) {
+                        start.linkTo(vGuideline2)
+                    }) {
+                        singleExplains.forEach {
+                            Text(
+                                text = it,
+                                fontSize = 18.sp,
+                                modifier = Modifier
+                                    .padding(end = 10.dp)
+                                    .size(height = Dp.Infinity, width = maxWidth + startBorder),
+                            )
+                        }
                     }
                 }
             }
@@ -390,8 +405,10 @@ fun WebExplains(web: List<Web>) {
                 )
             }
             Text(
-                text = it.value.joinToString(";"),
-                modifier = Modifier.padding(start = 5.dp, bottom = 10.dp, end = 10.dp),
+                text = it.value.joinToString(";  "),
+                modifier = Modifier
+                    .padding(start = 5.dp, bottom = 10.dp, end = 10.dp)
+                    .size(height = Dp.Infinity, width = maxWidth + startBorder + 40.dp),
                 fontSize = 18.sp
             )
         }

@@ -247,6 +247,7 @@ fun TransRecordCard(transRecord: TransRecord, isLast: Boolean, states: StateHold
             val vGuideline1 = createGuidelineFromStart(35.dp)
             val hGuideline = createGuidelineFromTop(0.5f)
             val vGuideline2 = createGuidelineFromStart(300.dp)
+            val maxWidth = 320.dp
             Icon(painter = painterResource(id = R.drawable.history),
                 contentDescription = null,
                 tint = Color.Gray,
@@ -264,6 +265,8 @@ fun TransRecordCard(transRecord: TransRecord, isLast: Boolean, states: StateHold
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
                     .padding(start = 10.dp)
+                    // 注意：为了让word完整显示出来，需要手动控制Text的size（主要是width，height设置为充满给定的高度即可）
+                    .size(height = Dp.Infinity, width = maxWidth)
                     .constrainAs(wordRef) {
                         start.linkTo(vGuideline1)
                         top.linkTo(parent.top)
@@ -276,6 +279,7 @@ fun TransRecordCard(transRecord: TransRecord, isLast: Boolean, states: StateHold
                 color = Color.Gray,
                 modifier = Modifier
                     .padding(start = 10.dp)
+                    .size(height = Dp.Infinity, width = maxWidth)
                     .constrainAs(transRef) {
                         start.linkTo(vGuideline1)
                         top.linkTo(hGuideline)
