@@ -9,6 +9,7 @@ import com.cyy.transapp.network.SerializationConverter
 import com.cyy.transapp.repository.ListenRepository
 import com.cyy.transapp.repository.QueryRepository
 import com.cyy.transapp.repository.TransRepository
+import com.cyy.transapp.repository.UserRepository
 import com.drake.net.BuildConfig
 import com.drake.net.NetConfig
 import com.drake.net.okhttp.setConverter
@@ -23,6 +24,7 @@ class TransApp : Application() {
     val transRepository by lazy { TransRepository(database.getTransRecordDao()) }
     val queryRepository by lazy { QueryRepository() }
     val listenRepository by lazy { ListenRepository() }
+    val userRepository by lazy { UserRepository(database.getUserDao()) }
     override fun onCreate() {
         super.onCreate()
         // Net设置
@@ -35,7 +37,7 @@ class TransApp : Application() {
             setConverter(SerializationConverter())
         }
         // 通知设置
-         //从API 26开始使用通知渠道
+        //从API 26开始使用通知渠道
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             //定义通知管理器
             val notificationManager: NotificationManager =

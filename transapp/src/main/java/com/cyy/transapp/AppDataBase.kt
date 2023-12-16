@@ -6,8 +6,10 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.cyy.transapp.dao.TransRecordDao
+import com.cyy.transapp.dao.UserDao
 import com.cyy.transapp.pojo.Converters
 import com.cyy.transapp.pojo.TransRecord
+import com.cyy.transapp.pojo.User
 
 /**
  * Room 是 SQLite 数据库之上的一个数据库层。它负责处理平常使用 SQLiteOpenHelper 所处理的单调乏味的任务。
@@ -22,12 +24,12 @@ import com.cyy.transapp.pojo.TransRecord
  * 5、getDatabase 会返回该单例。首次使用时，它会创建数据库，具体方法是：使用 Room 的数据库构建器在 AppDataBase 类的应用上下文中创建 RoomDatabase 对象，并指定数据库的名称为 “app_database”。
  */
 // 定义一个数据库类，用注解 @Database 标记，并将实体类的数组作为参数传递（会自动创建对应的数据表）
-@Database(entities = [TransRecord::class], version = 1, exportSchema = false)
+@Database(entities = [TransRecord::class, User::class], version = 1, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDataBase : RoomDatabase() {
 
     abstract fun getTransRecordDao(): TransRecordDao
-//    abstract fun getRecordDao(): RecordDao
+    abstract fun getUserDao(): UserDao
 
     // 创建一个单例对象，避免同时打开多个数据库实例
     companion object {
@@ -39,7 +41,7 @@ abstract class AppDataBase : RoomDatabase() {
                 val dataBase = Room.databaseBuilder(
                     context.applicationContext,
                     // 若修改了pojo，则需要修改这里的数据库名称（即：创建一个新的SQLite数据库）
-                    AppDataBase::class.java, "db1"
+                    AppDataBase::class.java, "db2"
                 )
                     .build()
                 INSTANCE = dataBase

@@ -1,5 +1,6 @@
 package com.cyy.transapp.activity
 
+import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
@@ -14,26 +15,44 @@ import android.os.Looper
 import android.os.Message
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
+import com.cyy.transapp.R
 import com.cyy.transapp.pojo.ListenResource
 import com.cyy.transapp.service.ListenService
+import com.cyy.transapp.util.FileUtil
 import kotlin.concurrent.thread
 
 class ListenActivity : ComponentActivity() {
@@ -69,7 +88,8 @@ class ListenActivity : ComponentActivity() {
         setContent {
             // 界面的状态值
             val progressState = remember { mutableStateOf(0.0f) }
-            val timerState = remember { mutableStateOf("") }
+            val timerState = remember { mutableStateOf("00:00") }
+            val runningState = remember { mutableStateOf(false) }
 
             val handler = object : Handler(Looper.getMainLooper()) {
                 override fun handleMessage(msg: Message) {
@@ -84,6 +104,9 @@ class ListenActivity : ComponentActivity() {
             // 用于数据交换
             conn = object : ServiceConnection {
                 override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+                    // 开始运行
+                    runningState.value = true
+                    // 获取服务的binder
                     val binder = service as ListenService.ProgressBinder
                     thread {
                         while (running) {
@@ -98,6 +121,8 @@ class ListenActivity : ComponentActivity() {
                             msg.obj = convertTime(binder.getTimer())
                             handler.sendMessage(msg)
                         }
+                        // 结束运行
+                        runningState.value = false
                     }
                 }
 
@@ -105,12 +130,13 @@ class ListenActivity : ComponentActivity() {
                 }
             }
 
-            DisplayScreen(
+            ListenScreen(
                 timerState = timerState,
                 progressState = progressState,
                 playAction = ::playMusic,
                 stopAction = ::stopMusic,
-                listenResource = listenResource
+                listenResource = listenResource,
+                runningState = runningState
             )
         }
     }
@@ -188,38 +214,214 @@ class ListenActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DisplayScreen(
+fun ListenScreen(
     timerState: MutableState<String>,
     progressState: MutableState<Float>,
     playAction: () -> Unit,
     stopAction: () -> Unit,
-    listenResource: ListenResource
+    listenResource: ListenResource,
+    runningState: MutableState<Boolean>
 ) {
-    Box(
+    val context = LocalContext.current as Activity
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            text = listenResource.topic,
+                            modifier = Modifier.padding(start = 5.dp),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 23.sp
+                        )
+                    }
+                },
+                // 左侧图标
+                navigationIcon = {
+                    // 图标按钮
+                    IconButton(onClick = {
+                        // TODO：返回上一页
+                        // 先停止服务
+                        stopAction.invoke()
+                        // 再返回
+                        context.finish()
+                    }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.back),
+                            contentDescription = null,
+                            modifier = Modifier.size(30.dp)
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = {
+                        // TODO：分享听力资源
+
+                    }) {
+                        Icon(
+                            painterResource(id = R.drawable.share),
+                            contentDescription = null,
+                            modifier = Modifier.size(30.dp)
+                        )
+                    }
+                }
+            )
+        },
+        bottomBar = {
+        },
+        content = {
+            // 页面的主体部分
+            Box(modifier = Modifier.padding(it)) {
+                ListenContentScreen(
+                    timerState = timerState,
+                    progressState = progressState,
+                    playAction = playAction,
+                    stopAction = stopAction,
+                    listenResource = listenResource,
+                    runningState = runningState
+                )
+            }
+        },
+        floatingActionButton = {
+        })
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ListenContentScreen(
+    timerState: MutableState<String>,
+    progressState: MutableState<Float>,
+    playAction: () -> Unit,
+    stopAction: () -> Unit,
+    listenResource: ListenResource,
+    runningState: MutableState<Boolean>
+) {
+    val context = LocalContext.current as Activity
+    val expanded = remember { mutableStateOf(false) }
+    val options = listOf("只显示英文", "只显示中文", "中英文")
+    val selectedOptionText = remember { mutableStateOf("只显示英文") }
+    val en = FileUtil.readRawToTxt(context, listenResource.en)
+    val zh = FileUtil.readRawToTxt(context, listenResource.zh)
+    Column(
         modifier = Modifier
             .fillMaxSize(),
-        contentAlignment = Alignment.Center
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
+        Card(
+            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .wrapContentHeight(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .wrapContentHeight()
+                .padding(10.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White)
         ) {
-            Text(text = timerState.value, fontSize = 24.sp)
-            LinearProgressIndicator(progress = progressState.value)
-            Row(modifier = Modifier.fillMaxWidth()) {
-                TextButton(onClick = {
-                    playAction.invoke()
-                }) {
-                    Text(text = "播放", fontSize = 20.sp)
+            val iconSIze = 38.dp
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (runningState.value) {
+                    IconButton(onClick = {
+                        stopAction.invoke()
+                    }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.pause),
+                            contentDescription = null,
+                            modifier = Modifier.size(iconSIze)
+                        )
+                    }
+                } else {
+                    IconButton(onClick = {
+                        playAction.invoke()
+                    }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.play),
+                            contentDescription = null,
+                            modifier = Modifier.size(iconSIze)
+                        )
+                    }
                 }
-                TextButton(onClick = {
-                    stopAction.invoke()
-                }) {
-                    Text(text = "暂停", fontSize = 20.sp)
+                LinearProgressIndicator(
+                    progress = progressState.value,
+                )
+                Text(
+                    text = timerState.value,
+                    fontSize = 24.sp,
+                    modifier = Modifier.padding(start = 10.dp, end = 10.dp)
+                )
+            }
+        }
+        ExposedDropdownMenuBox(
+            expanded = expanded.value,
+            onExpandedChange = {
+                expanded.value = !expanded.value
+            }
+        ) {
+            TextField(
+                readOnly = true,
+                value = selectedOptionText.value,
+                onValueChange = { },
+                label = { },
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(
+                        expanded = expanded.value
+                    )
+                },
+                colors = ExposedDropdownMenuDefaults.textFieldColors(
+
+                ),
+                modifier = Modifier.menuAnchor()
+            )
+            ExposedDropdownMenu(
+                expanded = expanded.value,
+                onDismissRequest = {
+                    expanded.value = false
+                },
+            ) {
+                options.forEach { selectionOption ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(selectionOption)
+                        },
+                        onClick = {
+                            selectedOptionText.value = selectionOption
+                            expanded.value = false
+                        }
+                    )
+                }
+            }
+        }
+        when (selectedOptionText.value) {
+            "只显示英文" -> {
+                Text(
+                    text = en,
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(10.dp)
+                )
+            }
+
+            "只显示中文" -> {
+                Text(
+                    text = zh,
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(10.dp)
+                )
+            }
+
+            else -> {
+                Column {
+                    Text(
+                        text = en,
+                        fontSize = 20.sp,
+                        modifier = Modifier.padding(10.dp)
+                    )
+                    Text(
+                        text = zh,
+                        fontSize = 20.sp,
+                        modifier = Modifier.padding(10.dp)
+                    )
                 }
             }
         }

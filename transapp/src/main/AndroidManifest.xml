@@ -14,6 +14,12 @@
             android:supportsRtl="true"
             android:theme="@style/Theme.Chenyi">
         <activity
+                android:name=".activity.LoginActivity"
+                android:exported="true" />
+        <activity
+                android:name=".activity.RegisterActivity"
+                android:exported="true" />
+        <activity
                 android:name=".activity.ListenActivity"
                 android:exported="true" />
         <activity
