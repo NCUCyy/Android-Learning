@@ -80,7 +80,7 @@ sealed class Screen(val route: String, val title: String, val icon: Int) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun QueryScreen(states: StateHolder) {
+fun QueryScreen(states: StateHolder, userId: Int) {
     val context = LocalContext.current as Activity
     val application = LocalContext.current.applicationContext as TransApp
     val queryViewModel = viewModel<QueryViewModel>(
@@ -122,10 +122,7 @@ fun QueryScreen(states: StateHolder) {
             ),
             keyboardActions = KeyboardActions(onSearch = {
                 // TODO:跳转到TransActivity
-                val intent = Intent(context, TransActivity::class.java)
-                intent.putExtra("query", query.value)
-                intent.putExtra("userId", states.curUserId)
-                states.resultLauncher.launch(intent)
+                toTransActivity(context, states, query.value, userId)
             })
         )
         Spacer(modifier = Modifier.height(10.dp))
@@ -138,7 +135,9 @@ fun QueryScreen(states: StateHolder) {
             when (sentenceState.value) {
                 is OpResult.Success -> {
                     DailySentenceCard(
-                        (sentenceState.value as OpResult.Success<*>).data as SentenceModel, states
+                        (sentenceState.value as OpResult.Success<*>).data as SentenceModel,
+                        states,
+                        userId
                     )
                 }
 
@@ -189,7 +188,8 @@ fun QueryScreen(states: StateHolder) {
                 TransRecordCard(
                     transRecord = transRecord,
                     isLast = idx == transRecords.value.size - 1,
-                    states = states
+                    states = states,
+                    userId = userId
                 )
             }
         }
@@ -197,7 +197,7 @@ fun QueryScreen(states: StateHolder) {
 }
 
 @Composable
-fun DailySentenceCard(sentenceModel: SentenceModel, states: StateHolder) {
+fun DailySentenceCard(sentenceModel: SentenceModel, states: StateHolder, userId: Int) {
     val context = LocalContext.current as Activity
     val data = sentenceModel.data
     Card(
@@ -207,7 +207,7 @@ fun DailySentenceCard(sentenceModel: SentenceModel, states: StateHolder) {
             containerColor = Color(0xFFEBF4FA),
             contentColor = Color.Black
         ), modifier = Modifier.clickable {
-            toTransActivity(context, states, data.en)
+            toTransActivity(context, states, data.en, userId)
         }
     ) {
         Column(modifier = Modifier.padding(10.dp)) {
@@ -238,14 +238,14 @@ fun DailySentenceCard(sentenceModel: SentenceModel, states: StateHolder) {
 }
 
 @Composable
-fun TransRecordCard(transRecord: TransRecord, isLast: Boolean, states: StateHolder) {
+fun TransRecordCard(transRecord: TransRecord, isLast: Boolean, states: StateHolder, userId: Int) {
     val context = LocalContext.current as Activity
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable {
                 // 点击卡片即可翻译查询
-                toTransActivity(context, states, transRecord.word)
+                toTransActivity(context, states, transRecord.word, userId)
             }, colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
         ConstraintLayout {
@@ -397,16 +397,17 @@ fun ListenResourceCard(listenResource: ListenResource, states: StateHolder) {
     }
 }
 
-@Composable
-fun LearnScreen() {
-
-}
 
 /**
  * 跳转到TransActivity---进行翻译
  */
-fun toTransActivity(context: Activity, states: StateHolder, query: String) {
+fun toTransActivity(context: Activity, states: StateHolder, query: String, userId: Int) {
     val intent = Intent(context, TransActivity::class.java)
     intent.putExtra("query", query)
+    intent.putExtra("userId", userId)
     states.resultLauncher.launch(intent)
+}
+
+@Composable
+fun LearnScreen(states: StateHolder) {
 }

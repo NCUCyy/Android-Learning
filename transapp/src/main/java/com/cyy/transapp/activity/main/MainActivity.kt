@@ -84,6 +84,7 @@ import kotlin.system.exitProcess
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // TODO：登录成功后，只是传过来了一个userId！
         // 默认给个id = 1，用于测试
         val userId = intent.getIntExtra("userId", 1)
 
@@ -113,7 +114,7 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(userId: Int, resultLauncher: ActivityResultLauncher<Intent>) {
-    val states = rememberStates(userId, resultLauncher)
+    val states = rememberStates(resultLauncher)
     val context = LocalContext.current as Activity
     val application = context.application as TransApp
 
@@ -125,13 +126,6 @@ fun MainScreen(userId: Int, resultLauncher: ActivityResultLauncher<Intent>) {
                 application.sentenceRepository
             )
         )
-    // MainActivity中管理User的ViewModel
-    val curUserViewModel = viewModel<CurUserViewModel>(
-        factory = CurUserViewModelFactory(
-            userId,
-            application.userRepository
-        )
-    )
     val showDeleteDialog = remember { mutableStateOf(false) }
     if (showDeleteDialog.value) {
         DeleteDialog(showDeleteDialog, queryViewModel::clearAllTransRecords)
@@ -221,7 +215,7 @@ fun MainScreen(userId: Int, resultLauncher: ActivityResultLauncher<Intent>) {
             // 页面的主体部分
             Box(modifier = Modifier.padding(it)) {
                 // 侧滑导航视图（侧滑界面+导航图）
-                DrawView(states, curUserViewModel)
+                DrawerView(states, userId)
             }
         },
         floatingActionButton = {
@@ -322,7 +316,15 @@ fun DialogButton(color: Color, text: String, icon: Int, action: () -> Unit) {
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DrawView(states: StateHolder, curUserViewModel: CurUserViewModel) {
+fun DrawerView(states: StateHolder, userId: Int) {
+    val application = LocalContext.current.applicationContext as TransApp
+    // MainActivity中管理User的ViewModel
+    val curUserViewModel = viewModel<CurUserViewModel>(
+        factory = CurUserViewModelFactory(
+            userId,
+            application.userRepository
+        )
+    )
     val curUser = curUserViewModel.curUser.collectAsStateWithLifecycle()
     ModalNavigationDrawer(
         // 抽屉是否可以通过手势进行交互
@@ -348,8 +350,6 @@ fun DrawView(states: StateHolder, curUserViewModel: CurUserViewModel) {
                             states.scope.launch {
                                 states.drawerState.close()
                             }
-                            // 跳转到UserActivity
-//                            states.navController.navigate(Screen.UserPage.route)
                         }
                     )
                     Text(text = "用户名", fontSize = 30.sp)
@@ -381,13 +381,13 @@ fun DrawView(states: StateHolder, curUserViewModel: CurUserViewModel) {
         },
         content = {
             // 主体是导航图
-            NavigationGraphScreen(states)
+            NavigationGraphScreen(states, userId)
         })
 }
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-fun NavigationGraphScreen(states: StateHolder) {
+fun NavigationGraphScreen(states: StateHolder, userId: Int) {
     // 定义宿主(需要：导航控制器、导航起点---String类型)
     NavHost(navController = states.navController, startDestination = states.startDestination) {
         // 定义有几个页面，就有几个composable(){...}
@@ -397,7 +397,7 @@ fun NavigationGraphScreen(states: StateHolder) {
             // 1、更新当前显示的Screen
             states.currentScreen.value = Screen.QueryPage
             // 2、此语句处才会展示指定的Screen
-            QueryScreen(states)
+            QueryScreen(states, userId)
         }
         // 页面2：听力
         composable(route = Screen.ListenPage.route) {
@@ -411,7 +411,7 @@ fun NavigationGraphScreen(states: StateHolder) {
             // 1、更新当前显示的Screen
             states.currentScreen.value = Screen.LearnPage
             // 2、此语句处才会展示指定的Screen
-            LearnScreen()
+            LearnScreen(states)
         }
     }
 }
@@ -457,8 +457,6 @@ fun MenuView(states: StateHolder) {
  */
 @OptIn(ExperimentalMaterial3Api::class)
 class StateHolder(
-    // 当前登录的用户的id
-    val curUserId: Int,
     val resultLauncher: ActivityResultLauncher<Intent>,
     // 当前页面是谁（只用于：bottomBar的selected中底部导航栏高亮显示当前页面的选项）
     val currentScreen: MutableState<Screen>,
@@ -479,16 +477,14 @@ class StateHolder(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun rememberStates(
-    curUserId: Int,
     resultLauncher: ActivityResultLauncher<Intent>,
     currentScreen: MutableState<Screen> = remember { mutableStateOf(Screen.QueryPage) },
     navController: NavHostController = rememberNavController(),
-    startDestination: String = Screen.QueryPage.route,
+    startDestination: String = Screen.LearnPage.route,
     scope: CoroutineScope = rememberCoroutineScope(),
     drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
     dropState: MutableState<Boolean> = mutableStateOf(false)
 ) = StateHolder(
-    curUserId,
     resultLauncher,
     currentScreen,
     navController,

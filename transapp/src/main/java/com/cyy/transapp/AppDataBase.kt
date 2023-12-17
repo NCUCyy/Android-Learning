@@ -9,7 +9,9 @@ import com.cyy.transapp.dao.StarWordDao
 import com.cyy.transapp.dao.TransRecordDao
 import com.cyy.transapp.dao.UserDao
 import com.cyy.transapp.pojo.Converters
+import com.cyy.transapp.pojo.Plan
 import com.cyy.transapp.pojo.StarWord
+import com.cyy.transapp.pojo.Today
 import com.cyy.transapp.pojo.TransRecord
 import com.cyy.transapp.pojo.User
 
@@ -27,7 +29,7 @@ import com.cyy.transapp.pojo.User
  */
 // 定义一个数据库类，用注解 @Database 标记，并将实体类的数组作为参数传递（会自动创建对应的数据表）
 @Database(
-    entities = [TransRecord::class, User::class, StarWord::class],
+    entities = [TransRecord::class, User::class, StarWord::class, Today::class, Plan::class],
     version = 1,
     exportSchema = false
 )
@@ -48,7 +50,7 @@ abstract class AppDataBase : RoomDatabase() {
                 val dataBase = Room.databaseBuilder(
                     context.applicationContext,
                     // 若修改了pojo，则需要修改这里的数据库名称（即：创建一个新的SQLite数据库）
-                    AppDataBase::class.java, "db4"
+                    AppDataBase::class.java, "db5"
                 )
                     .build()
                 INSTANCE = dataBase

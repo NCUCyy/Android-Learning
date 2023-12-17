@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
@@ -115,6 +116,7 @@ fun TransScreen(query: String = "Dec", userId: Int = 0) {
                         IconButton(onClick = {
                             // TODO：取消收藏
                             transViewModel.unstarWord()
+                            Toast.makeText(context, "取消成功！", Toast.LENGTH_SHORT).show()
                         }, modifier = Modifier.padding(end = 16.dp)) {
                             Icon(
                                 painter = painterResource(id = R.drawable.star_fill),
@@ -127,6 +129,7 @@ fun TransScreen(query: String = "Dec", userId: Int = 0) {
                         IconButton(onClick = {
                             // TODO：收藏
                             transViewModel.starWord()
+                            Toast.makeText(context, "收藏成功！", Toast.LENGTH_SHORT).show()
                         }, modifier = Modifier.padding(end = 16.dp)) {
                             Icon(
                                 painter = painterResource(id = R.drawable.star),
