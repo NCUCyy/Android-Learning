@@ -67,7 +67,7 @@ fun LoginScreen(resultLauncher: ActivityResultLauncher<Intent>) {
         viewModel<UserViewModel>(factory = UserViewModelFactory(application.userRepository))
     val username = userViewModel.username.collectAsState()
     val password = userViewModel.password.collectAsState()
-    val usernameAndPasswordState = userViewModel.usernameAndPasswordState.value
+    val usernameAndPasswordState = userViewModel.usernameAndPasswordState.collectAsState().value
     val loginState = userViewModel.loginState
     val context = LocalContext.current as ComponentActivity
 

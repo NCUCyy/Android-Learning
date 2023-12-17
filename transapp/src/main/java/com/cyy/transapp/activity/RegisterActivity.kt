@@ -81,8 +81,8 @@ fun RegisterScreen(resultLauncher: ActivityResultLauncher<Intent>) {
     val confirmPassword = userViewModel.confirmPassword.collectAsState()
 
     // 用户名、确认密码的状态（必须要有NOT_BEGIN）
-    val usernameState = userViewModel.usernameState.value
-    val confirmPasswordState = userViewModel.confirmPasswordState.value
+    val usernameState = userViewModel.usernameState.collectAsState().value
+    val confirmPasswordState = userViewModel.confirmPasswordState.collectAsState().value
 
     // 登录（必须要有NOT_BEGIN）
     val registerState = userViewModel.registerState

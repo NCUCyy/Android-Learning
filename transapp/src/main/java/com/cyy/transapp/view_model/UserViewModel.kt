@@ -1,6 +1,5 @@
 package com.cyy.transapp.view_model
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -31,14 +30,20 @@ class UserViewModel(private val userRepository: UserRepository) : ViewModel() {
 
 
     // 用户名状态(register)
-    val usernameState = mutableStateOf(UsernameState.NOT_BEGIN)
+    // 老办法：直接用MutableState
+    //  val usernameState = mutableStateOf(UsernameState.NOT_BEGIN)
+    // 正确方法？用MutableStateFlow
+    private val _usernameState = MutableStateFlow(UsernameState.NOT_BEGIN)
+    val usernameState = _usernameState.asStateFlow()
 
     // 确认密码状态(register)
-    val confirmPasswordState = mutableStateOf(ConfirmPasswordState.NOT_BEGIN)
+    private val _confirmPasswordState = MutableStateFlow(ConfirmPasswordState.NOT_BEGIN)
+    val confirmPasswordState = _confirmPasswordState.asStateFlow()
 
 
     // 用户名和密码状态(loginToMainActivity)
-    val usernameAndPasswordState = mutableStateOf(UsernameAndPasswordState.NOT_BEGIN)
+    private val _usernameAndPasswordState = MutableStateFlow(UsernameAndPasswordState.NOT_BEGIN)
+    val usernameAndPasswordState = _usernameAndPasswordState.asStateFlow()
 
     // 注册状态(register)---observe
     val registerState = MutableLiveData(RegisterState.NOT_BEGIN)
@@ -71,13 +76,13 @@ class UserViewModel(private val userRepository: UserRepository) : ViewModel() {
     fun login() = viewModelScope.launch {
         val user = userRepository.getByUsernameAndPassword(_username.value, _password.value)
         if (user != null) {
-            usernameAndPasswordState.value = UsernameAndPasswordState.CORRECT
+            _usernameAndPasswordState.value = UsernameAndPasswordState.CORRECT
             // TODO：注意给loginUser赋值 和 LoginState.SUCCESS 的顺序
             initLoginUser(user)
             loginState.value = LoginState.SUCCESS
             // TODO：Initial--Today
         } else {
-            usernameAndPasswordState.value = UsernameAndPasswordState.ERROR
+            _usernameAndPasswordState.value = UsernameAndPasswordState.ERROR
             loginState.value = LoginState.FAILED
         }
     }
@@ -99,16 +104,16 @@ class UserViewModel(private val userRepository: UserRepository) : ViewModel() {
     private fun judgeExist(username: String) = viewModelScope.launch {
         val user = userRepository.getByUsername(username)
         if (user != null) {
-            usernameState.value = UsernameState.EXIST
+            _usernameState.value = UsernameState.EXIST
         } else {
-            usernameState.value = UsernameState.AVAILABLE
+            _usernameState.value = UsernameState.AVAILABLE
         }
     }
 
     fun updateUsername(username: String) {
         _username.value = username
         if (username == "") {
-            usernameState.value = UsernameState.EMPTY
+            _usernameState.value = UsernameState.EMPTY
         } else {
             // 同步修改
             judgeExist(username)
@@ -122,9 +127,9 @@ class UserViewModel(private val userRepository: UserRepository) : ViewModel() {
     fun updateConfirmPassword(confirmPassword: String) {
         _confirmPassword.value = confirmPassword
         if (_password.value != confirmPassword) {
-            confirmPasswordState.value = ConfirmPasswordState.DIFFERENT
+            _confirmPasswordState.value = ConfirmPasswordState.DIFFERENT
         } else {
-            confirmPasswordState.value = ConfirmPasswordState.AVAILABLE
+            _confirmPasswordState.value = ConfirmPasswordState.AVAILABLE
         }
     }
 
