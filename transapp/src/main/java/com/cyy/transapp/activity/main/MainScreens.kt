@@ -1,4 +1,4 @@
-package com.cyy.transapp.activity.screens
+package com.cyy.transapp.activity.main
 
 import android.app.Activity
 import android.content.Intent
@@ -51,9 +51,6 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cyy.transapp.R
 import com.cyy.transapp.TransApp
-import com.cyy.transapp.activity.ListenActivity
-import com.cyy.transapp.activity.StateHolder
-import com.cyy.transapp.activity.TransActivity
 import com.cyy.transapp.model.OpResult
 import com.cyy.transapp.model.daily_sentence.SentenceModel
 import com.cyy.transapp.pojo.ListenResource
@@ -127,6 +124,7 @@ fun QueryScreen(states: StateHolder) {
                 // TODO:跳转到TransActivity
                 val intent = Intent(context, TransActivity::class.java)
                 intent.putExtra("query", query.value)
+                intent.putExtra("userId", states.curUserId)
                 states.resultLauncher.launch(intent)
             })
         )

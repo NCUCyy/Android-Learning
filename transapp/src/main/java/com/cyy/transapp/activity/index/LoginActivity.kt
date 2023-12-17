@@ -1,4 +1,4 @@
-package com.cyy.transapp.activity
+package com.cyy.transapp.activity.index
 
 import android.content.Intent
 import android.os.Bundle

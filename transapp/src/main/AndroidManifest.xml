@@ -14,16 +14,16 @@
             android:supportsRtl="true"
             android:theme="@style/Theme.Chenyi">
         <activity
-                android:name=".activity.StarWordActivity"
+                android:name=".activity.other.StarWordActivity"
                 android:exported="false" />
         <activity
-                android:name=".activity.LoginActivity"
+                android:name=".activity.index.LoginActivity"
                 android:exported="true" />
         <activity
-                android:name=".activity.RegisterActivity"
+                android:name=".activity.index.RegisterActivity"
                 android:exported="true" />
         <activity
-                android:name=".activity.ListenActivity"
+                android:name=".activity.main.ListenActivity"
                 android:exported="true" />
         <activity
                 android:name=".test.TestActivity"
@@ -39,19 +39,19 @@
                 android:exported="true" />
 
         <activity
-                android:name=".activity.UserActivity"
+                android:name=".activity.other.UserActivity"
                 android:exported="true" />
         <activity
-                android:name=".activity.LearnActivity"
+                android:name=".activity.main.LearnActivity"
                 android:exported="true" />
         <activity
-                android:name=".activity.TransActivity"
+                android:name=".activity.main.TransActivity"
                 android:exported="true" />
         <activity
-                android:name=".activity.IndexActivity"
+                android:name=".activity.index.IndexActivity"
                 android:exported="true" />
         <activity
-                android:name=".activity.MainActivity"
+                android:name=".activity.main.MainActivity"
                 android:exported="true" />
     </application>
 

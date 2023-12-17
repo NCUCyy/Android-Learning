@@ -1,4 +1,4 @@
-package com.cyy.transapp.activity
+package com.cyy.transapp.activity.main
 
 import android.app.Activity
 import android.content.BroadcastReceiver

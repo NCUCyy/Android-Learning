@@ -1,4 +1,4 @@
-package com.cyy.transapp.activity
+package com.cyy.transapp.activity.index
 
 import android.app.Activity
 import android.content.Intent
@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cyy.transapp.R
 import com.cyy.transapp.TransApp
+import com.cyy.transapp.activity.main.MainActivity
 import com.cyy.transapp.model.ConfirmPasswordState
 import com.cyy.transapp.model.RegisterState
 import com.cyy.transapp.model.UsernameState

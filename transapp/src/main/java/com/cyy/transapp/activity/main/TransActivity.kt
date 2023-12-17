@@ -1,8 +1,9 @@
-package com.cyy.transapp.activity
+package com.cyy.transapp.activity.main
 
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
@@ -33,7 +34,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,8 +56,6 @@ import com.cyy.transapp.model.trans.TransRes
 import com.cyy.transapp.model.trans.Web
 import com.cyy.transapp.pojo.TransRecord
 import com.cyy.transapp.service.VoiceService
-import com.cyy.transapp.view_model.StarWordViewModel
-import com.cyy.transapp.view_model.StarWordViewModelFactory
 import com.cyy.transapp.view_model.TransRecordViewModel
 import com.cyy.transapp.view_model.TransRecordViewModelFactory
 import com.cyy.transapp.view_model.TransViewModel
@@ -67,6 +65,7 @@ class TransActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val userId = intent.getIntExtra("userId", 0)
+        Log.i("TransActivity", "userId: $userId")
         val query = intent.getStringExtra("query")!!.trim()
         setContent {
             TransScreen(query, userId)
@@ -80,15 +79,16 @@ class TransActivity : ComponentActivity() {
 fun TransScreen(query: String = "Dec", userId: Int = 0) {
     val context = LocalContext.current as Activity
     val application = LocalContext.current.applicationContext as TransApp
-    val starWordViewModel = viewModel<StarWordViewModel>(
-        factory = StarWordViewModelFactory(
-            userId,
-            application.starWordRepository
+    val transViewModel =
+        viewModel<TransViewModel>(
+            factory = TransViewModelFactory(
+                application.transRepository,
+                userId,
+                query,
+                application.starWordRepository
+            )
         )
-    )
-
-    var wordExistState = starWordViewModel.wordExistState.value
-
+    val isStared = transViewModel.isStared.collectAsState()
     // 脚手架
     Scaffold(
         topBar = {
@@ -111,25 +111,38 @@ fun TransScreen(query: String = "Dec", userId: Int = 0) {
                     }
                 },
                 actions = {
-                    // TODO：加入生词本---需要if判断是否已经加入生词本
-                    IconButton(onClick = {
-
-                    }, modifier = Modifier.padding(end = 16.dp)) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.star_fill),
-                            contentDescription = null,
-                            Modifier.size(30.dp),
-                            tint = Color(0xFFE8C11C)
-                        )
+                    if (isStared.value) {
+                        IconButton(onClick = {
+                            // TODO：取消收藏
+                            transViewModel.unstarWord()
+                        }, modifier = Modifier.padding(end = 16.dp)) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.star_fill),
+                                contentDescription = null,
+                                Modifier.size(30.dp),
+                                tint = Color(0xFFE8C11C)
+                            )
+                        }
+                    } else {
+                        IconButton(onClick = {
+                            // TODO：收藏
+                            transViewModel.starWord()
+                        }, modifier = Modifier.padding(end = 16.dp)) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.star),
+                                contentDescription = null,
+                                Modifier.size(30.dp),
+                                tint = Color(0xFFE8C11C)
+                            )
+                        }
                     }
-
                 }
             )
         },
         content = {
             // 页面的主体部分
             Box(modifier = Modifier.padding(it)) {
-                ContentScreen(query, userId)
+                ContentScreen(query, userId, transViewModel)
             }
         },
         floatingActionButton = {
@@ -137,22 +150,19 @@ fun TransScreen(query: String = "Dec", userId: Int = 0) {
 }
 
 @Composable
-fun ContentScreen(query: String, userId: Int) {
+fun ContentScreen(query: String, userId: Int, transViewModel: TransViewModel) {
     val application = LocalContext.current.applicationContext as TransApp
-    val transViewModel =
-        viewModel<TransViewModel>(
-            factory = TransViewModelFactory(application.transRepository)
-        )
+
     val transRecordViewModel =
         viewModel<TransRecordViewModel>(
             factory = TransRecordViewModelFactory(
                 application.transRepository
             )
         )
-
-    LaunchedEffect(key1 = query) {
-        transViewModel.translate(query)
-    }
+//
+//    LaunchedEffect(key1 = query) {
+//        transViewModel.translate(query)
+//    }
     val transState = transViewModel.transState.collectAsState()
     Box(modifier = Modifier.fillMaxSize()) {
         when (transState.value) {

@@ -1,4 +1,4 @@
-package com.cyy.transapp.activity
+package com.cyy.transapp.activity.main
 
 
 import android.annotation.SuppressLint
@@ -72,11 +72,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.cyy.transapp.R
 import com.cyy.transapp.TransApp
-import com.cyy.transapp.activity.screens.LearnScreen
-import com.cyy.transapp.activity.screens.ListenScreen
-import com.cyy.transapp.activity.screens.QueryScreen
-import com.cyy.transapp.activity.screens.Screen
-import com.cyy.transapp.activity.screens.screens
 import com.cyy.transapp.view_model.CurUserViewModel
 import com.cyy.transapp.view_model.CurUserViewModelFactory
 import com.cyy.transapp.view_model.QueryViewModel
@@ -118,7 +113,7 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(userId: Int, resultLauncher: ActivityResultLauncher<Intent>) {
-    val states = rememberStates(resultLauncher)
+    val states = rememberStates(userId, resultLauncher)
     val context = LocalContext.current as Activity
     val application = context.application as TransApp
 
@@ -462,6 +457,8 @@ fun MenuView(states: StateHolder) {
  */
 @OptIn(ExperimentalMaterial3Api::class)
 class StateHolder(
+    // 当前登录的用户的id
+    val curUserId: Int,
     val resultLauncher: ActivityResultLauncher<Intent>,
     // 当前页面是谁（只用于：bottomBar的selected中底部导航栏高亮显示当前页面的选项）
     val currentScreen: MutableState<Screen>,
@@ -482,6 +479,7 @@ class StateHolder(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun rememberStates(
+    curUserId: Int,
     resultLauncher: ActivityResultLauncher<Intent>,
     currentScreen: MutableState<Screen> = remember { mutableStateOf(Screen.QueryPage) },
     navController: NavHostController = rememberNavController(),
@@ -490,6 +488,7 @@ fun rememberStates(
     drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
     dropState: MutableState<Boolean> = mutableStateOf(false)
 ) = StateHolder(
+    curUserId,
     resultLauncher,
     currentScreen,
     navController,

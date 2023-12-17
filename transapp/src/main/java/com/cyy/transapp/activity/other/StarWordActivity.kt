@@ -1,4 +1,4 @@
-package com.cyy.transapp.activity
+package com.cyy.transapp.activity.other
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity

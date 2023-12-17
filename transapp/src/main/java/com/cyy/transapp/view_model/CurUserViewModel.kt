@@ -19,6 +19,9 @@ class CurUserViewModel(private val userId: Int, private val userRepository: User
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000)
     )
+    val today = null
+    val plan = null
+    val starWords = null
 }
 
 class CurUserViewModelFactory(private val userId: Int, private val userRepository: UserRepository) :

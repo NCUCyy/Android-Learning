@@ -20,6 +20,9 @@ interface StarWordDao {
     @Delete
     suspend fun delete(vararg starWord: StarWord)
 
+    @Query("DELETE FROM star_words WHERE userId = :userId AND word = :word")
+    suspend fun deleteByUserIdAndWord(userId: Int, word: String)
+
     @Query("DELETE FROM star_words") // 表名会自动转大写
     suspend fun deleteAll()
 
@@ -32,4 +35,7 @@ interface StarWordDao {
      */
     @Query("SELECT * from star_words WHERE userId = :userId ORDER BY addTime")
     fun getAllByUserId(userId: Int): Flow<List<StarWord>>
+
+    @Query("SELECT * from star_words WHERE userId = :userId and word = :word")
+    suspend fun getStarWordByUserIdAndWord(userId: Int, word: String): StarWord
 }

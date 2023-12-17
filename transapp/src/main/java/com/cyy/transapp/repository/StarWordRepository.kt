@@ -22,6 +22,11 @@ class StarWordRepository(private val starWordDao: StarWordDao) {
     }
 
     @WorkerThread
+    suspend fun deleteByUserIdAndWord(userId: Int, word: String) {
+        starWordDao.deleteByUserIdAndWord(userId, word)
+    }
+
+    @WorkerThread
     suspend fun deleteAll() {
         starWordDao.deleteAll()
     }
@@ -29,5 +34,10 @@ class StarWordRepository(private val starWordDao: StarWordDao) {
     @WorkerThread
     fun getAllByUserId(userId: Int): Flow<List<StarWord>> {
         return starWordDao.getAllByUserId(userId)
+    }
+
+    @WorkerThread
+    suspend fun getStarWordByUserIdAndWord(userId: Int, word: String): StarWord {
+        return starWordDao.getStarWordByUserIdAndWord(userId, word)
     }
 }
