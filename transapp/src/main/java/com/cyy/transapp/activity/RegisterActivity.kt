@@ -1,5 +1,6 @@
 package com.cyy.transapp.activity
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -31,6 +32,7 @@ import com.cyy.transapp.TransApp
 import com.cyy.transapp.model.ConfirmPasswordState
 import com.cyy.transapp.model.RegisterState
 import com.cyy.transapp.model.UsernameState
+import com.cyy.transapp.pojo.User
 import com.cyy.transapp.view_model.UserViewModel
 import com.cyy.transapp.view_model.UserViewModelFactory
 
@@ -53,32 +55,56 @@ class RegisterActivity : ComponentActivity() {
     }
 }
 
+/**
+ * 通用登录函数---loginToMainActivity/register都要用
+ */
+fun loginToMainActivity(
+    resultLauncher: ActivityResultLauncher<Intent>,
+    context: Activity,
+    loginUser: User
+) {
+    val intent = Intent(context, MainActivity::class.java)
+    intent.putExtra("userId", loginUser.id)
+    resultLauncher.launch(intent)
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(resultLauncher: ActivityResultLauncher<Intent>) {
     val application = LocalContext.current.applicationContext as TransApp
     val userViewModel =
         viewModel<UserViewModel>(factory = UserViewModelFactory(application.userRepository))
+
+    // 输入的用户名、密码、确认密码
     val username = userViewModel.username.collectAsState()
     val password = userViewModel.password.collectAsState()
     val confirmPassword = userViewModel.confirmPassword.collectAsState()
+
+    // 用户名、确认密码的状态（必须要有NOT_BEGIN）
     val usernameState = userViewModel.usernameState.value
     val confirmPasswordState = userViewModel.confirmPasswordState.value
+
+    // 登录（必须要有NOT_BEGIN）
     val registerState = userViewModel.registerState
     val context = LocalContext.current as ComponentActivity
 
+    // TODO：点击注册按钮---onClick后，修改registerState(观察registerState的改变)
     registerState.observe(context) {
         if (registerState.value == RegisterState.SUCCESS) {
-            val intent = Intent(context, MainActivity::class.java)
-            intent.putExtra("username", username.value)
-            resultLauncher.launch(intent)
+            val loginUser = userViewModel.loginUser
+            // TODO：loginToMainActivity
+            loginToMainActivity(resultLauncher, context, loginUser)
+            // 提示登录成功
             Toast.makeText(context, registerState.value!!.desc, Toast.LENGTH_LONG).show()
+            // 必须恢复为NOT_BEGIN
             registerState.value = RegisterState.NOT_BEGIN
         } else if (registerState.value == RegisterState.FAILED) {
             Toast.makeText(context, registerState.value!!.desc, Toast.LENGTH_LONG).show()
             registerState.value = RegisterState.NOT_BEGIN
         }
     }
+
+    // TODO：UI
     Column {
         Row(verticalAlignment = Alignment.CenterVertically) {
             TextField(

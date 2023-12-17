@@ -1,5 +1,8 @@
 package com.cyy.transapp.model
 
+/**
+ * 注意每个都必须有Not_BEGIN这个状态
+ */
 enum class UsernameState(val desc: String) {
     NOT_BEGIN(""),// 用户名未开始输入
     EXIST("用户名已存在"),// 用户名已存在
@@ -21,7 +24,7 @@ enum class RegisterState(val desc: String) {
 
 enum class UsernameAndPasswordState(val desc: String) {
     NOT_BEGIN(""),// 用户名和密码未开始输入
-    ERROR("用户名和密码错误"),// 用户名和密码错误
+    ERROR("用户名或密码错误"),// 用户名和密码错误
     CORRECT(""),// 用户名和密码正确
 }
 

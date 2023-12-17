@@ -17,39 +17,48 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class UserViewModel(private val userRepository: UserRepository) : ViewModel() {
-    // 用户名
+    // 用户名(register/loginToMainActivity)
     private val _username = MutableStateFlow("")
     val username = _username.asStateFlow()
 
-    // 密码
+    // 密码(register/loginToMainActivity)
     private val _password = MutableStateFlow("")
     val password = _password.asStateFlow()
 
-    // 确认密码
+    // 确认密码(register)
     private val _confirmPassword = MutableStateFlow("")
     val confirmPassword = _confirmPassword.asStateFlow()
 
-    // 用户名状态
+
+    // 用户名状态(register)
     val usernameState = mutableStateOf(UsernameState.NOT_BEGIN)
 
-    // 确认密码状态
+    // 确认密码状态(register)
     val confirmPasswordState = mutableStateOf(ConfirmPasswordState.NOT_BEGIN)
 
-    // 用户名和密码状态
+
+    // 用户名和密码状态(loginToMainActivity)
     val usernameAndPasswordState = mutableStateOf(UsernameAndPasswordState.NOT_BEGIN)
 
-    // 注册状态
+    // 注册状态(register)---observe
     val registerState = MutableLiveData(RegisterState.NOT_BEGIN)
 
-    // 登录状态
+    // 登录状态(loginToMainActivity)---observe
     val loginState = MutableLiveData(LoginState.NOT_BEGIN)
 
+    lateinit var loginUser: User
+    private fun updateLoginUser(user: User) {
+        loginUser = user
+    }
 
     fun login() = viewModelScope.launch {
-        var user = userRepository.getByUsernameAndPassword(_username.value, _password.value)
+        val user = userRepository.getByUsernameAndPassword(_username.value, _password.value)
         if (user != null) {
             usernameAndPasswordState.value = UsernameAndPasswordState.CORRECT
+            // TODO：注意给loginUser赋值 和 LoginState.SUCCESS 的顺序
+            updateLoginUser(user)
             loginState.value = LoginState.SUCCESS
+            // TODO：Initial--Today
         } else {
             usernameAndPasswordState.value = UsernameAndPasswordState.ERROR
             loginState.value = LoginState.FAILED
@@ -58,22 +67,24 @@ class UserViewModel(private val userRepository: UserRepository) : ViewModel() {
 
     fun register() = viewModelScope.launch {
         if (usernameState.value == UsernameState.AVAILABLE && confirmPasswordState.value == ConfirmPasswordState.AVAILABLE) {
-            val user = User(_username.value, _password.value)
+            var user = User(_username.value, _password.value)
             userRepository.insert(user)
+            user = userRepository.getByUsernameAndPassword(_username.value, _password.value)
+            // TODO：注意给loginUser赋值 和 RegisterState.SUCCESS 的顺序
+            updateLoginUser(user)
             registerState.value = RegisterState.SUCCESS
+            // TODO：Initial--Today
         } else {
             registerState.value = RegisterState.FAILED
         }
     }
 
     private fun judgeExist(username: String) = viewModelScope.launch {
-        if (username != "") {
-            val user = userRepository.getByUsername(username)
-            if (user != null) {
-                usernameState.value = UsernameState.EXIST
-            } else {
-                usernameState.value = UsernameState.AVAILABLE
-            }
+        val user = userRepository.getByUsername(username)
+        if (user != null) {
+            usernameState.value = UsernameState.EXIST
+        } else {
+            usernameState.value = UsernameState.AVAILABLE
         }
     }
 
@@ -102,7 +113,6 @@ class UserViewModel(private val userRepository: UserRepository) : ViewModel() {
 
     fun update(vararg user: User) = viewModelScope.launch {
         userRepository.update(*user)
-//        updateRes.value = true
     }
 
     fun delete(vararg user: User) = viewModelScope.launch {

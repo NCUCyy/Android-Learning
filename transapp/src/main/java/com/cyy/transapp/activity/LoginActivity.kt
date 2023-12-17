@@ -65,17 +65,20 @@ fun LoginScreen(resultLauncher: ActivityResultLauncher<Intent>) {
     val application = LocalContext.current.applicationContext as TransApp
     val userViewModel =
         viewModel<UserViewModel>(factory = UserViewModelFactory(application.userRepository))
+    //
     val username = userViewModel.username.collectAsState()
     val password = userViewModel.password.collectAsState()
     val usernameAndPasswordState = userViewModel.usernameAndPasswordState.value
     val loginState = userViewModel.loginState
     val context = LocalContext.current as ComponentActivity
 
+
     loginState.observe(context) {
         if (loginState.value == LoginState.SUCCESS) {
-            val intent = Intent(context, MainActivity::class.java)
-            intent.putExtra("username", username.value)
-            resultLauncher.launch(intent)
+            val loginUser = userViewModel.loginUser
+            // TODO：loginToMainActivity
+            loginToMainActivity(resultLauncher, context, loginUser)
+            // 提示登录成功
             Toast.makeText(context, loginState.value!!.desc, Toast.LENGTH_LONG).show()
             loginState.value = LoginState.NOT_BEGIN
         } else if (loginState.value == LoginState.FAILED) {
