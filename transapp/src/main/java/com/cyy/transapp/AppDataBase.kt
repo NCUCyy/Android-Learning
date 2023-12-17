@@ -5,7 +5,9 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.cyy.transapp.dao.PlanDao
 import com.cyy.transapp.dao.StarWordDao
+import com.cyy.transapp.dao.TodayDao
 import com.cyy.transapp.dao.TransRecordDao
 import com.cyy.transapp.dao.UserDao
 import com.cyy.transapp.pojo.Converters
@@ -39,6 +41,8 @@ abstract class AppDataBase : RoomDatabase() {
     abstract fun getTransRecordDao(): TransRecordDao
     abstract fun getUserDao(): UserDao
     abstract fun getStarWordDao(): StarWordDao
+    abstract fun getTodayDao(): TodayDao
+    abstract fun getPlanDao(): PlanDao
 
     // 创建一个单例对象，避免同时打开多个数据库实例
     companion object {
@@ -50,7 +54,7 @@ abstract class AppDataBase : RoomDatabase() {
                 val dataBase = Room.databaseBuilder(
                     context.applicationContext,
                     // 若修改了pojo，则需要修改这里的数据库名称（即：创建一个新的SQLite数据库）
-                    AppDataBase::class.java, "db5"
+                    AppDataBase::class.java, "db6"
                 )
                     .build()
                 INSTANCE = dataBase
