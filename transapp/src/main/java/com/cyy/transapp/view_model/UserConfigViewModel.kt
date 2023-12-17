@@ -8,12 +8,8 @@ import com.cyy.transapp.repository.UserRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 
-/**
- * 保存当前登录的用户---curUser（根据UserId查询得到，ViewModel初始化的时候得到）
- */
-class CurUserViewModel(private val userId: Int, private val userRepository: UserRepository) :
+class UserConfigViewModel(private val userId: Int, private val userRepository: UserRepository) :
     ViewModel() {
-    // 当前登录的用户
     val curUser = userRepository.getById(userId).stateIn(
         initialValue = User(),
         scope = viewModelScope,
@@ -21,12 +17,15 @@ class CurUserViewModel(private val userId: Int, private val userRepository: User
     )
 }
 
-class CurUserViewModelFactory(private val userId: Int, private val userRepository: UserRepository) :
+class UserConfigViewModelFactory(
+    private val userId: Int,
+    private val userRepository: UserRepository
+) :
     ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(CurUserViewModel::class.java)) {
+        if (modelClass.isAssignableFrom(UserConfigViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return CurUserViewModel(userId, userRepository) as T
+            return UserConfigViewModel(userId, userRepository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

@@ -7,10 +7,9 @@ import com.drake.net.Get
 import com.drake.net.utils.scopeNet
 
 /**
- * 查询模块的数据仓库
- * 1. 每日一句
+ * 查询模块的句子仓库---【每日一句】
  */
-class QueryRepository {
+class SentenceRepository {
     /**
      * 请求加载数据
      * @param callBack Function1<Result2<String>, Unit> 回调

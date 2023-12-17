@@ -46,17 +46,34 @@ class UserViewModel(private val userRepository: UserRepository) : ViewModel() {
     // 登录状态(loginToMainActivity)---observe
     val loginState = MutableLiveData(LoginState.NOT_BEGIN)
 
+    // TODO：当前登录的用户（login/register成功后再赋值），只是为了获得userId，才有这个变量！（不想用username！）
     lateinit var loginUser: User
-    private fun updateLoginUser(user: User) {
+
+    private fun initLoginUser(user: User) {
         loginUser = user
     }
+//
+//    var user = mutableStateOf(
+//        userRepository.getById(1).stateIn(
+//            initialValue = User(),
+//            scope = viewModelScope,
+//            started = SharingStarted.WhileSubscribed(5000)
+//        )
+//    )
+//    fun updateUser() {
+//        user.value = userRepository.getById(1).stateIn(
+//            initialValue = User(),
+//            scope = viewModelScope,
+//            started = SharingStarted.WhileSubscribed(5000)
+//        )
+//    }
 
     fun login() = viewModelScope.launch {
         val user = userRepository.getByUsernameAndPassword(_username.value, _password.value)
         if (user != null) {
             usernameAndPasswordState.value = UsernameAndPasswordState.CORRECT
             // TODO：注意给loginUser赋值 和 LoginState.SUCCESS 的顺序
-            updateLoginUser(user)
+            initLoginUser(user)
             loginState.value = LoginState.SUCCESS
             // TODO：Initial--Today
         } else {
@@ -71,7 +88,7 @@ class UserViewModel(private val userRepository: UserRepository) : ViewModel() {
             userRepository.insert(user)
             user = userRepository.getByUsernameAndPassword(_username.value, _password.value)
             // TODO：注意给loginUser赋值 和 RegisterState.SUCCESS 的顺序
-            updateLoginUser(user)
+            initLoginUser(user)
             registerState.value = RegisterState.SUCCESS
             // TODO：Initial--Today
         } else {

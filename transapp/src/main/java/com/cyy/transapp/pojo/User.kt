@@ -1,7 +1,9 @@
 package com.cyy.transapp.pojo
 
 import androidx.room.Entity
+import androidx.room.Ignore
 import androidx.room.PrimaryKey
+import com.cyy.transapp.R
 
 @Entity(tableName = "users")
 class User {
@@ -11,16 +13,15 @@ class User {
     var password: String = ""
     var nickname: String = ""
     var profile: String = ""
-    var iconId: Int = 0
+    var iconId: Int = R.drawable.user
     var todayId: Int = 0
     var planId: Int = 0
     var starBookId: Int = 0
 
-    // 空参构造器
-    constructor() {
 
-    }
+    constructor()
 
+    @Ignore
     // 用于注册---简要信息（其他默认）
     constructor(username: String, password: String) : this() {
         this.username = username

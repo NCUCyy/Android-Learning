@@ -56,18 +56,20 @@ import com.cyy.transapp.model.trans.TransRes
 import com.cyy.transapp.model.trans.Web
 import com.cyy.transapp.pojo.TransRecord
 import com.cyy.transapp.service.VoiceService
+import com.cyy.transapp.view_model.StarWordViewModel
+import com.cyy.transapp.view_model.StarWordViewModelFactory
 import com.cyy.transapp.view_model.TransRecordViewModel
 import com.cyy.transapp.view_model.TransRecordViewModelFactory
 import com.cyy.transapp.view_model.TransViewModel
 import com.cyy.transapp.view_model.TransViewModelFactory
-import java.time.OffsetDateTime
 
 class TransActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val userId = intent.getIntExtra("userId", 0)
         val query = intent.getStringExtra("query")!!.trim()
         setContent {
-            TransScreen(query)
+            TransScreen(query, userId)
         }
     }
 }
@@ -75,9 +77,17 @@ class TransActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
-fun TransScreen(query: String = "Dec") {
-    // 当前应用的上下文
+fun TransScreen(query: String = "Dec", userId: Int = 0) {
     val context = LocalContext.current as Activity
+    val application = LocalContext.current.applicationContext as TransApp
+    val starWordViewModel = viewModel<StarWordViewModel>(
+        factory = StarWordViewModelFactory(
+            userId,
+            application.starWordRepository
+        )
+    )
+
+    var wordExistState = starWordViewModel.wordExistState.value
 
     // 脚手架
     Scaffold(
@@ -103,7 +113,7 @@ fun TransScreen(query: String = "Dec") {
                 actions = {
                     // TODO：加入生词本---需要if判断是否已经加入生词本
                     IconButton(onClick = {
-                        /*TODO*/
+
                     }, modifier = Modifier.padding(end = 16.dp)) {
                         Icon(
                             painter = painterResource(id = R.drawable.star_fill),
@@ -119,7 +129,7 @@ fun TransScreen(query: String = "Dec") {
         content = {
             // 页面的主体部分
             Box(modifier = Modifier.padding(it)) {
-                ContentScreen(query)
+                ContentScreen(query, userId)
             }
         },
         floatingActionButton = {
@@ -127,7 +137,7 @@ fun TransScreen(query: String = "Dec") {
 }
 
 @Composable
-fun ContentScreen(query: String) {
+fun ContentScreen(query: String, userId: Int) {
     val application = LocalContext.current.applicationContext as TransApp
     val transViewModel =
         viewModel<TransViewModel>(
@@ -139,6 +149,7 @@ fun ContentScreen(query: String) {
                 application.transRepository
             )
         )
+
     LaunchedEffect(key1 = query) {
         transViewModel.translate(query)
     }
@@ -148,10 +159,9 @@ fun ContentScreen(query: String) {
             is OpResult.Success -> {
                 // TODO：显示翻译结果
                 val transRecord = TransRecord(
+                    userId = userId,
                     word = query,
                     trans = ((transState.value as OpResult.Success<*>).data as TransRes).translation[0],
-                    freq = 1,
-                    lastQueryTime = OffsetDateTime.now()
                 )
                 transRecordViewModel.updateHistory(transRecord)
                 TransDetailScreen((transState.value as OpResult.Success<*>).data as TransRes)

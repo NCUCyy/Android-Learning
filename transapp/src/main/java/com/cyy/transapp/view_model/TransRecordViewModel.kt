@@ -16,7 +16,7 @@ class TransRecordViewModel(private val transRecordRepository: TransRepository) :
         val last = transRecordRepository.getByWord(cur.word)
         if (last == null) {
             transRecordRepository.insert(cur)
-        } else {
+        } else{
             last.freq++
             last.lastQueryTime = cur.lastQueryTime
             transRecordRepository.update(last)

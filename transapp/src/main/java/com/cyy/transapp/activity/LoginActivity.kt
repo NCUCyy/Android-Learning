@@ -65,7 +65,6 @@ fun LoginScreen(resultLauncher: ActivityResultLauncher<Intent>) {
     val application = LocalContext.current.applicationContext as TransApp
     val userViewModel =
         viewModel<UserViewModel>(factory = UserViewModelFactory(application.userRepository))
-    //
     val username = userViewModel.username.collectAsState()
     val password = userViewModel.password.collectAsState()
     val usernameAndPasswordState = userViewModel.usernameAndPasswordState.value

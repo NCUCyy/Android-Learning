@@ -5,7 +5,6 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -65,8 +64,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.core.app.ActivityCompat.finishAffinity
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -79,6 +77,8 @@ import com.cyy.transapp.activity.screens.ListenScreen
 import com.cyy.transapp.activity.screens.QueryScreen
 import com.cyy.transapp.activity.screens.Screen
 import com.cyy.transapp.activity.screens.screens
+import com.cyy.transapp.view_model.CurUserViewModel
+import com.cyy.transapp.view_model.CurUserViewModelFactory
 import com.cyy.transapp.view_model.QueryViewModel
 import com.cyy.transapp.view_model.QueryViewModelFactory
 import kotlinx.coroutines.CoroutineScope
@@ -89,8 +89,9 @@ import kotlin.system.exitProcess
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val userId = intent.getIntExtra("userId", 0)
-        Log.i("MainActivity", "userId: $userId")
+        // 默认给个id = 1，用于测试
+        val userId = intent.getIntExtra("userId", 1)
+
         // 使用ActivityResultLauncher进行意图跳转
         val resultLauncher: ActivityResultLauncher<Intent> = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult(),
@@ -104,7 +105,7 @@ class MainActivity : ComponentActivity() {
             }
         )
         setContent {
-            MainScreen(resultLauncher)
+            MainScreen(userId, resultLauncher)
         }
     }
 }
@@ -116,20 +117,26 @@ class MainActivity : ComponentActivity() {
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(resultLauncher: ActivityResultLauncher<Intent>) {
-    // 1、定义状态集合————直接把这个状态集合作为compose组件之间传参的媒介
-    // 2、状态定义到顶层————单一数据流
+fun MainScreen(userId: Int, resultLauncher: ActivityResultLauncher<Intent>) {
     val states = rememberStates(resultLauncher)
-    // 当前应用的上下文
     val context = LocalContext.current as Activity
     val application = context.application as TransApp
+
+    // TODO：查词记录的ViewModel
     val queryViewModel =
         viewModel<QueryViewModel>(
             factory = QueryViewModelFactory(
                 application.transRepository,
-                application.queryRepository
+                application.sentenceRepository
             )
         )
+    // MainActivity中管理User的ViewModel
+    val curUserViewModel = viewModel<CurUserViewModel>(
+        factory = CurUserViewModelFactory(
+            userId,
+            application.userRepository
+        )
+    )
     val showDeleteDialog = remember { mutableStateOf(false) }
     if (showDeleteDialog.value) {
         DeleteDialog(showDeleteDialog, queryViewModel::clearAllTransRecords)
@@ -219,7 +226,7 @@ fun MainScreen(resultLauncher: ActivityResultLauncher<Intent>) {
             // 页面的主体部分
             Box(modifier = Modifier.padding(it)) {
                 // 侧滑导航视图（侧滑界面+导航图）
-                DrawView(states)
+                DrawView(states, curUserViewModel)
             }
         },
         floatingActionButton = {
@@ -320,10 +327,8 @@ fun DialogButton(color: Color, text: String, icon: Int, action: () -> Unit) {
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DrawView(states: StateHolder) {
-    // 创建一个 ViewModelProvider 实例
-    val viewModelProvider = ViewModelProvider(LocalContext.current as ViewModelStoreOwner)
-
+fun DrawView(states: StateHolder, curUserViewModel: CurUserViewModel) {
+    val curUser = curUserViewModel.curUser.collectAsStateWithLifecycle()
     ModalNavigationDrawer(
         // 抽屉是否可以通过手势进行交互
         gesturesEnabled = true,
@@ -342,7 +347,7 @@ fun DrawView(states: StateHolder) {
             ) {
                 Row(modifier = Modifier.padding(bottom = 50.dp)) {
                     Icon(
-                        painter = painterResource(id = R.drawable.user),
+                        painter = painterResource(id = curUser.value.iconId),
                         contentDescription = null,
                         modifier = Modifier.clickable {
                             states.scope.launch {

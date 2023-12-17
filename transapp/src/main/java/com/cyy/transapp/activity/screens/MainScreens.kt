@@ -89,7 +89,7 @@ fun QueryScreen(states: StateHolder) {
     val queryViewModel = viewModel<QueryViewModel>(
         factory = QueryViewModelFactory(
             application.transRepository,
-            application.queryRepository
+            application.sentenceRepository
         )
     )
     val query = queryViewModel.query.collectAsState()

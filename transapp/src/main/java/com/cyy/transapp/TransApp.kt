@@ -7,7 +7,8 @@ import android.content.Context
 import android.os.Build
 import com.cyy.transapp.network.SerializationConverter
 import com.cyy.transapp.repository.ListenRepository
-import com.cyy.transapp.repository.QueryRepository
+import com.cyy.transapp.repository.SentenceRepository
+import com.cyy.transapp.repository.StarWordRepository
 import com.cyy.transapp.repository.TransRepository
 import com.cyy.transapp.repository.UserRepository
 import com.drake.net.BuildConfig
@@ -22,9 +23,10 @@ class TransApp : Application() {
 
 
     val transRepository by lazy { TransRepository(database.getTransRecordDao()) }
-    val queryRepository by lazy { QueryRepository() }
+    val sentenceRepository by lazy { SentenceRepository() }
     val listenRepository by lazy { ListenRepository() }
     val userRepository by lazy { UserRepository(database.getUserDao()) }
+    val starWordRepository by lazy { StarWordRepository(database.getStarWordDao()) }
     override fun onCreate() {
         super.onCreate()
         // Net设置
