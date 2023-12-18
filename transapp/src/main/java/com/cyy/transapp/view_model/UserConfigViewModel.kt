@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.stateIn
 
 class UserConfigViewModel(private val userId: Int, private val userRepository: UserRepository) :
     ViewModel() {
-    val curUser = userRepository.getById(userId).stateIn(
+    val curUser = userRepository.getFlowById(userId).stateIn(
         initialValue = User(),
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000)

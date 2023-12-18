@@ -2,7 +2,6 @@ package com.cyy.transapp.activity.main
 
 import android.app.Activity
 import android.content.Intent
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -431,11 +430,10 @@ fun LearnScreen(states: StateHolder, learnReviewViewModel: LearnReviewViewModel)
 fun VocabularyCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel) {
     val context = LocalContext.current as Activity
     val curUser = learnReviewViewModel.curUser.collectAsStateWithLifecycle()
-    Log.i("LearnScreen", "curUser: ${curUser.value}")
     Card(
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
         modifier = Modifier.clickable {
-            if (curUser.value.vocabulary == "") {
+            if (curUser.value.vocabulary == "未选择") {
                 // TODO：跳转到VocabularyActivity
                 val intent = Intent(context, VocabularyActivity::class.java)
                 states.resultLauncher.launch(intent)
@@ -469,10 +467,16 @@ fun ProgressCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel
 @Composable
 fun LearnAndReviewCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel) {
     // TODO：？？？问题
-    val learnProcess = learnReviewViewModel.getLearnProcess()
-    Button(onClick = { /*TODO*/ }) {
-        Text(text = "Learn:${learnProcess.process.size}")
+    val plan = learnReviewViewModel.plan.collectAsStateWithLifecycle()
+    val curUser = learnReviewViewModel.curUser.collectAsStateWithLifecycle()
+    Text(text = "Learn:${curUser.value.username}")
+    if (plan.value != null) {
+        Text(text = "Learn:${plan.value.vocabulary}")
     }
+//    val learnProcess = learnReviewViewModel.getLearnProcess()
+//    Button(onClick = { /*TODO*/ }) {
+//        Text(text = "Learn:${learnProcess.process.size}")
+//    }
 }
 
 @Composable

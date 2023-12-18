@@ -9,13 +9,18 @@ import com.cyy.transapp.model.LoginState
 import com.cyy.transapp.model.RegisterState
 import com.cyy.transapp.model.UsernameAndPasswordState
 import com.cyy.transapp.model.UsernameState
+import com.cyy.transapp.pojo.Plan
 import com.cyy.transapp.pojo.User
+import com.cyy.transapp.repository.PlanRepository
 import com.cyy.transapp.repository.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class UserViewModel(private val userRepository: UserRepository) : ViewModel() {
+class UserViewModel(
+    private val userRepository: UserRepository,
+    private val planRepository: PlanRepository
+) : ViewModel() {
     // 用户名(register/loginToMainActivity)
     private val _username = MutableStateFlow("")
     val username = _username.asStateFlow()
@@ -59,14 +64,14 @@ class UserViewModel(private val userRepository: UserRepository) : ViewModel() {
     }
 //
 //    var user = mutableStateOf(
-//        userRepository.getById(1).stateIn(
+//        userRepository.getFlowById(1).stateIn(
 //            initialValue = User(),
 //            scope = viewModelScope,
 //            started = SharingStarted.WhileSubscribed(5000)
 //        )
 //    )
 //    fun updateUser() {
-//        user.value = userRepository.getById(1).stateIn(
+//        user.value = userRepository.getFlowById(1).stateIn(
 //            initialValue = User(),
 //            scope = viewModelScope,
 //            started = SharingStarted.WhileSubscribed(5000)
@@ -95,7 +100,8 @@ class UserViewModel(private val userRepository: UserRepository) : ViewModel() {
             // TODO：注意给loginUser赋值 和 RegisterState.SUCCESS 的顺序
             initLoginUser(user)
             registerState.value = RegisterState.SUCCESS
-            // TODO：Initial--Today
+            // TODO：Initial--Plan
+            planRepository.insert(Plan(user.id,"未选择"))
         } else {
             registerState.value = RegisterState.FAILED
         }
@@ -146,12 +152,15 @@ class UserViewModel(private val userRepository: UserRepository) : ViewModel() {
     }
 }
 
-class UserViewModelFactory(private val userRepository: UserRepository) :
+class UserViewModelFactory(
+    private val userRepository: UserRepository,
+    private val planRepository: PlanRepository
+) :
     ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(UserViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return UserViewModel(userRepository) as T
+            return UserViewModel(userRepository,planRepository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

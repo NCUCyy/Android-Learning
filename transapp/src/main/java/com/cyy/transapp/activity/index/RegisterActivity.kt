@@ -74,7 +74,12 @@ fun loginToMainActivity(
 fun RegisterScreen(resultLauncher: ActivityResultLauncher<Intent>) {
     val application = LocalContext.current.applicationContext as TransApp
     val userViewModel =
-        viewModel<UserViewModel>(factory = UserViewModelFactory(application.userRepository))
+        viewModel<UserViewModel>(
+            factory = UserViewModelFactory(
+                application.userRepository,
+                application.planRepository
+            )
+        )
 
     // 输入的用户名、密码、确认密码
     val username = userViewModel.username.collectAsState()
