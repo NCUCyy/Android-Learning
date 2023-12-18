@@ -21,4 +21,7 @@ interface TodayDao {
 
     @Query("SELECT * FROM todays WHERE userId = :userId AND year = :year AND month = :month AND day = :day")
     fun getFlowByUserIdAndYMD(userId: Int, year: Int, month: Int, day: Int): Flow<Today>
+
+    @Query("SELECT * FROM todays WHERE userId = :userId")
+    fun getFlowByUserId(userId: Int): Flow<List<Today>>
 }

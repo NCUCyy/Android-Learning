@@ -27,4 +27,8 @@ class TodayRepository(private val todayDao: TodayDao) {
     fun getFlowByUserIdAndYMD(userId: Int, year: Int, month: Int, day: Int): Flow<Today> {
         return todayDao.getFlowByUserIdAndYMD(userId, year, month, day)
     }
+
+    fun getFlowByUserId(userId: Int): Flow<List<Today>> {
+        return todayDao.getFlowByUserId(userId)
+    }
 }

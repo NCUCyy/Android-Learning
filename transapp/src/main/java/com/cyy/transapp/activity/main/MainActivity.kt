@@ -428,6 +428,7 @@ fun NavigationGraphScreen(states: StateHolder, userId: Int, vocabulary: Vocabula
     )
 
     if (vocabulary != Vocabulary.NOT_SELECTED) {
+        // 选择Vocabulary后执行（仅一次）
         learnReviewViewModel.updateVocabulary(vocabulary)
     }
 

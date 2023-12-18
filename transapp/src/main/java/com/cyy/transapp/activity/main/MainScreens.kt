@@ -2,6 +2,7 @@ package com.cyy.transapp.activity.main
 
 import android.app.Activity
 import android.content.Intent
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -404,6 +406,10 @@ fun ListenResourceCard(listenResource: ListenResource, states: StateHolder) {
 }
 
 // ----------------------------------------------------③LearnScreen----------------------------------------------------
+/**
+ * 显示当前词汇表的总词数：获得整个词汇表
+ * learnProcess：
+ */
 @Composable
 fun LearnScreen(states: StateHolder, learnReviewViewModel: LearnReviewViewModel) {
     val scrollState = rememberScrollState()
@@ -441,7 +447,7 @@ fun VocabularyCard(states: StateHolder, learnReviewViewModel: LearnReviewViewMod
                 // TODO：跳转到AllWordsActivity（还没写）
             }
         }) {
-        Row(modifier = Modifier.fillMaxWidth()) {
+        Row {
             Text(text = "Vocabulary", fontWeight = FontWeight.Bold, fontSize = 20.sp)
             Spacer(modifier = Modifier.width(10.dp))
             Icon(
@@ -455,38 +461,73 @@ fun VocabularyCard(states: StateHolder, learnReviewViewModel: LearnReviewViewMod
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .padding(10.dp)
-                .fillMaxWidth()
+
         )
     }
 }
 
 @Composable
 fun ProgressCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel) {
+    val vocabularySize = learnReviewViewModel.vocabularySize.collectAsState()
+    Log.i("LearnReviewViewModel", "vocabularySize: ${vocabularySize.value}")
+    val plan = learnReviewViewModel.plan.collectAsStateWithLifecycle()
+    Card(elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp)) {
+        if (plan.value.vocabulary != "未选择" && plan.value.vocabulary != "") {
+            val learnProcess = learnReviewViewModel.getLearnProcess()
+            Text("${learnProcess.process.size}/${vocabularySize.value}")
+            Log.i("LearnReviewViewModel", "${learnProcess.process.size}/${vocabularySize.value}")
+        } else {
+            Text("加载中...")
+        }
+    }
 }
 
 @Composable
 fun LearnAndReviewCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel) {
-    // TODO：？？？问题
+    val context = LocalContext.current as Activity
     val plan = learnReviewViewModel.plan.collectAsStateWithLifecycle()
     val curUser = learnReviewViewModel.curUser.collectAsStateWithLifecycle()
     Text(text = "Learn:${curUser.value.username}")
-    if (plan.value != null) {
+    Text(text = plan.value.learnProcess)
+    if (plan.value.vocabulary != "未选择" && plan.value.vocabulary != "") {
+        // 这里注意要判断！
+        val learnProcess = learnReviewViewModel.getLearnProcess()
+        val reviewProcess = learnReviewViewModel.getReviewProcess()
+
         Text(text = "Learn:${plan.value.vocabulary}")
+        Button(onClick = {
+            // TODO：跳转到LearnActivity
+            val intent = Intent(context, LearnActivity::class.java)
+            states.resultLauncher.launch(intent)
+        }) {
+            Text(text = "Learn:${learnProcess.process.size}")
+        }
+        Button(onClick = {
+            // TODO：跳转到ReviewActivity
+            val intent = Intent(context, ReviewActivity::class.java)
+            states.resultLauncher.launch(intent)
+        }) {
+            Text(text = "Review:${reviewProcess.process.size}")
+        }
     }
-//    val learnProcess = learnReviewViewModel.getLearnProcess()
-//    Button(onClick = { /*TODO*/ }) {
-//        Text(text = "Learn:${learnProcess.process.size}")
-//    }
 }
 
 @Composable
 fun DailyAttendanceCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel) {
+    val todays = learnReviewViewModel.todays.collectAsStateWithLifecycle()
+    LazyRow {
+        items(todays.value) {
+            Card {
+                Text(text = it.day.toString())
+            }
+        }
+    }
 }
 
 @Composable
 fun TodayCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel) {
     val today = learnReviewViewModel.today.collectAsStateWithLifecycle().value
-    Card {
+    Card(elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp)) {
         Text(text = "Today", fontWeight = FontWeight.Bold, fontSize = 20.sp)
         Text(text = "新学")
         Text(text = today.newLearnNum.toString())

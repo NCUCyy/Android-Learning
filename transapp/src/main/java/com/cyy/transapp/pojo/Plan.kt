@@ -28,6 +28,10 @@ class Plan {
     constructor() {
     }
 
+    constructor(userId: Int) {
+        this.userId = userId
+    }
+
     @Ignore
     constructor(userId: Int, vocabulary: String) {
         this.userId = userId

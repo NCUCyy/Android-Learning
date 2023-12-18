@@ -9,7 +9,14 @@ import kotlinx.serialization.json.Json
 
 class VocabularyRepository {
     val vocabularies = listOf(Vocabulary.CET4, Vocabulary.CET6, Vocabulary.TOEFL)
-
+    fun getVocabularyByStr(str: String): Vocabulary {
+        return when (str) {
+            "CET4" -> Vocabulary.CET4
+            "CET6" -> Vocabulary.CET6
+            "TOEFL" -> Vocabulary.TOEFL
+            else -> Vocabulary.CET4
+        }
+    }
 
     fun getVocabularyWords(context: Activity, vocabulary: Vocabulary): List<WordItem> {
         val jsonContent = FileUtil.readRawToTxt(context, vocabulary.fileDir)
