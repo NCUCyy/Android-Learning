@@ -13,6 +13,7 @@ import com.cyy.transapp.repository.StarWordRepository
 import com.cyy.transapp.repository.TodayRepository
 import com.cyy.transapp.repository.TransRepository
 import com.cyy.transapp.repository.UserRepository
+import com.cyy.transapp.repository.VocabularyRepository
 import com.drake.net.BuildConfig
 import com.drake.net.NetConfig
 import com.drake.net.okhttp.setConverter
@@ -31,6 +32,7 @@ class TransApp : Application() {
     val starWordRepository by lazy { StarWordRepository(database.getStarWordDao()) }
     val planRepository by lazy { PlanRepository(database.getPlanDao()) }
     val todayRepository by lazy { TodayRepository(database.getTodayDao()) }
+    val vocabularyRepository by lazy { VocabularyRepository() }
 
     override fun onCreate() {
         super.onCreate()

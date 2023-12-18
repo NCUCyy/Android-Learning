@@ -2,6 +2,7 @@ package com.cyy.transapp.pojo
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.time.OffsetDateTime
 
 @Entity(tableName = "todays")
 class Today {
@@ -10,9 +11,9 @@ class Today {
 
     // 用于唯一定位
     var userId: Int = 0
-    var year: Int = 0
-    var month: Int = 0
-    var day: Int = 0
+    var year: Int = OffsetDateTime.now().year
+    var month: Int = OffsetDateTime.now().monthValue
+    var day: Int = OffsetDateTime.now().dayOfMonth
 
     // 用于UI显示
     var newLearnNum: Int = 0 // 今日新学单词个数
@@ -23,10 +24,7 @@ class Today {
     var openNum: Int = 1 // 今日打开APP次数
 
     constructor()
-    constructor(userId: Int, year: Int, month: Int, day: Int) {
+    constructor(userId: Int) {
         this.userId = userId
-        this.year = year
-        this.month = month
-        this.day = day
     }
 }

@@ -1,7 +1,10 @@
 package com.cyy.transapp.pojo
 
 import androidx.room.Entity
+import androidx.room.Ignore
 import androidx.room.PrimaryKey
+import com.cyy.transapp.model.LearnProcess
+import com.google.gson.Gson
 
 @Entity(tableName = "plans")
 class Plan {
@@ -19,14 +22,18 @@ class Plan {
     var reviewProcess: String = ""
 
     // 每日一组学习数量
-    var dailyNum = 0
+    var dailyNum = 10 // 默认
 
     constructor() {
 
     }
 
+    @Ignore
     constructor(userId: Int, vocabulary: String) {
         this.userId = userId
         this.vocabulary = vocabulary
+        // TODO：初始化！
+        this.learnProcess = Gson().toJson(LearnProcess())
+        this.reviewProcess = Gson().toJson(LearnProcess())
     }
 }

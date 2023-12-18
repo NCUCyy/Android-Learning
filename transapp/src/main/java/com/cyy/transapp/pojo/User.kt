@@ -14,9 +14,7 @@ class User {
     var nickname: String = ""
     var profile: String = ""
     var iconId: Int = R.drawable.user
-    var todayId: Int = 0
-    var planId: Int = 0
-    var starBookId: Int = 0
+    var vocabulary: String = ""
 
 
     constructor()

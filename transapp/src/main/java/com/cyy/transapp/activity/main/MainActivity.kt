@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -72,8 +73,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.cyy.transapp.R
 import com.cyy.transapp.TransApp
+import com.cyy.transapp.model.Vocabulary
 import com.cyy.transapp.view_model.CurUserViewModel
 import com.cyy.transapp.view_model.CurUserViewModelFactory
+import com.cyy.transapp.view_model.LearnReviewViewModel
+import com.cyy.transapp.view_model.LearnReviewViewModelFactory
 import com.cyy.transapp.view_model.QueryViewModel
 import com.cyy.transapp.view_model.QueryViewModelFactory
 import kotlinx.coroutines.CoroutineScope
@@ -88,20 +92,28 @@ class MainActivity : ComponentActivity() {
         // 默认给个id = 1，用于测试
         val userId = intent.getIntExtra("userId", 1)
 
+        // TODO：注意要定义为MutableState！
+        val vocabulary = mutableStateOf(Vocabulary.NOT_SELECTED)
+
         // 使用ActivityResultLauncher进行意图跳转
         val resultLauncher: ActivityResultLauncher<Intent> = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult(),
             // 意图结束后，执行这个「回调函数」
             ActivityResultCallback {
                 if (it.resultCode == RESULT_OK) {
-                    // 返回的data数据是个intent类型，里面存储了一段文本内容
-                    val username = it.data?.getStringExtra("username")
+                    if (it.data!!.hasExtra("vocabulary")) {
+                        // 返回的data数据是个intent类型，里面存储了一段文本内容
+                        vocabulary.value =
+                            it.data?.getSerializableExtra("vocabulary", Vocabulary::class.java)!!
+                        // vocabulary更新后，会重组整个UI界面
+                    }
                     Toast.makeText(this, "回到MainActivity", Toast.LENGTH_LONG).show()
                 }
             }
         )
         setContent {
-            MainScreen(userId, resultLauncher)
+            Log.i("MainActivity---Look", vocabulary.toString())
+            MainScreen(userId, resultLauncher, vocabulary.value)
         }
     }
 }
@@ -113,7 +125,11 @@ class MainActivity : ComponentActivity() {
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(userId: Int, resultLauncher: ActivityResultLauncher<Intent>) {
+fun MainScreen(
+    userId: Int,
+    resultLauncher: ActivityResultLauncher<Intent>,
+    vocabulary: Vocabulary
+) {
     val states = rememberStates(resultLauncher)
     val context = LocalContext.current as Activity
     val application = context.application as TransApp
@@ -215,7 +231,7 @@ fun MainScreen(userId: Int, resultLauncher: ActivityResultLauncher<Intent>) {
             // 页面的主体部分
             Box(modifier = Modifier.padding(it)) {
                 // 侧滑导航视图（侧滑界面+导航图）
-                DrawerView(states, userId)
+                DrawerView(states, userId, vocabulary)
             }
         },
         floatingActionButton = {
@@ -316,15 +332,16 @@ fun DialogButton(color: Color, text: String, icon: Int, action: () -> Unit) {
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DrawerView(states: StateHolder, userId: Int) {
+fun DrawerView(states: StateHolder, userId: Int, vocabulary: Vocabulary) {
     val application = LocalContext.current.applicationContext as TransApp
     // MainActivity中管理User的ViewModel
     val curUserViewModel = viewModel<CurUserViewModel>(
         factory = CurUserViewModelFactory(
             userId,
-            application.userRepository
+            application.userRepository,
         )
     )
+    Log.i("vocabulary-------", vocabulary.desc)
     val curUser = curUserViewModel.curUser.collectAsStateWithLifecycle()
     ModalNavigationDrawer(
         // 抽屉是否可以通过手势进行交互
@@ -381,13 +398,25 @@ fun DrawerView(states: StateHolder, userId: Int) {
         },
         content = {
             // 主体是导航图
-            NavigationGraphScreen(states, userId)
+            NavigationGraphScreen(states, userId, vocabulary)
         })
 }
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-fun NavigationGraphScreen(states: StateHolder, userId: Int) {
+fun NavigationGraphScreen(states: StateHolder, userId: Int, vocabulary: Vocabulary) {
+    val application = LocalContext.current.applicationContext as TransApp
+    val learnReviewViewModel = viewModel<LearnReviewViewModel>(
+        factory = LearnReviewViewModelFactory(
+            userId,
+            application.userRepository,
+            application.todayRepository,
+            application.planRepository
+        )
+    )
+    if (vocabulary != Vocabulary.NOT_SELECTED) {
+        learnReviewViewModel.updateVocabulary(vocabulary)
+    }
     // 定义宿主(需要：导航控制器、导航起点---String类型)
     NavHost(navController = states.navController, startDestination = states.startDestination) {
         // 定义有几个页面，就有几个composable(){...}
@@ -411,7 +440,7 @@ fun NavigationGraphScreen(states: StateHolder, userId: Int) {
             // 1、更新当前显示的Screen
             states.currentScreen.value = Screen.LearnPage
             // 2、此语句处才会展示指定的Screen
-            LearnScreen(states)
+            LearnScreen(states, learnReviewViewModel)
         }
     }
 }

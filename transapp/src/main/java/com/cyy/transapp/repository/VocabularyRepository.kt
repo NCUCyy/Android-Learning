@@ -1,12 +1,16 @@
 package com.cyy.transapp.repository
 
 import com.cyy.app.word_bank.model.WordItem
+import com.cyy.transapp.model.Vocabulary
 import com.cyy.transapp.util.FileUtil
 import com.google.gson.JsonParser
 import kotlinx.serialization.json.Json
 
 class VocabularyRepository {
+    val vocabularies = listOf(Vocabulary.CET4, Vocabulary.CET6, Vocabulary.TOEFL)
+
     /**
+     * TODO：弃用——因为：Vocabulary类的使用
      * 把单词本(名称)转换为字符串(JSON字符串)
      */
     private fun transferVocabularyToString(vocabulary: String): String {
@@ -23,8 +27,9 @@ class VocabularyRepository {
         return FileUtil.readFileAsString(fileName)
     }
 
-    fun getVocabularyWords(vocabulary: String): List<WordItem> {
-        val jsonContent = transferVocabularyToString(vocabulary)
+    fun getVocabularyWords(vocabulary: Vocabulary): List<WordItem> {
+//        val jsonContent = transferVocabularyToString(vocabulary.desc)
+        val jsonContent = FileUtil.readFileAsString(vocabulary.fileDir)
         val jsonArray = JsonParser.parseString(jsonContent).asJsonArray
         val wordList = mutableListOf<WordItem>()
 

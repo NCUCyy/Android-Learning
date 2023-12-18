@@ -2,8 +2,10 @@ package com.cyy.transapp.activity.main
 
 import android.app.Activity
 import android.content.Intent
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -48,6 +50,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cyy.transapp.R
 import com.cyy.transapp.TransApp
@@ -56,6 +59,7 @@ import com.cyy.transapp.model.daily_sentence.SentenceModel
 import com.cyy.transapp.pojo.ListenResource
 import com.cyy.transapp.pojo.TransRecord
 import com.cyy.transapp.util.FileUtil
+import com.cyy.transapp.view_model.LearnReviewViewModel
 import com.cyy.transapp.view_model.ListenViewModel
 import com.cyy.transapp.view_model.ListenViewModelFactory
 import com.cyy.transapp.view_model.QueryViewModel
@@ -77,7 +81,7 @@ sealed class Screen(val route: String, val title: String, val icon: Int) {
         Screen(route = "learn", title = "学习", icon = R.drawable.dictionary)
 }
 
-
+// ----------------------------------------------------①QueryScreen----------------------------------------------------
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QueryScreen(states: StateHolder, userId: Int) {
@@ -329,6 +333,17 @@ fun TransRecordCard(transRecord: TransRecord, isLast: Boolean, states: StateHold
     }
 }
 
+/**
+ * 跳转到TransActivity---进行翻译
+ */
+fun toTransActivity(context: Activity, states: StateHolder, query: String, userId: Int) {
+    val intent = Intent(context, TransActivity::class.java)
+    intent.putExtra("query", query)
+    intent.putExtra("userId", userId)
+    states.resultLauncher.launch(intent)
+}
+
+// ----------------------------------------------------②ListenScreen----------------------------------------------------
 @Composable
 fun ListenScreen(states: StateHolder) {
     val application = LocalContext.current.applicationContext as TransApp
@@ -397,17 +412,89 @@ fun ListenResourceCard(listenResource: ListenResource, states: StateHolder) {
     }
 }
 
-
-/**
- * 跳转到TransActivity---进行翻译
- */
-fun toTransActivity(context: Activity, states: StateHolder, query: String, userId: Int) {
-    val intent = Intent(context, TransActivity::class.java)
-    intent.putExtra("query", query)
-    intent.putExtra("userId", userId)
-    states.resultLauncher.launch(intent)
+// ----------------------------------------------------③LearnScreen----------------------------------------------------
+@Composable
+fun LearnScreen(states: StateHolder, learnReviewViewModel: LearnReviewViewModel) {
+    val scrollState = rememberScrollState()
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(scrollState)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            VocabularyCard(states, learnReviewViewModel)
+            ProgressCard(states, learnReviewViewModel)
+        }
+        LearnAndReviewCard(states, learnReviewViewModel)
+        DailyAttendanceCard(states, learnReviewViewModel)
+        TodayCard(states, learnReviewViewModel)
+    }
 }
 
 @Composable
-fun LearnScreen(states: StateHolder) {
+fun VocabularyCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel) {
+    val context = LocalContext.current as Activity
+    val curUser = learnReviewViewModel.curUser.collectAsStateWithLifecycle()
+    Log.i("LearnScreen", "curUser: ${curUser.value}")
+    Card(
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
+        modifier = Modifier.clickable {
+            if (curUser.value.vocabulary == "") {
+                // TODO：跳转到VocabularyActivity
+                val intent = Intent(context, VocabularyActivity::class.java)
+                states.resultLauncher.launch(intent)
+            } else {
+                // TODO：跳转到AllWordsActivity（还没写）
+            }
+        }) {
+        Row(modifier = Modifier.fillMaxWidth()) {
+            Text(text = "Vocabulary", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+            Spacer(modifier = Modifier.width(10.dp))
+            Icon(
+                painter = painterResource(id = R.drawable.navigate_next),
+                contentDescription = null
+            )
+        }
+        Text(
+            text = curUser.value.vocabulary,
+            fontSize = 40.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .padding(10.dp)
+                .fillMaxWidth()
+        )
+    }
+}
+
+@Composable
+fun ProgressCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel) {
+}
+
+@Composable
+fun LearnAndReviewCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel) {
+    Button(onClick = { /*TODO*/ }) {
+        Text(text = "Learn")
+    }
+}
+
+@Composable
+fun DailyAttendanceCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel) {
+}
+
+@Composable
+fun TodayCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel) {
+    val today = learnReviewViewModel.today.collectAsStateWithLifecycle().value
+    Card {
+        Text(text = "Today", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+        Text(text = today.newLearnNum.toString())
+        Text(text = today.reviewNum.toString())
+        Text(text = today.starNum.toString())
+        Text(text = today.removeNum.toString())
+        Text(text = today.learnTime.toString())
+        Text(text = today.openNum.toString())
+    }
 }
