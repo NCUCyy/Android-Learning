@@ -63,7 +63,6 @@ import com.cyy.transapp.view_model.LearnReviewViewModel
 import com.cyy.transapp.view_model.ListenViewModel
 import com.cyy.transapp.view_model.ListenViewModelFactory
 import com.cyy.transapp.view_model.QueryViewModel
-import com.cyy.transapp.view_model.QueryViewModelFactory
 
 val screens = listOf(Screen.QueryPage, Screen.ListenPage, Screen.LearnPage)
 
@@ -84,15 +83,8 @@ sealed class Screen(val route: String, val title: String, val icon: Int) {
 // ----------------------------------------------------①QueryScreen----------------------------------------------------
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun QueryScreen(states: StateHolder, userId: Int) {
+fun QueryScreen(states: StateHolder, queryViewModel: QueryViewModel) {
     val context = LocalContext.current as Activity
-    val application = LocalContext.current.applicationContext as TransApp
-    val queryViewModel = viewModel<QueryViewModel>(
-        factory = QueryViewModelFactory(
-            application.transRepository,
-            application.sentenceRepository
-        )
-    )
     val query = queryViewModel.query.collectAsState()
     val sentenceState = queryViewModel.sentenceState.collectAsState()
     val transRecords = queryViewModel.transRecords.collectAsState()
@@ -126,7 +118,7 @@ fun QueryScreen(states: StateHolder, userId: Int) {
             ),
             keyboardActions = KeyboardActions(onSearch = {
                 // TODO:跳转到TransActivity
-                toTransActivity(context, states, query.value, userId)
+                toTransActivity(context, states, query.value, queryViewModel.userId)
             })
         )
         Spacer(modifier = Modifier.height(10.dp))
@@ -141,7 +133,7 @@ fun QueryScreen(states: StateHolder, userId: Int) {
                     DailySentenceCard(
                         (sentenceState.value as OpResult.Success<*>).data as SentenceModel,
                         states,
-                        userId
+                        queryViewModel.userId
                     )
                 }
 
@@ -193,7 +185,7 @@ fun QueryScreen(states: StateHolder, userId: Int) {
                     transRecord = transRecord,
                     isLast = idx == transRecords.value.size - 1,
                     states = states,
-                    userId = userId
+                    userId = queryViewModel.userId
                 )
             }
         }
@@ -476,8 +468,10 @@ fun ProgressCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel
 
 @Composable
 fun LearnAndReviewCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel) {
+    // TODO：？？？问题
+    val learnProcess = learnReviewViewModel.getLearnProcess()
     Button(onClick = { /*TODO*/ }) {
-        Text(text = "Learn")
+        Text(text = "Learn:${learnProcess.process.size}")
     }
 }
 
@@ -490,11 +484,17 @@ fun TodayCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel) {
     val today = learnReviewViewModel.today.collectAsStateWithLifecycle().value
     Card {
         Text(text = "Today", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+        Text(text = "新学")
         Text(text = today.newLearnNum.toString())
+        Text(text = "复习")
         Text(text = today.reviewNum.toString())
+        Text(text = "收藏")
         Text(text = today.starNum.toString())
+        Text(text = "移除")
         Text(text = today.removeNum.toString())
+        Text(text = "学习时长")
         Text(text = today.learnTime.toString())
+        Text("打开App次数")
         Text(text = today.openNum.toString())
     }
 }

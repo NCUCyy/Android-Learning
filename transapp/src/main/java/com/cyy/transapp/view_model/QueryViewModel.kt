@@ -22,6 +22,7 @@ import kotlin.concurrent.thread
  * 3、清空查询历史
  */
 class QueryViewModel(
+    val userId: Int,
     private val transRepository: TransRepository,
     private val sentenceRepository: SentenceRepository
 ) : ViewModel() {
@@ -60,6 +61,7 @@ class QueryViewModel(
 }
 
 class QueryViewModelFactory(
+    val userId: Int,
     private val transRepository: TransRepository,
     private val sentenceRepository: SentenceRepository
 ) :
@@ -67,7 +69,7 @@ class QueryViewModelFactory(
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(QueryViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return QueryViewModel(transRepository, sentenceRepository) as T
+            return QueryViewModel(userId, transRepository, sentenceRepository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

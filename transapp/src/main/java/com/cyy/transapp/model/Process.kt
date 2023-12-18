@@ -3,19 +3,24 @@ package com.cyy.transapp.model
 import com.google.gson.Gson
 
 class PlanWord {
-    val index: Int = 0
-    val process: Int = 0
-    val interval: Int = 0
+    var index: Int = 0
+    var process: Int = 0
+    var interval: Int = 0
+
+    constructor()
+    constructor(index: Int) {
+        this.index = index
+    }
 }
 
 class LearnProcess {
-    val process: List<PlanWord> = listOf()
+    val process: MutableList<PlanWord> = mutableListOf()
     val learnedIdx: Int = 0
     val learnedNum: Int = 0
 }
 
 class ReviewProcess {
-    val process: List<PlanWord> = listOf()
+    val process: MutableList<PlanWord> = mutableListOf()
 }
 
 fun main() {

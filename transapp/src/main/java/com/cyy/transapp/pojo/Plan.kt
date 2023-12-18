@@ -4,6 +4,7 @@ import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.cyy.transapp.model.LearnProcess
+import com.cyy.transapp.model.ReviewProcess
 import com.google.gson.Gson
 
 @Entity(tableName = "plans")
@@ -25,7 +26,6 @@ class Plan {
     var dailyNum = 10 // 默认
 
     constructor() {
-
     }
 
     @Ignore
@@ -34,6 +34,6 @@ class Plan {
         this.vocabulary = vocabulary
         // TODO：初始化！
         this.learnProcess = Gson().toJson(LearnProcess())
-        this.reviewProcess = Gson().toJson(LearnProcess())
+        this.reviewProcess = Gson().toJson(ReviewProcess())
     }
 }
