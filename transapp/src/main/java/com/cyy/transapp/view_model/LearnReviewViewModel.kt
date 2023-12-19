@@ -90,12 +90,13 @@ class LearnReviewViewModel(
             // TODO：初始化plan（Flow）
             val selectedUser = userRepository.getById(userId)
             // 再初始化plan
-            plan.value = planRepository.getFlowByUserIdAndVocabulary(userId, selectedUser.vocabulary)
-                .stateIn(
-                    initialValue = Plan(),
-                    scope = viewModelScope,
-                    started = SharingStarted.WhileSubscribed(0)
-                )
+            plan.value =
+                planRepository.getFlowByUserIdAndVocabulary(userId, selectedUser.vocabulary)
+                    .stateIn(
+                        initialValue = Plan(),
+                        scope = viewModelScope,
+                        started = SharingStarted.WhileSubscribed(0)
+                    )
             // TODO：初始化Today（Flow）
             val selectedToday =
                 todayRepository.getByUserIdAndYMD(
@@ -120,6 +121,11 @@ class LearnReviewViewModel(
     }
 
 
+    /**
+     * 初始化LearnProcess（要把process的词数提升到dailyNum）
+     * 场景1. 刚选完Vocabulary
+     * 场景2. 今天刚登陆（若已经相等，则不变，即addNum=0）
+     */
     private fun initLearnProcess() = viewModelScope.launch {
         val user = userRepository.getById(userId)
         if (user.vocabulary != "未选择") {
@@ -136,6 +142,9 @@ class LearnReviewViewModel(
         }
     }
 
+    /**
+     * 把更新后的LearnProcess保存到Plan中，并update(plan)！
+     */
     private fun updateLearnProcess(learnProcess: LearnProcess) = viewModelScope.launch {
         val learnProcessStr = Gson().toJson(learnProcess)
         val user = userRepository.getById(userId)
@@ -144,16 +153,25 @@ class LearnReviewViewModel(
         planRepository.update(plan)
     }
 
+    /**
+     * 根据传入的plan获得对应的LearnProcess
+     */
     fun getLearnProcess(plan: Plan): LearnProcess {
         val learnProcessStr = plan.learnProcess
         return Gson().fromJson(learnProcessStr, LearnProcess::class.java)
     }
 
+    /**
+     * 根据传入的plan获得对应的ReviewProcess
+     */
     fun getReviewProcess(plan: Plan): ReviewProcess {
         val reviewProcessStr = plan.reviewProcess
         return Gson().fromJson(reviewProcessStr, ReviewProcess::class.java)
     }
 
+    /**
+     * 根据user中的vocabulary加载字典
+     */
     private fun loadVocabulary() = viewModelScope.launch {
         val user = userRepository.getById(userId)
         if (user.vocabulary != "未选择") {
@@ -164,7 +182,11 @@ class LearnReviewViewModel(
                 )
         }
     }
+    // --------------------------------------------更换字典 part--------------------------------------------
 
+    /**
+     * 更换Vocabulary后，更新user中的Vocabulary，更新要展示的plan（可能不存在，则要创建）
+     */
     // 外部调用（选择字典的时候）
     fun updateVocabulary(vocabulary: Vocabulary) = viewModelScope.launch {
         // 修改user中的vocabulary
@@ -176,25 +198,30 @@ class LearnReviewViewModel(
         loadVocabulary()
     }
 
+    /**
+     * 在updateVocabulary()内部调用，更新Plan（有则赋值，没有则插入后赋值）
+     */
     private fun updatePlan() = viewModelScope.launch {
         val selectedPlan = planRepository.getByUserIdAndVocabulary(userId, curUser.value.vocabulary)
         if (selectedPlan != null) {
-            plan.value = planRepository.getFlowByUserIdAndVocabulary(userId, curUser.value.vocabulary)
-                .stateIn(
-                    initialValue = Plan(),
-                    scope = viewModelScope,
-                    started = SharingStarted.WhileSubscribed(5000)
-                )
+            plan.value =
+                planRepository.getFlowByUserIdAndVocabulary(userId, curUser.value.vocabulary)
+                    .stateIn(
+                        initialValue = Plan(),
+                        scope = viewModelScope,
+                        started = SharingStarted.WhileSubscribed(5000)
+                    )
         } else {
             // 先插进去
             planRepository.insert(Plan(userId, curUser.value.vocabulary))
             // 再查出来（这样LearnProcess和ReviewProcess就有值了————虽然也是空的）
-            plan.value = planRepository.getFlowByUserIdAndVocabulary(userId, curUser.value.vocabulary)
-                .stateIn(
-                    initialValue = Plan(),
-                    scope = viewModelScope,
-                    started = SharingStarted.WhileSubscribed(5000)
-                )
+            plan.value =
+                planRepository.getFlowByUserIdAndVocabulary(userId, curUser.value.vocabulary)
+                    .stateIn(
+                        initialValue = Plan(),
+                        scope = viewModelScope,
+                        started = SharingStarted.WhileSubscribed(5000)
+                    )
             // 刚创建完Plan后，需要初始化LearnProcess
             initLearnProcess()
         }

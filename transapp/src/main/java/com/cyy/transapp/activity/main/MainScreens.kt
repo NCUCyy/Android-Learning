@@ -446,6 +446,8 @@ fun VocabularyCard(states: StateHolder, learnReviewViewModel: LearnReviewViewMod
                 states.resultLauncher.launch(intent)
             } else {
                 // TODO：跳转到AllWordsActivity（还没写）
+                val intent = Intent(context, VocabularyActivity::class.java)
+                states.resultLauncher.launch(intent)
             }
         }) {
         Row {
