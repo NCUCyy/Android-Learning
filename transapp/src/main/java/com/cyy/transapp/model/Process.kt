@@ -14,9 +14,9 @@ class PlanWord {
 }
 
 class LearnProcess {
-    val process: MutableList<PlanWord> = mutableListOf()
-    val learnedIdx: Int = 0
-    val learnedNum: Int = 0
+    var process: MutableList<PlanWord> = mutableListOf()
+    var learnedIdx: Int = 0
+    var learnedNum: Int = 0
 }
 
 class ReviewProcess {

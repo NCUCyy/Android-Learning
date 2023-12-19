@@ -1,11 +1,14 @@
 package com.cyy.transapp.view_model
 
 import android.app.Activity
-import android.util.Log
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.cyy.app.word_bank.model.WordItem
 import com.cyy.transapp.model.LearnProcess
+import com.cyy.transapp.model.PlanWord
 import com.cyy.transapp.model.ReviewProcess
 import com.cyy.transapp.model.Vocabulary
 import com.cyy.transapp.pojo.Plan
@@ -62,11 +65,11 @@ class LearnReviewViewModel(
 
     // Plan---用于观察
     // 每个user固定都有一个空的 Plan=> ()
-    var plan: StateFlow<Plan> = MutableStateFlow(Plan())
+    var plan: MutableState<StateFlow<Plan>> = mutableStateOf(MutableStateFlow(Plan()))
 
 
-    private var _vocabularySize = MutableStateFlow(0)
-    val vocabularySize: StateFlow<Int> = _vocabularySize.asStateFlow()
+    private val _vocabulary = MutableStateFlow<List<WordItem>>(listOf())
+    val vocabulary: StateFlow<List<WordItem>> = _vocabulary.asStateFlow()
 
     /**
      * 修改单词本之后，要改哪些地方：
@@ -78,77 +81,105 @@ class LearnReviewViewModel(
         // 最早执行的部分（且只执行一次）
         viewModelScope.launch {
             // 三个初始化部分先后---StateIn没什么顺序
-            // TODO：初始化curUser
+            // TODO：初始化curUser（Flow）
             curUser = userRepository.getFlowById(userId).stateIn(
                 initialValue = User(),
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(0)
             )
-            // TODO：初始化plan
-            // 先查出来---TODO：这里要单独查一次，因为stateIn查询的时候，curUser还没有值！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！！
-            val user = userRepository.getById(userId)
+            // TODO：初始化plan（Flow）
+            val selectedUser = userRepository.getById(userId)
             // 再初始化plan
-            plan = planRepository.getFlowByUserIdAndVocabulary(userId, user.vocabulary)
+            plan.value = planRepository.getFlowByUserIdAndVocabulary(userId, selectedUser.vocabulary)
                 .stateIn(
                     initialValue = Plan(),
                     scope = viewModelScope,
                     started = SharingStarted.WhileSubscribed(0)
                 )
-
-            // TODO：初始化Today
-            val today =
+            // TODO：初始化Today（Flow）
+            val selectedToday =
                 todayRepository.getByUserIdAndYMD(
                     userId,
                     now.year,
                     now.monthValue,
                     now.dayOfMonth
                 )
-            if (today == null) {
-                // 若不存在，则插入
+            if (selectedToday == null) {
+                // ①若不存在，则插入
                 todayRepository.insert(Today(userId))
-//                initLearnProcess()
+                // 今天刚登录的话，需要初始化LearnProcess
+                initLearnProcess()
             } else {
-                // 若存在，则打开次数+1
-                val selectedToday = todayRepository.getByUserIdAndYMD(
-                    userId,
-                    now.year,
-                    now.monthValue,
-                    now.dayOfMonth
-                )
+                // ②若存在，则打开次数+1
                 selectedToday.openNum++
                 todayRepository.update(selectedToday)
             }
         }
-        // 很慢
-        initVocabularySize()
+        // 加载字典
+        loadVocabulary()
     }
 
-    private fun initVocabularySize() = viewModelScope.launch {
+
+    private fun initLearnProcess() = viewModelScope.launch {
         val user = userRepository.getById(userId)
         if (user.vocabulary != "未选择") {
-            _vocabularySize.value =
-                vocabularyRepository.getVocabularyWords(
-                    context,
-                    Vocabulary.valueOf(user.vocabulary)
-                ).size
+            val plan = planRepository.getByUserIdAndVocabulary(userId, user.vocabulary)!!
+            val learnProcess = getLearnProcess(plan)
+            // 初始化dailyNum个词汇
+            val curNum = learnProcess.process.size
+            val addNum = plan.dailyNum - curNum
+            for (i in 0 until addNum) {
+                learnProcess.process.add(PlanWord(learnProcess.learnedIdx + curNum))
+            }
+            learnProcess.learnedIdx += addNum
+            updateLearnProcess(learnProcess)
         }
     }
 
-    // 外部调用
+    private fun updateLearnProcess(learnProcess: LearnProcess) = viewModelScope.launch {
+        val learnProcessStr = Gson().toJson(learnProcess)
+        val user = userRepository.getById(userId)
+        val plan = planRepository.getByUserIdAndVocabulary(userId, user.vocabulary)
+        plan.learnProcess = learnProcessStr
+        planRepository.update(plan)
+    }
+
+    fun getLearnProcess(plan: Plan): LearnProcess {
+        val learnProcessStr = plan.learnProcess
+        return Gson().fromJson(learnProcessStr, LearnProcess::class.java)
+    }
+
+    fun getReviewProcess(plan: Plan): ReviewProcess {
+        val reviewProcessStr = plan.reviewProcess
+        return Gson().fromJson(reviewProcessStr, ReviewProcess::class.java)
+    }
+
+    private fun loadVocabulary() = viewModelScope.launch {
+        val user = userRepository.getById(userId)
+        if (user.vocabulary != "未选择") {
+            _vocabulary.value =
+                vocabularyRepository.getVocabularyWords(
+                    context,
+                    Vocabulary.valueOf(user.vocabulary)
+                )
+        }
+    }
+
+    // 外部调用（选择字典的时候）
     fun updateVocabulary(vocabulary: Vocabulary) = viewModelScope.launch {
         // 修改user中的vocabulary
         curUser.value.vocabulary = vocabulary.desc
         userRepository.update(curUser.value)
-        // 修改当前的词库
-//        _totalWords.value = vocabularyRepository.getVocabularyWords(context, vocabulary)
         // 修改Plan（有则赋值，没有则插入后赋值）
         updatePlan()
+        // 更新
+        loadVocabulary()
     }
 
     private fun updatePlan() = viewModelScope.launch {
         val selectedPlan = planRepository.getByUserIdAndVocabulary(userId, curUser.value.vocabulary)
         if (selectedPlan != null) {
-            plan = planRepository.getFlowByUserIdAndVocabulary(userId, curUser.value.vocabulary)
+            plan.value = planRepository.getFlowByUserIdAndVocabulary(userId, curUser.value.vocabulary)
                 .stateIn(
                     initialValue = Plan(),
                     scope = viewModelScope,
@@ -158,36 +189,18 @@ class LearnReviewViewModel(
             // 先插进去
             planRepository.insert(Plan(userId, curUser.value.vocabulary))
             // 再查出来（这样LearnProcess和ReviewProcess就有值了————虽然也是空的）
-            plan = planRepository.getFlowByUserIdAndVocabulary(userId, curUser.value.vocabulary)
+            plan.value = planRepository.getFlowByUserIdAndVocabulary(userId, curUser.value.vocabulary)
                 .stateIn(
                     initialValue = Plan(),
                     scope = viewModelScope,
                     started = SharingStarted.WhileSubscribed(5000)
                 )
+            // 刚创建完Plan后，需要初始化LearnProcess
+            initLearnProcess()
         }
     }
 
-    private fun initLearnProcess() = viewModelScope.launch {
-//        val plan = planRepository.getByUserIdAndVocabulary(userId, curUser.value.vocabulary)
-//        val learnProcess = getLearnProcess()
-//        // 初始化dailyNum个词汇
-//        for (i in 0..plan.value.dailyNum) {
-//            learnProcess.process.add(PlanWord(i))
-//        }
-    }
 
-    fun getLearnProcess(): LearnProcess {
-        // TODO：要确保Plan不为Plan()
-        Log.i("LearnReviewViewModel", "getLearnProcess: ${plan.value.learnProcess}")
-        val learnProcessStr = plan.value.learnProcess
-        return Gson().fromJson(learnProcessStr, LearnProcess::class.java)
-    }
-
-    fun getReviewProcess(): ReviewProcess {
-        // TODO：要确保Plan不为Plan()
-        val reviewProcessStr = plan.value.reviewProcess
-        return Gson().fromJson(reviewProcessStr, ReviewProcess::class.java)
-    }
 }
 
 class LearnReviewViewModelFactory(

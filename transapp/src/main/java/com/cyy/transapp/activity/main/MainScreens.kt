@@ -2,7 +2,6 @@ package com.cyy.transapp.activity.main
 
 import android.app.Activity
 import android.content.Intent
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -55,6 +54,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cyy.transapp.R
 import com.cyy.transapp.TransApp
+import com.cyy.transapp.model.LearnProcess
 import com.cyy.transapp.model.OpResult
 import com.cyy.transapp.model.daily_sentence.SentenceModel
 import com.cyy.transapp.pojo.ListenResource
@@ -64,6 +64,7 @@ import com.cyy.transapp.view_model.LearnReviewViewModel
 import com.cyy.transapp.view_model.ListenViewModel
 import com.cyy.transapp.view_model.ListenViewModelFactory
 import com.cyy.transapp.view_model.QueryViewModel
+import com.google.gson.Gson
 
 val screens = listOf(Screen.QueryPage, Screen.ListenPage, Screen.LearnPage)
 
@@ -461,23 +462,18 @@ fun VocabularyCard(states: StateHolder, learnReviewViewModel: LearnReviewViewMod
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .padding(10.dp)
-
         )
     }
 }
 
 @Composable
 fun ProgressCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel) {
-    val vocabularySize = learnReviewViewModel.vocabularySize.collectAsState()
-    Log.i("LearnReviewViewModel", "vocabularySize: ${vocabularySize.value}")
-    val plan = learnReviewViewModel.plan.collectAsStateWithLifecycle()
+    val vocabularySize = learnReviewViewModel.vocabulary.collectAsState().value.size
+    val plan = learnReviewViewModel.plan.value.collectAsStateWithLifecycle()
     Card(elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp)) {
         if (plan.value.vocabulary != "未选择" && plan.value.vocabulary != "") {
-            val learnProcess = learnReviewViewModel.getLearnProcess()
-            Text("${learnProcess.process.size}/${vocabularySize.value}")
-            Log.i("LearnReviewViewModel", "${learnProcess.process.size}/${vocabularySize.value}")
-        } else {
-            Text("加载中...")
+            val learnProcess = Gson().fromJson(plan.value.learnProcess, LearnProcess::class.java)
+            Text("${learnProcess.learnedNum}/${vocabularySize}")
         }
     }
 }
@@ -485,14 +481,14 @@ fun ProgressCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel
 @Composable
 fun LearnAndReviewCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel) {
     val context = LocalContext.current as Activity
-    val plan = learnReviewViewModel.plan.collectAsStateWithLifecycle()
+    val plan = learnReviewViewModel.plan.value.collectAsStateWithLifecycle()
     val curUser = learnReviewViewModel.curUser.collectAsStateWithLifecycle()
     Text(text = "Learn:${curUser.value.username}")
     Text(text = plan.value.learnProcess)
     if (plan.value.vocabulary != "未选择" && plan.value.vocabulary != "") {
         // 这里注意要判断！
-        val learnProcess = learnReviewViewModel.getLearnProcess()
-        val reviewProcess = learnReviewViewModel.getReviewProcess()
+        val learnProcess = learnReviewViewModel.getLearnProcess(plan.value)
+        val reviewProcess = learnReviewViewModel.getReviewProcess(plan.value)
 
         Text(text = "Learn:${plan.value.vocabulary}")
         Button(onClick = {
