@@ -1,13 +1,14 @@
 package com.cyy.transapp.view_model
 
 import android.app.Activity
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.cyy.app.word_bank.model.Word
-import com.cyy.app.word_bank.model.WordItem
+import com.cyy.transapp.model.LearnDTO
 import com.cyy.transapp.model.LearnProcess
 import com.cyy.transapp.model.OpResult
 import com.cyy.transapp.model.PlanWord
@@ -248,12 +249,10 @@ class LearnReviewViewModel(
         }
     }
 
-    fun getSubVocabulary(plan: Plan): List<WordItem> {
-        // 取当前学到的编号的前后2*dailyNum的长度的单词（subList传过去）
-        val gap = plan.dailyNum * 2
-        val learnProcess = getLearnProcess(plan)
-        // learnProcess.process[0].index是最开头的那个单词的编号
-        // learnIdx是最后的那个单词的编号
+
+    fun getLearnDTO(): LearnDTO {
+        val learnProcess = getLearnProcess(plan.value.value)
+        val gap = plan.value.value.dailyNum * 2
         val startIdx = Integer.max(
             learnProcess.process[0].index - gap,
             0
@@ -262,7 +261,16 @@ class LearnReviewViewModel(
             learnProcess.learnedIdx + gap,
             vocabulary.value.size
         )
-        return vocabulary.value.subList(startIdx, endIdx)
+//        val allWordsStr = Gson().toJson(vocabulary.value.subList(startIdx, endIdx).toList())
+        val allWordsStr = Gson().toJson(vocabulary.value)
+        Log.i("Lookkkkkkkkkkkkk", allWordsStr)
+        return LearnDTO(
+            userId,
+            curUser.value.vocabulary,
+            allWordsStr,
+            startIdx,
+            endIdx
+        )
     }
 }
 

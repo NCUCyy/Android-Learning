@@ -1,23 +1,18 @@
 package com.cyy.transapp.activity.main
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.cyy.app.word_bank.model.WordItem
-import com.google.gson.Gson
 
 class LearnActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val userId = intent.getIntExtra("userId", 0)
         val vocabulary = intent.getStringExtra("vocabulary")!!
-        val allWordsStr = intent.getStringExtra("allWordsStr")!!
-        val allWords = Gson().fromJson(allWordsStr, Array<WordItem>::class.java).toList()
-        Log.i("LearnActivity", "allWords: $allWords")
 
         setContent {
-//            LearnMainScreen(userId, vocabulary)
+            // TODO：显示查询的词汇
+            // LearnMainScreen(userId, vocabulary)
         }
     }
 }

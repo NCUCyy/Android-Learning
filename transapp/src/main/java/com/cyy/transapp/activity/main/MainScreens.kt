@@ -423,16 +423,19 @@ fun LearnScreen(states: StateHolder, learnReviewViewModel: LearnReviewViewModel)
         when (loadVocabularyState.value) {
             is OpResult.Success, OpResult.NotBegin -> {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     VocabularyCard(states, learnReviewViewModel)
+                    Spacer(modifier = Modifier.width(10.dp))
                     ProgressCard(states, learnReviewViewModel)
                 }
-                LearnAndReviewCard(states, learnReviewViewModel)
                 DailyAttendanceCard(states, learnReviewViewModel)
                 TodayCard(states, learnReviewViewModel)
+                LearnAndReviewCard(states, learnReviewViewModel)
             }
 
 
@@ -453,33 +456,51 @@ fun LearnScreen(states: StateHolder, learnReviewViewModel: LearnReviewViewModel)
 fun VocabularyCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel) {
     val context = LocalContext.current as Activity
     val curUser = learnReviewViewModel.curUser.collectAsStateWithLifecycle()
+    val vocabularySize = learnReviewViewModel.vocabulary.collectAsState().value.size
     Card(
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
-        modifier = Modifier.clickable {
-            if (curUser.value.vocabulary == "未选择") {
-                // TODO：跳转到VocabularyActivity
+        modifier = Modifier
+            .clickable {
+                // TODO：跳转到VocabularyActivity(选择字典)
                 val intent = Intent(context, VocabularyActivity::class.java)
                 states.resultLauncher.launch(intent)
-            } else {
-                // TODO：跳转到AllWordsActivity（还没写）
-//                val intent = Intent(context, VocabularyActivity::class.java)
-//                states.resultLauncher.launch(intent)
             }
-        }) {
+            .size(width = 180.dp, height = 150.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White,
+        )
+    ) {
         Row {
-            Text(text = "Vocabulary", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-            Spacer(modifier = Modifier.width(10.dp))
+            Text(
+                text = "Vocabulary",
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                modifier = Modifier.padding(10.dp)
+            )
+            Spacer(modifier = Modifier.width(15.dp))
             Icon(
                 painter = painterResource(id = R.drawable.navigate_next),
-                contentDescription = null
+                contentDescription = null,
+                modifier = Modifier
+                    .size(40.dp)
+                    .padding(top = 10.dp)
             )
         }
         Text(
             text = curUser.value.vocabulary,
             fontSize = 40.sp,
+            fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .padding(10.dp)
+                .fillMaxWidth(),
+            color = Color(0xFF269C2A)
+        )
+        Text(
+            text = "共计 $vocabularySize 个单词",
+            modifier = Modifier.padding(start = 10.dp),
+            color = Color.Gray,
+            fontSize = 13.sp
         )
     }
 }
@@ -488,14 +509,52 @@ fun VocabularyCard(states: StateHolder, learnReviewViewModel: LearnReviewViewMod
 fun ProgressCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel) {
     val vocabularySize = learnReviewViewModel.vocabulary.collectAsState().value.size
     val plan = learnReviewViewModel.plan.value.collectAsStateWithLifecycle()
-    Card(elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp)) {
+    Card(
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
+        modifier = Modifier.size(width = 180.dp, height = 150.dp), colors = CardDefaults.cardColors(
+            containerColor = Color.White,
+        )
+    ) {
+        Row {
+            Text(
+                text = "Progress",
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                modifier = Modifier.padding(10.dp)
+            )
+            Spacer(modifier = Modifier.width(35.dp))
+            Icon(
+                painter = painterResource(id = R.drawable.progress),
+                contentDescription = null,
+                modifier = Modifier.padding(top = 15.dp)
+            )
+        }
         if (plan.value.vocabulary != "") {
             // 查询好了
             if (plan.value.vocabulary != "未选择") {
                 // 有选择
                 val learnProcess =
                     Gson().fromJson(plan.value.learnProcess, LearnProcess::class.java)
-                Text("${learnProcess.learnedNum}/${vocabularySize}")
+                val process = String.format(
+                    (learnProcess.learnedNum * 100 / vocabularySize.toFloat()).toString(), "0.1f"
+                )
+                Text(
+                    text = "$process %",
+                    fontSize = 40.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .fillMaxWidth(),
+                    color = Color(0xFF269C2A)
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+                Text(
+                    text = "已掌握 ${learnProcess.learnedNum} 个单词",
+                    modifier = Modifier.padding(start = 10.dp),
+                    color = Color.Gray,
+                    fontSize = 13.sp
+                )
             } else {
                 // 没选择
                 Text("未选择")
@@ -512,59 +571,53 @@ fun LearnAndReviewCard(states: StateHolder, learnReviewViewModel: LearnReviewVie
     val context = LocalContext.current as Activity
     val plan = learnReviewViewModel.plan.value.collectAsStateWithLifecycle()
     val curUser = learnReviewViewModel.curUser.collectAsStateWithLifecycle()
-    val vocabulary = learnReviewViewModel.vocabulary.collectAsStateWithLifecycle()
-//    Text(text = "Learn:${curUser.value.username}")
-//    Text(text = plan.value.learnProcess)
-//    Text(text = "Learn:${plan.value.vocabulary}")
-    Button(onClick = {
-        if (plan.value.vocabulary != "" && plan.value.vocabulary != "未选择") {
-            // 已经查询结束，并且不是"未选择"
-            // TODO：跳转到LearnActivity
-            val intent = Intent(context, LearnActivity::class.java)
-            intent.putExtra("userId", curUser.value.id)
-            intent.putExtra("vocabulary", plan.value.vocabulary)
-            intent.putExtra(
-                "allWordsStr",
-                Gson().toJson(learnReviewViewModel.getSubVocabulary(plan.value))
-            )
-            states.resultLauncher.launch(intent)
-        }
-    }) {
-        if (plan.value.vocabulary != "") {
-            // 查询好了
-            if (plan.value.vocabulary != "未选择") {
-                // 有选择
-                val learnProcess = learnReviewViewModel.getLearnProcess(plan.value)
-                Text(text = "Learn:${learnProcess.process.size}")
-            } else {
-                // 无选择
-                Text(text = "请先选择词库")
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Button(onClick = {
+            if (plan.value.vocabulary != "" && plan.value.vocabulary != "未选择") {
+                // 已经查询结束，并且不是"未选择"
+                // TODO：跳转到LearnActivity
+                val intent = Intent(context, LearnActivity::class.java)
+                intent.putExtra("userId", curUser.value.id)
+                intent.putExtra("vocabulary", plan.value.vocabulary)
+                states.resultLauncher.launch(intent)
             }
-        } else {
-            // 查询中
-            CircularProgressIndicator()
-        }
-    }
-    Button(onClick = {
-        // TODO：跳转到ReviewActivity
-        if (plan.value.vocabulary != "" && plan.value.vocabulary != "未选择") {
-            val intent = Intent(context, ReviewActivity::class.java)
-            states.resultLauncher.launch(intent)
-        }
-    }) {
-        if (plan.value.vocabulary != "") {
-            // 查询好了
-            if (plan.value.vocabulary != "未选择") {
-                // 有选择
-                val reviewProcess = learnReviewViewModel.getReviewProcess(plan.value)
-                Text(text = "Review:${reviewProcess.process.size}")
+        }, shape = RoundedCornerShape(5.dp)) {
+            if (plan.value.vocabulary != "") {
+                // 查询好了
+                if (plan.value.vocabulary != "未选择") {
+                    // 有选择
+                    val learnProcess = learnReviewViewModel.getLearnProcess(plan.value)
+                    Text(text = "Learn:${learnProcess.process.size}")
+                } else {
+                    // 无选择
+                    Text(text = "请先选择词库")
+                }
             } else {
-                // 无选择
-                Text(text = "请先选择词库")
+                // 查询中
+                CircularProgressIndicator()
             }
-        } else {
-            // 查询中
-            CircularProgressIndicator()
+        }
+        Button(onClick = {
+            // TODO：跳转到ReviewActivity
+            if (plan.value.vocabulary != "" && plan.value.vocabulary != "未选择") {
+                val intent = Intent(context, ReviewActivity::class.java)
+                states.resultLauncher.launch(intent)
+            }
+        }) {
+            if (plan.value.vocabulary != "") {
+                // 查询好了
+                if (plan.value.vocabulary != "未选择") {
+                    // 有选择
+                    val reviewProcess = learnReviewViewModel.getReviewProcess(plan.value)
+                    Text(text = "Review:${reviewProcess.process.size}")
+                } else {
+                    // 无选择
+                    Text(text = "请先选择词库")
+                }
+            } else {
+                // 查询中
+                CircularProgressIndicator()
+            }
         }
     }
 }
@@ -585,19 +638,124 @@ fun DailyAttendanceCard(states: StateHolder, learnReviewViewModel: LearnReviewVi
 @Composable
 fun TodayCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel) {
     val today = learnReviewViewModel.today.collectAsStateWithLifecycle().value
-    Card(elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp)) {
-        Text(text = "Today", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-        Text(text = "新学")
-        Text(text = today.newLearnNum.toString())
-        Text(text = "复习")
-        Text(text = today.reviewNum.toString())
-        Text(text = "收藏")
-        Text(text = today.starNum.toString())
-        Text(text = "移除")
-        Text(text = today.removeNum.toString())
-        Text(text = "学习时长")
-        Text(text = today.learnTime.toString())
-        Text("打开App次数")
-        Text(text = today.openNum.toString())
+    Card(
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White,
+        )
+    ) {
+        Text(
+            text = "Today",
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp,
+            modifier = Modifier.padding(10.dp)
+        )
+        Row(
+            modifier = Modifier
+                .padding(10.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TodayCardItem(
+                "复习单词",
+                today.reviewNum.toString(),
+                R.drawable.book,
+                iconTint = Color(0xFF476D1A),
+                containerColor = Color(0xFFE7BAAC)
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            TodayCardItem(
+                "新学单词",
+                today.newLearnNum.toString(),
+                R.drawable.book,
+                iconTint = Color(0xFF476D1A),
+                containerColor = Color(0xFFE7BAAC)
+            )
+        }
+        Row(
+            modifier = Modifier
+                .padding(10.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TodayCardItem(
+                "收藏单词",
+                today.starNum.toString(),
+                R.drawable.star2,
+                iconTint = Color(0xFFDDB405),
+                containerColor = Color(0xFFF8EF9D)
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            TodayCardItem(
+                "移除单词",
+                today.removeNum.toString(),
+                R.drawable.delete,
+                iconTint = Color(0xFFEB3838),
+                containerColor = Color(0xFFF5AAC3)
+            )
+        }
+        Row(
+            modifier = Modifier
+                .padding(10.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TodayCardItem(
+                "共学习",
+                today.learnTime.toString() + " 分钟",
+                R.drawable.time,
+                iconTint = Color(0xFF118EF1),
+                containerColor = Color(0xFFA2D2F8)
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            TodayCardItem(
+                "打开App",
+                today.openNum.toString() + " 次",
+                R.drawable.open,
+                iconTint = Color(0xFF118EF1),
+                containerColor = Color(0xFFA2D2F8)
+            )
+        }
+    }
+}
+
+@Composable
+fun TodayCardItem(
+    title: String,
+    value: String,
+    icon: Int,
+    iconTint: Color,
+    containerColor: Color
+) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = containerColor),
+        shape = RoundedCornerShape(10.dp),
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(start = 10.dp, end = 10.dp, top = 5.dp, bottom = 5.dp)
+                .size(width = 150.dp, height = Dp.Infinity),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painter = painterResource(id = icon),
+                contentDescription = null,
+                tint = iconTint
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(text = title)
+            Spacer(modifier = Modifier.width(5.dp))
+            Text(
+                text = value,
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 15.sp,
+            )
+        }
     }
 }
