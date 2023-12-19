@@ -65,8 +65,10 @@ class LearnReviewViewModel(
         started = SharingStarted.WhileSubscribed(5000)
     )
 
+
     // Plan---用于观察
     // 每个user固定都有一个空的 Plan=> ()
+    // TODO：这里需要外面再包一个MutableState，因为plan整体会被替换！！！
     var plan: MutableState<StateFlow<Plan>> = mutableStateOf(MutableStateFlow(Plan()))
 
 

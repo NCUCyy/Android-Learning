@@ -512,6 +512,8 @@ fun LearnAndReviewCard(states: StateHolder, learnReviewViewModel: LearnReviewVie
         Button(onClick = {
             // TODO：跳转到LearnActivity
             val intent = Intent(context, LearnActivity::class.java)
+            intent.putExtra("userId", curUser.value.id)
+            intent.putExtra("vocabulary", plan.value.vocabulary)
             states.resultLauncher.launch(intent)
         }) {
             Text(text = "Learn:${learnProcess.process.size}")
