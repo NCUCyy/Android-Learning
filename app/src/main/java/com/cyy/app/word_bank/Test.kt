@@ -1,4 +1,6 @@
+import com.cyy.app.word_bank.model.Word
 import com.cyy.app.word_bank.model.WordItem
+import com.google.gson.Gson
 import com.google.gson.JsonParser
 import kotlinx.serialization.json.Json
 import java.io.File
@@ -31,8 +33,20 @@ fun parseFirstTwenty(json: String) {
     }
 }
 
+fun test(json: String): Word {
+//    val jsonObject = JsonParser.parseString(json).asJsonObject
+//    return Json.decodeFromJsonElement(
+//        Word.serializer(),
+//        Json.parseToJsonElement(
+//            jsonObject.toString()
+//        )
+//    )
+    return  Gson().fromJson(json, Word::class.java)
+}
+
 fun main() {
     val jsonContent =
         readFileAsString("/Users/cyy/AndroidStudioProjects/Chenyi/app/src/main/java/com/cyy/app/word_bank/bank2/考研.json")
-    parseFirstTwenty(jsonContent)
+//    parseFirstTwenty(jsonContent)
+    println(test(jsonContent))
 }

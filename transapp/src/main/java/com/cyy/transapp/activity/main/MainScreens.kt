@@ -462,8 +462,8 @@ fun VocabularyCard(states: StateHolder, learnReviewViewModel: LearnReviewViewMod
                 states.resultLauncher.launch(intent)
             } else {
                 // TODO：跳转到AllWordsActivity（还没写）
-                val intent = Intent(context, VocabularyActivity::class.java)
-                states.resultLauncher.launch(intent)
+//                val intent = Intent(context, VocabularyActivity::class.java)
+//                states.resultLauncher.launch(intent)
             }
         }) {
         Row {
@@ -489,9 +489,20 @@ fun ProgressCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel
     val vocabularySize = learnReviewViewModel.vocabulary.collectAsState().value.size
     val plan = learnReviewViewModel.plan.value.collectAsStateWithLifecycle()
     Card(elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp)) {
-        if (plan.value.vocabulary != "未选择" && plan.value.vocabulary != "") {
-            val learnProcess = Gson().fromJson(plan.value.learnProcess, LearnProcess::class.java)
-            Text("${learnProcess.learnedNum}/${vocabularySize}")
+        if (plan.value.vocabulary != "") {
+            // 查询好了
+            if (plan.value.vocabulary != "未选择") {
+                // 有选择
+                val learnProcess =
+                    Gson().fromJson(plan.value.learnProcess, LearnProcess::class.java)
+                Text("${learnProcess.learnedNum}/${vocabularySize}")
+            } else {
+                // 没选择
+                Text("未选择")
+            }
+        } else {
+            // 查询中
+            CircularProgressIndicator(modifier = Modifier.fillMaxSize())
         }
     }
 }
@@ -501,32 +512,63 @@ fun LearnAndReviewCard(states: StateHolder, learnReviewViewModel: LearnReviewVie
     val context = LocalContext.current as Activity
     val plan = learnReviewViewModel.plan.value.collectAsStateWithLifecycle()
     val curUser = learnReviewViewModel.curUser.collectAsStateWithLifecycle()
-    Text(text = "Learn:${curUser.value.username}")
-    Text(text = plan.value.learnProcess)
-    if (plan.value.vocabulary != "未选择" && plan.value.vocabulary != "") {
-        // 这里注意要判断！
-        val learnProcess = learnReviewViewModel.getLearnProcess(plan.value)
-        val reviewProcess = learnReviewViewModel.getReviewProcess(plan.value)
-
-        Text(text = "Learn:${plan.value.vocabulary}")
-        Button(onClick = {
+    val vocabulary = learnReviewViewModel.vocabulary.collectAsStateWithLifecycle()
+//    Text(text = "Learn:${curUser.value.username}")
+//    Text(text = plan.value.learnProcess)
+//    Text(text = "Learn:${plan.value.vocabulary}")
+    Button(onClick = {
+        if (plan.value.vocabulary != "" && plan.value.vocabulary != "未选择") {
+            // 已经查询结束，并且不是"未选择"
             // TODO：跳转到LearnActivity
             val intent = Intent(context, LearnActivity::class.java)
             intent.putExtra("userId", curUser.value.id)
             intent.putExtra("vocabulary", plan.value.vocabulary)
+            intent.putExtra(
+                "allWordsStr",
+                Gson().toJson(learnReviewViewModel.getSubVocabulary(plan.value))
+            )
             states.resultLauncher.launch(intent)
-        }) {
-            Text(text = "Learn:${learnProcess.process.size}")
         }
-        Button(onClick = {
-            // TODO：跳转到ReviewActivity
+    }) {
+        if (plan.value.vocabulary != "") {
+            // 查询好了
+            if (plan.value.vocabulary != "未选择") {
+                // 有选择
+                val learnProcess = learnReviewViewModel.getLearnProcess(plan.value)
+                Text(text = "Learn:${learnProcess.process.size}")
+            } else {
+                // 无选择
+                Text(text = "请先选择词库")
+            }
+        } else {
+            // 查询中
+            CircularProgressIndicator()
+        }
+    }
+    Button(onClick = {
+        // TODO：跳转到ReviewActivity
+        if (plan.value.vocabulary != "" && plan.value.vocabulary != "未选择") {
             val intent = Intent(context, ReviewActivity::class.java)
             states.resultLauncher.launch(intent)
-        }) {
-            Text(text = "Review:${reviewProcess.process.size}")
+        }
+    }) {
+        if (plan.value.vocabulary != "") {
+            // 查询好了
+            if (plan.value.vocabulary != "未选择") {
+                // 有选择
+                val reviewProcess = learnReviewViewModel.getReviewProcess(plan.value)
+                Text(text = "Review:${reviewProcess.process.size}")
+            } else {
+                // 无选择
+                Text(text = "请先选择词库")
+            }
+        } else {
+            // 查询中
+            CircularProgressIndicator()
         }
     }
 }
+
 
 @Composable
 fun DailyAttendanceCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel) {

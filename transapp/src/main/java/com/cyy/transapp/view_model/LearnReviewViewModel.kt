@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.OffsetDateTime
 import kotlin.concurrent.thread
+import kotlin.math.min
 
 /**
  * 保存当前登录的用户---curUser（根据UserId查询得到，ViewModel初始化的时候得到）
@@ -94,6 +95,8 @@ class LearnReviewViewModel(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(0)
             )
+
+
             // TODO：初始化plan（Flow）
             val selectedUser = userRepository.getById(userId)
             // 再初始化plan
@@ -104,6 +107,8 @@ class LearnReviewViewModel(
                         scope = viewModelScope,
                         started = SharingStarted.WhileSubscribed(0)
                     )
+
+
             // TODO：初始化Today（Flow）
             val selectedToday =
                 todayRepository.getByUserIdAndYMD(
@@ -123,6 +128,8 @@ class LearnReviewViewModel(
                 todayRepository.update(selectedToday)
             }
         }
+
+
         // 加载字典
         loadVocabulary()
     }
@@ -240,7 +247,19 @@ class LearnReviewViewModel(
         }
     }
 
-
+    fun getSubVocabulary(plan: Plan) :List<WordItem> {
+        // 取当前学到的编号的前后2*dailyNum的长度的单词（subList传过去）
+        val step = plan.dailyNum * 2
+        val startIdx = Integer.max(
+            getLearnProcess(plan).learnedIdx - step,
+            0
+        )
+        val endIdx = min(
+            getLearnProcess(plan).learnedIdx + step,
+            vocabulary.value.size
+        )
+        return vocabulary.value.subList(startIdx, endIdx)
+    }
 }
 
 class LearnReviewViewModelFactory(

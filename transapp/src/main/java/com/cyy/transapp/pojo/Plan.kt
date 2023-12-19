@@ -30,6 +30,8 @@ class Plan {
 
     constructor(userId: Int) {
         this.userId = userId
+        this.learnProcess = Gson().toJson(LearnProcess())
+        this.reviewProcess = Gson().toJson(ReviewProcess())
     }
 
     @Ignore

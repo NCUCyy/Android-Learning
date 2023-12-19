@@ -1,9 +1,11 @@
 package com.cyy.transapp.repository
 
 import android.app.Activity
+import com.cyy.app.word_bank.model.Word
 import com.cyy.app.word_bank.model.WordItem
 import com.cyy.transapp.model.Vocabulary
 import com.cyy.transapp.util.FileUtil
+import com.google.gson.Gson
 import com.google.gson.JsonParser
 import kotlinx.serialization.json.Json
 
@@ -16,6 +18,11 @@ class VocabularyRepository {
             "TOEFL" -> Vocabulary.TOEFL
             else -> Vocabulary.CET4
         }
+    }
+
+    fun getVocabularyWord(context: Activity, vocabulary: Vocabulary, word: String): Word {
+        val jsonContent = FileUtil.readRawToTxt(context, vocabulary.fileDir)
+        return Gson().fromJson(jsonContent, Word::class.java)
     }
 
     fun getVocabularyWords(context: Activity, vocabulary: Vocabulary): List<WordItem> {

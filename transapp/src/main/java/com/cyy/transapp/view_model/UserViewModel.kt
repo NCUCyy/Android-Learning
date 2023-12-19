@@ -100,8 +100,8 @@ class UserViewModel(
             // TODO：注意给loginUser赋值 和 RegisterState.SUCCESS 的顺序
             initLoginUser(user)
             registerState.value = RegisterState.SUCCESS
-            // TODO：Initial--Plan
-            planRepository.insert(Plan(user.id,"未选择"))
+            // TODO：Initial--Plan---默认给个未选择（用于取消学习计划时使用！）
+            planRepository.insert(Plan(user.id, "未选择"))
         } else {
             registerState.value = RegisterState.FAILED
         }
@@ -160,7 +160,7 @@ class UserViewModelFactory(
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(UserViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return UserViewModel(userRepository,planRepository) as T
+            return UserViewModel(userRepository, planRepository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
