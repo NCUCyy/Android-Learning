@@ -20,11 +20,17 @@ class VocabularyRepository {
         }
     }
 
-    fun getVocabularyWord(context: Activity, vocabulary: Vocabulary, word: String): Word {
+    /**
+     * 用这个（比下面那个解析更快！）
+     */
+    fun getVocabularyWord(context: Activity, vocabulary: Vocabulary): Word {
         val jsonContent = FileUtil.readRawToTxt(context, vocabulary.fileDir)
         return Gson().fromJson(jsonContent, Word::class.java)
     }
 
+    /**
+     * Deprecated（解析太慢！）
+     */
     fun getVocabularyWords(context: Activity, vocabulary: Vocabulary): List<WordItem> {
         val jsonContent = FileUtil.readRawToTxt(context, vocabulary.fileDir)
         val jsonArray = JsonParser.parseString(jsonContent).asJsonArray

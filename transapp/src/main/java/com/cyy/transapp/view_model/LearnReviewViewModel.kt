@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.cyy.app.word_bank.model.Word
 import com.cyy.app.word_bank.model.WordItem
 import com.cyy.transapp.model.LearnProcess
 import com.cyy.transapp.model.OpResult
@@ -73,8 +74,8 @@ class LearnReviewViewModel(
     var plan: MutableState<StateFlow<Plan>> = mutableStateOf(MutableStateFlow(Plan()))
 
 
-    private val _vocabulary = MutableStateFlow<List<WordItem>>(listOf())
-    val vocabulary: StateFlow<List<WordItem>> = _vocabulary.asStateFlow()
+    private val _vocabulary = MutableStateFlow(Word())
+    val vocabulary: StateFlow<Word> = _vocabulary.asStateFlow()
 
     private val _loadVocabularyState = MutableStateFlow<OpResult<Any>>(OpResult.NotBegin)
     val loadVocabularyState: StateFlow<OpResult<Any>> = _loadVocabularyState.asStateFlow()
@@ -193,7 +194,7 @@ class LearnReviewViewModel(
             thread {
                 if (user.vocabulary != "未选择") {
                     _vocabulary.value =
-                        vocabularyRepository.getVocabularyWords(
+                        vocabularyRepository.getVocabularyWord(
                             context,
                             Vocabulary.valueOf(user.vocabulary)
                         )
@@ -247,15 +248,18 @@ class LearnReviewViewModel(
         }
     }
 
-    fun getSubVocabulary(plan: Plan) :List<WordItem> {
+    fun getSubVocabulary(plan: Plan): List<WordItem> {
         // 取当前学到的编号的前后2*dailyNum的长度的单词（subList传过去）
-        val step = plan.dailyNum * 2
+        val gap = plan.dailyNum * 2
+        val learnProcess = getLearnProcess(plan)
+        // learnProcess.process[0].index是最开头的那个单词的编号
+        // learnIdx是最后的那个单词的编号
         val startIdx = Integer.max(
-            getLearnProcess(plan).learnedIdx - step,
+            learnProcess.process[0].index - gap,
             0
         )
         val endIdx = min(
-            getLearnProcess(plan).learnedIdx + step,
+            learnProcess.learnedIdx + gap,
             vocabulary.value.size
         )
         return vocabulary.value.subList(startIdx, endIdx)
