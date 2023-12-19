@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.cyy.app.word_bank.model.WordItem
 import com.cyy.transapp.model.LearnProcess
+import com.cyy.transapp.model.OpResult
 import com.cyy.transapp.model.PlanWord
 import com.cyy.transapp.model.ReviewProcess
 import com.cyy.transapp.model.Vocabulary
@@ -26,6 +27,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.OffsetDateTime
+import kotlin.concurrent.thread
 
 /**
  * 保存当前登录的用户---curUser（根据UserId查询得到，ViewModel初始化的时候得到）
@@ -70,6 +72,9 @@ class LearnReviewViewModel(
 
     private val _vocabulary = MutableStateFlow<List<WordItem>>(listOf())
     val vocabulary: StateFlow<List<WordItem>> = _vocabulary.asStateFlow()
+
+    private val _loadVocabularyState = MutableStateFlow<OpResult<Any>>(OpResult.NotBegin)
+    val loadVocabularyState: StateFlow<OpResult<Any>> = _loadVocabularyState.asStateFlow()
 
     /**
      * 修改单词本之后，要改哪些地方：
@@ -172,14 +177,20 @@ class LearnReviewViewModel(
     /**
      * 根据user中的vocabulary加载字典
      */
-    private fun loadVocabulary() = viewModelScope.launch {
-        val user = userRepository.getById(userId)
-        if (user.vocabulary != "未选择") {
-            _vocabulary.value =
-                vocabularyRepository.getVocabularyWords(
-                    context,
-                    Vocabulary.valueOf(user.vocabulary)
-                )
+    private fun loadVocabulary() {
+        _loadVocabularyState.value = OpResult.Loading
+        viewModelScope.launch {
+            val user = userRepository.getById(userId)
+            thread {
+                if (user.vocabulary != "未选择") {
+                    _vocabulary.value =
+                        vocabularyRepository.getVocabularyWords(
+                            context,
+                            Vocabulary.valueOf(user.vocabulary)
+                        )
+                }
+                _loadVocabularyState.value = OpResult.Success("加载完成")
+            }
         }
     }
     // --------------------------------------------更换字典 part--------------------------------------------

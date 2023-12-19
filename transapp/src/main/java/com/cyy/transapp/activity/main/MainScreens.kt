@@ -414,22 +414,38 @@ fun ListenResourceCard(listenResource: ListenResource, states: StateHolder) {
 @Composable
 fun LearnScreen(states: StateHolder, learnReviewViewModel: LearnReviewViewModel) {
     val scrollState = rememberScrollState()
+    val loadVocabularyState = learnReviewViewModel.loadVocabularyState.collectAsState()
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(scrollState)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            VocabularyCard(states, learnReviewViewModel)
-            ProgressCard(states, learnReviewViewModel)
+        when (loadVocabularyState.value) {
+            is OpResult.Success, OpResult.NotBegin -> {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    VocabularyCard(states, learnReviewViewModel)
+                    ProgressCard(states, learnReviewViewModel)
+                }
+                LearnAndReviewCard(states, learnReviewViewModel)
+                DailyAttendanceCard(states, learnReviewViewModel)
+                TodayCard(states, learnReviewViewModel)
+            }
+
+
+            is OpResult.Loading -> {
+                // TODO：显示加载中
+                CircularProgressIndicator(modifier = Modifier.fillMaxSize())
+            }
+
+            else -> {
+                // TODO：显示空页面
+            }
         }
-        LearnAndReviewCard(states, learnReviewViewModel)
-        DailyAttendanceCard(states, learnReviewViewModel)
-        TodayCard(states, learnReviewViewModel)
+
     }
 }
 
