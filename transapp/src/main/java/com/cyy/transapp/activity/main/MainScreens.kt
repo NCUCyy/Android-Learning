@@ -585,75 +585,111 @@ fun LearnAndReviewCard(states: StateHolder, learnReviewViewModel: LearnReviewVie
     val context = LocalContext.current as Activity
     val plan = learnReviewViewModel.plan.value.collectAsStateWithLifecycle()
     val curUser = learnReviewViewModel.curUser.collectAsStateWithLifecycle()
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Button(onClick = {
-            if (plan.value.vocabulary != "") {
-                if (plan.value.vocabulary != "未选择") {
-                    // 已经查询结束，并且不是"未选择"
-                    val learnProcess = learnReviewViewModel.getLearnProcess(plan.value)
-                    val reviewProcess = learnReviewViewModel.getReviewProcess(plan.value)
-                    if (reviewProcess.process.size > 0) {
-                        // TODO：若还有没复习的，询问是否要先复习
-                        if (learnProcess.process.size > 0) {
-                            // TODO：跳转到LearnActivity
-                            val intent = Intent(context, LearnActivity::class.java)
-                            intent.putExtra("userId", curUser.value.id)
-                            intent.putExtra("vocabulary", plan.value.vocabulary)
-                            states.resultLauncher.launch(intent)
-                        } else {
-                            // TODO：开启下一组学习（弹窗确认）
-                            learnReviewViewModel.initLearnProcess()
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp)
+    ) {
+        if (plan.value.vocabulary != "") {
+            // 为""表示还没查询好(先不显示)
+            if (plan.value.vocabulary != "未选择") {
+                // 有选择
+                // TODO：Learn-Part
+                Card(
+                    elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
+                    modifier = Modifier
+                        .size(width = 170.dp, height = Dp.Infinity)
+                        .clickable {
+                            val learnProcess = learnReviewViewModel.getLearnProcess(plan.value)
+                            // TODO：若还有没复习的，询问是否要先复习
+                            if (learnProcess.process.size > 0) {
+                                // 还有词
+                                // TODO：跳转到LearnActivity
+                                val intent = Intent(context, LearnActivity::class.java)
+                                intent.putExtra("userId", curUser.value.id)
+                                intent.putExtra("vocabulary", plan.value.vocabulary)
+                                states.resultLauncher.launch(intent)
+                            } else {
+                                // 没词了
+                                // TODO：开启下一组学习（弹窗确认）
+                                learnReviewViewModel.initLearnProcess()
+                            }
+
                         }
-                    }
-                } else {
-                    toVocabularyActivity(context, states)
-                }
-            }
-        }, shape = RoundedCornerShape(5.dp)) {
-            if (plan.value.vocabulary != "") {
-                // 查询好了
-                if (plan.value.vocabulary != "未选择") {
+                ) {
                     // 有选择
                     val learnProcess = learnReviewViewModel.getLearnProcess(plan.value)
-                    if (learnProcess.process.size > 0)
-                        Text(text = "Learn:${learnProcess.process.size}")
-                    else
+                    if (learnProcess.process.size > 0) {
+                        // 还有词
+                        LearnReviewText("Learn", learnProcess.process.size)
+                    } else {
+                        // 没词了
                         Text(text = "学习下一组")
-                } else {
-                    // 无选择
-                    Text(text = "请先选择词库")
+                    }
                 }
-            }
-        }
-        Button(onClick = {
-            // TODO：跳转到ReviewActivity
-            if (plan.value.vocabulary != "") {
-                if (plan.value.vocabulary != "未选择") {
-                    val intent = Intent(context, ReviewActivity::class.java)
-                    intent.putExtra("userId", curUser.value.id)
-                    intent.putExtra("vocabulary", curUser.value.vocabulary)
-                    states.resultLauncher.launch(intent)
-                } else {
-                    // 跳转到VocabularyActivity
-                    toVocabularyActivity(context, states)
-                }
-            }
-        }) {
-            if (plan.value.vocabulary != "") {
-                // 查询好了
-                if (plan.value.vocabulary != "未选择") {
-                    // 有选择
+                Spacer(modifier = Modifier.width(15.dp))
+                // TODO：Review-Part
+                Card(
+                    elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
+                    modifier = Modifier
+                        .size(width = 170.dp, height = Dp.Infinity)
+                        .clickable {
+                            // TODO：跳转到ReviewActivity
+                            val intent = Intent(context, ReviewActivity::class.java)
+                            intent.putExtra("userId", curUser.value.id)
+                            intent.putExtra("vocabulary", curUser.value.vocabulary)
+                            states.resultLauncher.launch(intent)
+                        }
+                ) {
                     val reviewProcess = learnReviewViewModel.getReviewProcess(plan.value)
-                    Text(text = "Review:${reviewProcess.process.size}")
-                } else {
-                    // 无选择
-                    Text(text = "请先选择词库")
+                    LearnReviewText("Review", reviewProcess.process.size)
+                }
+            } else {
+                Card(
+                    elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
+                        .clickable {
+                            // TODO：跳转到VocabularyActivity---选择词汇
+                            toVocabularyActivity(context, states)
+                        },
+                ) {
+                    // 没选择
+                    Text(
+                        text = "请先选择词汇表",
+                        textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 25.sp,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(10.dp)
+                    )
                 }
             }
         }
     }
 }
 
+@Composable
+fun LearnReviewText(type: String, num: Int) {
+    Column(
+        modifier = Modifier
+            .padding(start = 20.dp, top = 10.dp, bottom = 10.dp)
+    ) {
+        Text(text = type, fontWeight = FontWeight.Bold, fontSize = 25.sp)
+        Text(
+            text = num.toString(),
+            color = Color(0xFFFF5722),
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp
+        )
+    }
+}
+
+// 跳转到VocabularyActivity---选Vocabulary
 fun toVocabularyActivity(context: Activity, states: StateHolder) {
     val intent = Intent(context, VocabularyActivity::class.java)
     states.resultLauncher.launch(intent)
