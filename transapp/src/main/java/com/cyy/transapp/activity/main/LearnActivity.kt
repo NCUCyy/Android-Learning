@@ -89,6 +89,7 @@ fun LearnMainScreen(userId: Int, vocabulary: String) {
                     // 图标按钮
                     IconButton(onClick = {
                         // TODO：返回查词页面
+                        learnViewModel.endLearn()
                         context.finish()
                     }) {
                         Icon(

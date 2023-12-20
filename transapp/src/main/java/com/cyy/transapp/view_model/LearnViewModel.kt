@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.OffsetDateTime
+import java.time.temporal.ChronoUnit
 import kotlin.concurrent.thread
 
 class LearnViewModel(
@@ -41,6 +42,8 @@ class LearnViewModel(
     private val vocabularyRepository: VocabularyRepository,
     private val starWordRepository: StarWordRepository
 ) : ViewModel() {
+    // 开始时间
+    private val startTime = OffsetDateTime.now()
     private val now = OffsetDateTime.now()
 
     // 当前登录的用户---用于观察
@@ -176,24 +179,38 @@ class LearnViewModel(
         _curOption.value = option
         val plan = planRepository.getByUserIdAndVocabulary(userId, vocabulary)
         val learnProcess = getLearnProcess(plan)
+        // TODO：在LearnProcess中的idx！！！
+        val idx = _curIdx.value
         if (option == _curQuizWord.value.answer) {
             // 答对：process+1
-            learnProcess.process[_curIdx.value].process += 1
+            learnProcess.process[idx].process += 1
         } else {
             // 答错：process清空
-            learnProcess.process[_curPlanWord.value.index].process = 0
+            learnProcess.process[idx].process = 0
         }
-        _curWordProcess.value = learnProcess.process[_curIdx.value].process
-        if (learnProcess.process[_curIdx.value].process >= 3) {
+        // TODO：要及时更新页面显示的process！
+        _curWordProcess.value = learnProcess.process[idx].process
+        if (learnProcess.process[idx].process >= 3) {
             // 若process>=3，则从process中删除
-            val reviewProcess = getReviewProcess(plan)
-            learnProcess.process.removeAt(_curIdx.value)
+            learnProcess.process.removeAt(idx)
             learnProcess.learnedNum++
-            reviewProcess.process.add(_curPlanWord.value)
-            updatePlanByReviewProcess(plan, reviewProcess)
+            // 更新ReviewProcess（process）和Today（newLearnNum）
+            configLearned(plan)
         }
-        // 更新数据库中的plan
+        // 更新数据库中的LearnProcess
         updatePlanByLearnProcess(plan, learnProcess)
+    }
+
+    /**
+     * 当一个词满足了process>=3的时候
+     */
+    private suspend fun configLearned(plan: Plan) {
+        // 更新ReviewProcess
+        val reviewProcess = getReviewProcess(plan)
+        reviewProcess.process.add(_curPlanWord.value)
+        updatePlanByReviewProcess(plan, reviewProcess)
+        // 更新Today.newLearnNum
+        updateTodayByNewLearn()
     }
 
     /**
@@ -260,6 +277,13 @@ class LearnViewModel(
         nextWord()
     }
 
+    private suspend fun updateTodayByNewLearn() {
+        val today =
+            todayRepository.getByUserIdAndYMD(userId, now.year, now.monthValue, now.dayOfMonth)
+        today.newLearnNum++
+        todayRepository.update(today)
+    }
+
     private suspend fun updatePlanByRemove() {
         val plan = planRepository.getByUserIdAndVocabulary(userId, vocabulary)
         val learnProcess = getLearnProcess(plan)
@@ -280,6 +304,25 @@ class LearnViewModel(
         val today =
             todayRepository.getByUserIdAndYMD(userId, now.year, now.monthValue, now.dayOfMonth)
         today.starNum++
+        todayRepository.update(today)
+    }
+
+    /**
+     * 结束学习！（更新时间）
+     */
+    fun endLearn() = viewModelScope.launch {
+        val endTime = OffsetDateTime.now()
+        // 更新Today
+        updateTodayByTime(endTime)
+    }
+
+    private suspend fun updateTodayByTime(endTime: OffsetDateTime) {
+        // 计算两个时间的差值
+        val duration = ChronoUnit.MINUTES.between(startTime, endTime)
+        // 更新Today
+        val today =
+            todayRepository.getByUserIdAndYMD(userId, now.year, now.monthValue, now.dayOfMonth)
+        today.learnTime += duration.toInt()
         todayRepository.update(today)
     }
     /**

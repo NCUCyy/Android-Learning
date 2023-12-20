@@ -54,6 +54,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cyy.transapp.R
 import com.cyy.transapp.TransApp
+import com.cyy.transapp.activity.other.VocabularyActivity
 import com.cyy.transapp.model.LearnProcess
 import com.cyy.transapp.model.OpResult
 import com.cyy.transapp.model.daily_sentence.SentenceModel

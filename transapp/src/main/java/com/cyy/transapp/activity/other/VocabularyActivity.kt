@@ -1,4 +1,4 @@
-package com.cyy.transapp.activity.main
+package com.cyy.transapp.activity.other
 
 import android.app.Activity
 import android.content.Intent
