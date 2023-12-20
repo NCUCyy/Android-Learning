@@ -201,6 +201,8 @@ class ReviewViewModel(
         updatePlanByReviewProcess(plan, reviewProcess)
         // 更新Today（reviewNum）
         updateTodayByNewReview()
+        // TODO：及时更新wordProcess用于UI显示
+        _curWordProcess.value = reviewProcess.process[_curIdx.value].process
     }
 
     /**
@@ -213,6 +215,8 @@ class ReviewViewModel(
         reviewProcess.process[_curIdx.value].process += 1
         // 更新ReviewProcess（process）
         updatePlanByReviewProcess(plan, reviewProcess)
+        // TODO：及时更新wordProcess用于UI显示
+        _curWordProcess.value = reviewProcess.process[_curIdx.value].process
     }
 
     /**
@@ -225,6 +229,8 @@ class ReviewViewModel(
         reviewProcess.process[_curIdx.value].process = 0
         // 更新ReviewProcess（process）
         updatePlanByReviewProcess(plan, reviewProcess)
+        // TODO：及时更新wordProcess用于UI显示
+        _curWordProcess.value = reviewProcess.process[_curIdx.value].process
     }
 
 

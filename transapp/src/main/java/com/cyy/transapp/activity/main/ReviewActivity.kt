@@ -175,7 +175,7 @@ fun ReviewMainScreen(
         content = {
             // 页面的主体部分
             Box(modifier = Modifier.padding(it)) {
-                ReviewContentScreen(reviewViewModel, resultLauncher, showDetail)
+                ReviewContentScreen(reviewViewModel, showDetail)
             }
         },
         floatingActionButton = {
@@ -222,11 +222,9 @@ fun ReviewBtn(
 @Composable
 fun ReviewContentScreen(
     reviewViewModel: ReviewViewModel,
-    resultLauncher: ActivityResultLauncher<Intent>,
     showDetail: MutableState<Boolean>
 ) {
     val loadVocabularyState = reviewViewModel.loadVocabularyState.collectAsState()
-    val curOption = reviewViewModel.curOption.collectAsState().value
 
     Column(modifier = Modifier.padding(10.dp)) {
         when (loadVocabularyState.value) {
@@ -241,7 +239,9 @@ fun ReviewContentScreen(
             }
 
             is OpResult.Loading -> {
-                CircularProgressIndicator(modifier = Modifier.fillMaxSize())
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
             }
 
             else -> {

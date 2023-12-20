@@ -408,6 +408,67 @@ fun TitleWordCard(learnViewModel: LearnViewModel) {
 @Composable
 fun ProcessCard(curProcess: Int) {
     // TODO：显示当前进度————球球
+    Row(modifier = Modifier.padding(start = 12.dp, top = 5.dp)) {
+        when (curProcess) {
+            0 -> {
+                ProcessIcon(0)
+                ProcessIcon(0)
+                ProcessIcon(0)
+            }
+
+            1 -> {
+                ProcessIcon(1)
+                ProcessIcon(0)
+                ProcessIcon(0)
+            }
+
+            2 -> {
+                ProcessIcon(1)
+                ProcessIcon(2)
+                ProcessIcon(0)
+            }
+
+            3 -> {
+                ProcessIcon(1)
+                ProcessIcon(2)
+                ProcessIcon(3)
+            }
+        }
+    }
+}
+
+@Composable
+fun ProcessIcon(process: Int) {
+    val tintColor = Color(0xFF4CAF50)
+    when (process) {
+        0 -> Icon(
+            painter = painterResource(id = R.drawable.counter_0),
+            contentDescription = null,
+            modifier = Modifier.size(30.dp),
+            tint = Color(0xFFE90C57)
+        )
+
+        1 -> Icon(
+            painter = painterResource(id = R.drawable.counter_1),
+            contentDescription = null,
+            modifier = Modifier.size(30.dp),
+            tint = tintColor
+        )
+
+        2 -> Icon(
+            painter = painterResource(id = R.drawable.counter_2),
+            contentDescription = null,
+            modifier = Modifier.size(30.dp),
+            tint = tintColor
+        )
+
+        3 -> Icon(
+            painter = painterResource(id = R.drawable.counter_3),
+            contentDescription = null,
+            modifier = Modifier.size(30.dp),
+            tint = tintColor
+        )
+    }
 }
 
 @Composable
