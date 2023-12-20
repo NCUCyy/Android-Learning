@@ -319,6 +319,7 @@ fun DetailWordCard(learnViewModel: LearnViewModel) {
                 fontSize = 22.sp,
             )
             TitleDivider()
+            Spacer(modifier = Modifier.height(15.dp))
             TranslationCard(translations)
         }
         Spacer(modifier = Modifier.height(20.dp))
@@ -329,6 +330,7 @@ fun DetailWordCard(learnViewModel: LearnViewModel) {
                 fontSize = 22.sp,
             )
             TitleDivider()
+            Spacer(modifier = Modifier.height(15.dp))
             PhraseCard(phrases)
         }
     }
@@ -431,7 +433,7 @@ fun TitleWordCard(learnViewModel: LearnViewModel) {
 @Composable
 fun ProcessCard(curProcess: Int) {
     // TODO：显示当前进度————球球
-    Row(modifier = Modifier.padding(start = 12.dp, top = 5.dp)) {
+    Row(modifier = Modifier.padding(start = 15.dp, top = 5.dp)) {
         when (curProcess) {
             0 -> {
                 ProcessIcon(0)
@@ -467,21 +469,21 @@ fun ProcessIcon(process: Int) {
         0 -> Icon(
             painter = painterResource(id = R.drawable.counter_0),
             contentDescription = null,
-            modifier = Modifier.size(30.dp),
+            modifier = Modifier.size(25.dp),
             tint = Color(0xFFE90C57)
         )
 
         1 -> Icon(
             painter = painterResource(id = R.drawable.counter_1),
             contentDescription = null,
-            modifier = Modifier.size(30.dp),
+            modifier = Modifier.size(25.dp),
             tint = tintColor
         )
 
         2 -> Icon(
             painter = painterResource(id = R.drawable.counter_2),
             contentDescription = null,
-            modifier = Modifier.size(30.dp),
+            modifier = Modifier.size(25.dp),
             tint = tintColor
         )
 

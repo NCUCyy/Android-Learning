@@ -600,7 +600,7 @@ fun LearnAndReviewCard(states: StateHolder, learnReviewViewModel: LearnReviewVie
                 Card(
                     elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
                     modifier = Modifier
-                        .size(width = 170.dp, height = Dp.Infinity)
+                        .size(width = 175.dp, height = Dp.Infinity)
                         .clickable {
                             val learnProcess = learnReviewViewModel.getLearnProcess(plan.value)
                             // TODO：若还有没复习的，询问是否要先复习
@@ -616,7 +616,6 @@ fun LearnAndReviewCard(states: StateHolder, learnReviewViewModel: LearnReviewVie
                                 // TODO：开启下一组学习（弹窗确认）
                                 learnReviewViewModel.initLearnProcess()
                             }
-
                         }
                 ) {
                     // 有选择
@@ -634,7 +633,7 @@ fun LearnAndReviewCard(states: StateHolder, learnReviewViewModel: LearnReviewVie
                 Card(
                     elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
                     modifier = Modifier
-                        .size(width = 170.dp, height = Dp.Infinity)
+                        .size(width = 175.dp, height = Dp.Infinity)
                         .clickable {
                             // TODO：跳转到ReviewActivity
                             val intent = Intent(context, ReviewActivity::class.java)
