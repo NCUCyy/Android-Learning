@@ -40,4 +40,9 @@ class StarWordRepository(private val starWordDao: StarWordDao) {
     suspend fun getStarWordByUserIdAndWord(userId: Int, word: String): StarWord {
         return starWordDao.getStarWordByUserIdAndWord(userId, word)
     }
+
+    @WorkerThread
+    fun getFlowStarWordByUserIdAndWord(userId: Int, word: String): Flow<StarWord> {
+        return starWordDao.getFlowStarWordByUserIdAndWord(userId, word)
+    }
 }

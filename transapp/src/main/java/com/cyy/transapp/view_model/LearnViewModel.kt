@@ -1,6 +1,7 @@
 package com.cyy.transapp.view_model
 
 import android.app.Activity
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -33,7 +34,7 @@ import java.time.temporal.ChronoUnit
 import kotlin.concurrent.thread
 
 class LearnViewModel(
-    private val userId: Int,
+    val userId: Int,
     private val vocabulary: String,
     private val context: Activity,
     private val userRepository: UserRepository,
@@ -61,6 +62,14 @@ class LearnViewModel(
         started = SharingStarted.WhileSubscribed(0)
     )
 
+//    val today =
+//        todayRepository.getFlowByUserIdAndYMD(userId, now.year, now.monthValue, now.dayOfMonth)
+//            .stateIn(
+//                initialValue = Today(),
+//                scope = viewModelScope,
+//                started = SharingStarted.WhileSubscribed(0)
+//            )
+
     // TODO：当前选择的单词的索引（在LearnProcess的process列表中的索引）
     private val _curIdx = MutableStateFlow(0)
     val curIdx = _curIdx.asStateFlow()
@@ -72,6 +81,8 @@ class LearnViewModel(
     // TODO：当前的题目————QuizWord
     private val _curQuizWord = MutableStateFlow(QuizWord())
     val curQuizWord = _curQuizWord.asStateFlow()
+
+    // 当前的WordItem
     private val _curWordItem = MutableStateFlow(WordItem())
     val curWordItem = _curWordItem.asStateFlow()
 
@@ -84,14 +95,25 @@ class LearnViewModel(
     val curWordProcess = _curWordProcess.asStateFlow()
 
     // TODO：当前的单词是否被收藏
-    private val _isCurStared = MutableStateFlow(false)
-    val isCurStared = _isCurStared.asStateFlow()
+//    private val _isCurStared = MutableStateFlow(false)
+//    val isCurStared = _isCurStared.asStateFlow()
 
-    // 字典的加载状态
+    // TODO：字典的加载状态
     private val _loadVocabularyState = MutableStateFlow<OpResult<Any>>(OpResult.NotBegin)
     val loadVocabularyState: StateFlow<OpResult<Any>> = _loadVocabularyState.asStateFlow()
 
+    // TODO：字典中的所有【WordItem】
     private lateinit var allWords: Word
+
+    // TODO：关键！------用于判断当前的词是否已经收藏
+    //  （注意是MutableState<StateFLow>的结构：StateFlow用于观察数据库中的变化，MutableState用于nextWord后更换curWord）
+    val starWord = mutableStateOf(
+        starWordRepository.getFlowStarWordByUserIdAndWord(userId, _curQuizWord.value.word).stateIn(
+            initialValue = StarWord(),
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(0)
+        )
+    )
 
     init {
         _loadVocabularyState.value = OpResult.Loading
@@ -128,7 +150,7 @@ class LearnViewModel(
      * 4、curWordProcess
      * 5、isCurStared
      */
-    private suspend fun configNext(learnProcess: LearnProcess) {
+    private fun configNext(learnProcess: LearnProcess) {
         _curPlanWord.value = learnProcess.process[_curIdx.value]
         // 取出在总字典中的索引，根据这个idx，构造出一个QuizWord（随机）
         _curQuizWord.value = QuizWord(_curPlanWord.value.index, allWords)
@@ -136,10 +158,16 @@ class LearnViewModel(
         _curOption.value = ""
         // 当前PlanWord的process
         _curWordProcess.value = _curPlanWord.value.process
-        // 更新isCurStared（给初值）
-        val word = starWordRepository.getStarWordByUserIdAndWord(userId, _curQuizWord.value.word)
-        _isCurStared.value = word != null
+        // 当前单词的WordItem
         _curWordItem.value = allWords[_curPlanWord.value.index]
+        // 更新这个单词是否收藏
+        starWord.value =
+            starWordRepository.getFlowStarWordByUserIdAndWord(userId, _curQuizWord.value.word)
+                .stateIn(
+                    initialValue = StarWord(),
+                    scope = viewModelScope,
+                    started = SharingStarted.WhileSubscribed(0)
+                )
     }
 
     /**
@@ -256,7 +284,6 @@ class LearnViewModel(
         starWordRepository.getStarWordByUserIdAndWord(userId, _curQuizWord.value.word)?.let {
             starWordRepository.delete(it)
         }
-        _isCurStared.value = false
     }
 
     /**
@@ -267,7 +294,6 @@ class LearnViewModel(
             StarWord(userId, _curQuizWord.value.word)
         )
         updateTodayByStar()
-        _isCurStared.value = true
     }
 
     /**

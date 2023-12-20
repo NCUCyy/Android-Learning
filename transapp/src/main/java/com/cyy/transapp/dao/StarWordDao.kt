@@ -38,4 +38,7 @@ interface StarWordDao {
 
     @Query("SELECT * from star_words WHERE userId = :userId and word = :word")
     suspend fun getStarWordByUserIdAndWord(userId: Int, word: String): StarWord
+
+    @Query("SELECT * from star_words WHERE userId = :userId and word = :word")
+    fun getFlowStarWordByUserIdAndWord(userId: Int, word: String): Flow<StarWord>
 }

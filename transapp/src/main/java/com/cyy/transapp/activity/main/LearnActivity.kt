@@ -36,6 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,6 +50,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cyy.app.word_bank.model.Phrase
 import com.cyy.app.word_bank.model.Translation
@@ -57,12 +59,15 @@ import com.cyy.transapp.TransApp
 import com.cyy.transapp.model.OpResult
 import com.cyy.transapp.view_model.LearnViewModel
 import com.cyy.transapp.view_model.LearnViewModelFactory
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class LearnActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val userId = intent.getIntExtra("userId", 0)
+        val userId = intent.getIntExtra("userId", 14)
         val vocabulary = intent.getStringExtra("vocabulary")!!
+//        val vocabulary = "CET6"
         // 使用ActivityResultLauncher进行意图跳转
         val resultLauncher: ActivityResultLauncher<Intent> = registerForActivityResult(
             ActivityResultContracts.StartActivityForResult(),
@@ -102,7 +107,9 @@ fun LearnMainScreen(
             application.starWordRepository
         )
     )
-    val isCurStared = learnViewModel.isCurStared.collectAsState()
+    val starWord = learnViewModel.starWord.value.collectAsStateWithLifecycle().value
+    // 控制详细释义是否显示（过1s显示）
+    val showDetail = remember { mutableStateOf(false) }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -126,7 +133,7 @@ fun LearnMainScreen(
                 },
                 actions = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        if (isCurStared.value) {
+                        if (starWord != null) {
                             StarIconButton(
                                 action = {
                                     // TODO：取消收藏
@@ -149,6 +156,7 @@ fun LearnMainScreen(
                         IconButton(onClick = {
                             // TODO：移除
                             learnViewModel.removeWord()
+                            Toast.makeText(context, "移除成功！", Toast.LENGTH_SHORT).show()
                         }) {
                             Icon(
                                 painter = painterResource(id = R.drawable.delete),
@@ -162,12 +170,17 @@ fun LearnMainScreen(
             )
         },
         bottomBar = {
-            TranslateOrNextBtn(learnViewModel = learnViewModel, resultLauncher = resultLauncher)
+            if (showDetail.value)
+                TranslateOrNextBtn(
+                    learnViewModel = learnViewModel,
+                    resultLauncher = resultLauncher,
+                    showDetail = showDetail
+                )
         },
         content = {
             // 页面的主体部分
             Box(modifier = Modifier.padding(it)) {
-                LearnContentScreen(learnViewModel, resultLauncher)
+                LearnContentScreen(learnViewModel, resultLauncher, showDetail)
             }
         },
         floatingActionButton = {
@@ -191,21 +204,24 @@ fun StarIconButton(action: () -> Unit, icon: Int) {
 @Composable
 fun LearnContentScreen(
     learnViewModel: LearnViewModel,
-    resultLauncher: ActivityResultLauncher<Intent>
+    resultLauncher: ActivityResultLauncher<Intent>,
+    showDetail: MutableState<Boolean>
 ) {
     val loadVocabularyState = learnViewModel.loadVocabularyState.collectAsState()
     val curOption = learnViewModel.curOption.collectAsState().value
+
     Column(modifier = Modifier.padding(10.dp)) {
         when (loadVocabularyState.value) {
             is OpResult.Success -> {
                 // 当前Word
                 TitleWordCard(learnViewModel)
-                if (curOption != "") {
+                Spacer(modifier = Modifier.height(20.dp))
+                if (showDetail.value) {
                     // 若选择完成，则显示完整释义（点击进行联网搜索）
                     DetailWordCard(learnViewModel)
                 } else {
                     // 四个选项
-                    OptionWordCard(learnViewModel)
+                    OptionWordCard(learnViewModel, showDetail)
                 }
             }
 
@@ -223,7 +239,8 @@ fun LearnContentScreen(
 @Composable
 fun TranslateOrNextBtn(
     learnViewModel: LearnViewModel,
-    resultLauncher: ActivityResultLauncher<Intent>
+    resultLauncher: ActivityResultLauncher<Intent>,
+    showDetail: MutableState<Boolean>
 ) {
     val context = LocalContext.current as Activity
     val curQuizWord = learnViewModel.curQuizWord.collectAsState().value
@@ -237,13 +254,14 @@ fun TranslateOrNextBtn(
                 .clickable {
                     // TODO：联网搜索
                     val intent = Intent(context, TransActivity::class.java)
+                    intent.putExtra("userId", learnViewModel.userId)
                     intent.putExtra("query", curQuizWord.word)
                     resultLauncher.launch(intent)
                 },
             elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp)
         ) {
             Text(
-                text = "翻译",
+                text = "查看完整释义",
                 modifier = Modifier.padding(10.dp),
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
@@ -255,6 +273,7 @@ fun TranslateOrNextBtn(
                 .clickable {
                     // TODO：下一个
                     learnViewModel.nextWord()
+                    showDetail.value = false
                 },
             elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp)
         ) {
@@ -392,18 +411,24 @@ fun ProcessCard(curProcess: Int) {
 }
 
 @Composable
-fun OptionWordCard(learnViewModel: LearnViewModel) {
+fun OptionWordCard(learnViewModel: LearnViewModel, showDetail: MutableState<Boolean>) {
     // TODO：显示查询的词汇
     val curQuizWord = learnViewModel.curQuizWord.collectAsState().value
     Column(modifier = Modifier.padding(10.dp)) {
         curQuizWord.options.forEach { option: String ->
-            OptionCard(curQuizWord.word, option, curQuizWord.answer, learnViewModel)
+            OptionCard(curQuizWord.word, option, curQuizWord.answer, learnViewModel, showDetail)
         }
     }
 }
 
 @Composable
-fun OptionCard(word: String, option: String, answer: String, learnViewModel: LearnViewModel) {
+fun OptionCard(
+    word: String,
+    option: String,
+    answer: String,
+    learnViewModel: LearnViewModel,
+    showDetail: MutableState<Boolean>
+) {
     val scope = rememberCoroutineScope()
     val containColorState = remember { mutableStateOf(Color.White) }
     val contentColoState = remember { mutableStateOf(Color.Black) }
@@ -440,13 +465,12 @@ fun OptionCard(word: String, option: String, answer: String, learnViewModel: Lea
             .clickable {
                 if (curOption == "") {// 只能选择一次
                     learnViewModel.setCurOption(option)
-                    // 过两秒自动跳转到下一题
-//                thread {
-//                    Thread.sleep(1000)
-//                    learnViewModel.nextWord()
-//                }
+                    // 过一秒自动显示详细释义
+                    scope.launch {
+                        delay(1000)
+                        showDetail.value = true
+                    }
                 }
-
             },
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
         colors = CardDefaults.cardColors(

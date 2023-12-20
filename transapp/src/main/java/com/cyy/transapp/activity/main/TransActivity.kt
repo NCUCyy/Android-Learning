@@ -3,7 +3,6 @@ package com.cyy.transapp.activity.main
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -66,7 +65,6 @@ class TransActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val userId = intent.getIntExtra("userId", 0)
-        Log.i("TransActivity", "userId: $userId")
         val query = intent.getStringExtra("query")!!.trim()
         setContent {
             TransScreen(query, userId)
