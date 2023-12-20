@@ -576,9 +576,6 @@ fun ProgressCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel
                     color = Color(0xFF269C2A)
                 )
             }
-        } else {
-            // 查询中
-            CircularProgressIndicator(modifier = Modifier.fillMaxSize())
         }
     }
 }
@@ -590,19 +587,27 @@ fun LearnAndReviewCard(states: StateHolder, learnReviewViewModel: LearnReviewVie
     val curUser = learnReviewViewModel.curUser.collectAsStateWithLifecycle()
     Row(verticalAlignment = Alignment.CenterVertically) {
         Button(onClick = {
-            if (plan.value.vocabulary != "" && plan.value.vocabulary != "未选择") {
-                // 已经查询结束，并且不是"未选择"
-                val learnProcess = learnReviewViewModel.getLearnProcess(plan.value)
-                if (learnProcess.process.size > 0) {
-                    // TODO：跳转到LearnActivity
-                    val intent = Intent(context, LearnActivity::class.java)
-                    intent.putExtra("userId", curUser.value.id)
-                    intent.putExtra("vocabulary", plan.value.vocabulary)
-                    states.resultLauncher.launch(intent)
+            if (plan.value.vocabulary != "") {
+                if (plan.value.vocabulary != "未选择") {
+                    // 已经查询结束，并且不是"未选择"
+                    val learnProcess = learnReviewViewModel.getLearnProcess(plan.value)
+                    val reviewProcess = learnReviewViewModel.getReviewProcess(plan.value)
+                    if (reviewProcess.process.size > 0) {
+                        // TODO：若还有没复习的，询问是否要先复习
+                        if (learnProcess.process.size > 0) {
+                            // TODO：跳转到LearnActivity
+                            val intent = Intent(context, LearnActivity::class.java)
+                            intent.putExtra("userId", curUser.value.id)
+                            intent.putExtra("vocabulary", plan.value.vocabulary)
+                            states.resultLauncher.launch(intent)
+                        } else {
+                            // TODO：开启下一组学习（弹窗确认）
+                            learnReviewViewModel.initLearnProcess()
+                        }
+                    }
                 } else {
-                    // 开启下一组
+                    toVocabularyActivity(context, states)
                 }
-
             }
         }, shape = RoundedCornerShape(5.dp)) {
             if (plan.value.vocabulary != "") {
@@ -610,23 +615,28 @@ fun LearnAndReviewCard(states: StateHolder, learnReviewViewModel: LearnReviewVie
                 if (plan.value.vocabulary != "未选择") {
                     // 有选择
                     val learnProcess = learnReviewViewModel.getLearnProcess(plan.value)
-                    Text(text = "Learn:${learnProcess.process.size}")
+                    if (learnProcess.process.size > 0)
+                        Text(text = "Learn:${learnProcess.process.size}")
+                    else
+                        Text(text = "学习下一组")
                 } else {
                     // 无选择
                     Text(text = "请先选择词库")
                 }
-            } else {
-                // 查询中
-                CircularProgressIndicator()
             }
         }
         Button(onClick = {
             // TODO：跳转到ReviewActivity
-            if (plan.value.vocabulary != "" && plan.value.vocabulary != "未选择") {
-                val intent = Intent(context, ReviewActivity::class.java)
-                intent.putExtra("userId", curUser.value.id)
-                intent.putExtra("vocabulary", curUser.value.vocabulary)
-                states.resultLauncher.launch(intent)
+            if (plan.value.vocabulary != "") {
+                if (plan.value.vocabulary != "未选择") {
+                    val intent = Intent(context, ReviewActivity::class.java)
+                    intent.putExtra("userId", curUser.value.id)
+                    intent.putExtra("vocabulary", curUser.value.vocabulary)
+                    states.resultLauncher.launch(intent)
+                } else {
+                    // 跳转到VocabularyActivity
+                    toVocabularyActivity(context, states)
+                }
             }
         }) {
             if (plan.value.vocabulary != "") {
@@ -639,12 +649,14 @@ fun LearnAndReviewCard(states: StateHolder, learnReviewViewModel: LearnReviewVie
                     // 无选择
                     Text(text = "请先选择词库")
                 }
-            } else {
-                // 查询中
-                CircularProgressIndicator()
             }
         }
     }
+}
+
+fun toVocabularyActivity(context: Activity, states: StateHolder) {
+    val intent = Intent(context, VocabularyActivity::class.java)
+    states.resultLauncher.launch(intent)
 }
 
 

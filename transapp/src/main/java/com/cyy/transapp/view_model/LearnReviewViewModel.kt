@@ -142,7 +142,7 @@ class LearnReviewViewModel(
      * 场景1. 刚选完Vocabulary
      * 场景2. 今天刚登陆（若已经相等，则不变，即addNum=0）
      */
-    private fun initLearnProcess() = viewModelScope.launch {
+    fun initLearnProcess() = viewModelScope.launch {
         val user = userRepository.getById(userId)
         if (user.vocabulary != "未选择") {
             val plan = planRepository.getByUserIdAndVocabulary(userId, user.vocabulary)
