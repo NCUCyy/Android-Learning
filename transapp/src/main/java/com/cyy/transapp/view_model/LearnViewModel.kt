@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.cyy.app.word_bank.model.Word
+import com.cyy.app.word_bank.model.WordItem
 import com.cyy.transapp.model.LearnProcess
 import com.cyy.transapp.model.OpResult
 import com.cyy.transapp.model.PlanWord
@@ -71,6 +72,8 @@ class LearnViewModel(
     // TODO：当前的题目————QuizWord
     private val _curQuizWord = MutableStateFlow(QuizWord())
     val curQuizWord = _curQuizWord.asStateFlow()
+    private val _curWordItem = MutableStateFlow(WordItem())
+    val curWordItem = _curWordItem.asStateFlow()
 
     // TODO：当前的选择（用户的）
     private val _curOption = MutableStateFlow("")
@@ -136,6 +139,7 @@ class LearnViewModel(
         // 更新isCurStared（给初值）
         val word = starWordRepository.getStarWordByUserIdAndWord(userId, _curQuizWord.value.word)
         _isCurStared.value = word != null
+        _curWordItem.value = allWords[_curPlanWord.value.index]
     }
 
     /**

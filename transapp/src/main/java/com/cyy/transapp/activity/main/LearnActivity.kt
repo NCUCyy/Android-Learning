@@ -1,25 +1,36 @@
 package com.cyy.transapp.activity.main
 
 import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Button
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -34,33 +45,48 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.cyy.app.word_bank.model.Phrase
+import com.cyy.app.word_bank.model.Translation
 import com.cyy.transapp.R
 import com.cyy.transapp.TransApp
 import com.cyy.transapp.model.OpResult
 import com.cyy.transapp.view_model.LearnViewModel
 import com.cyy.transapp.view_model.LearnViewModelFactory
-import kotlin.concurrent.thread
 
 class LearnActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val userId = intent.getIntExtra("userId", 0)
         val vocabulary = intent.getStringExtra("vocabulary")!!
+        // 使用ActivityResultLauncher进行意图跳转
+        val resultLauncher: ActivityResultLauncher<Intent> = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult(),
+            // 意图结束后，执行这个「回调函数」
+            ActivityResultCallback {
+                if (it.resultCode == RESULT_OK && it.data?.hasExtra("record")!!) {
+                    // nothing
+                }
+            }
+        )
         setContent {
-
             // TODO：显示查询的词汇
-            LearnMainScreen(userId, vocabulary)
+            LearnMainScreen(userId, vocabulary, resultLauncher)
         }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LearnMainScreen(userId: Int, vocabulary: String) {
+fun LearnMainScreen(
+    userId: Int,
+    vocabulary: String,
+    resultLauncher: ActivityResultLauncher<Intent>
+) {
     val application = LocalContext.current.applicationContext as TransApp
     val context = LocalContext.current as Activity
     val learnViewModel = viewModel<LearnViewModel>(
@@ -135,10 +161,13 @@ fun LearnMainScreen(userId: Int, vocabulary: String) {
                 }
             )
         },
+        bottomBar = {
+            TranslateOrNextBtn(learnViewModel = learnViewModel, resultLauncher = resultLauncher)
+        },
         content = {
             // 页面的主体部分
             Box(modifier = Modifier.padding(it)) {
-                LearnContentScreen(learnViewModel)
+                LearnContentScreen(learnViewModel, resultLauncher)
             }
         },
         floatingActionButton = {
@@ -160,17 +189,24 @@ fun StarIconButton(action: () -> Unit, icon: Int) {
 }
 
 @Composable
-fun LearnContentScreen(learnViewModel: LearnViewModel) {
+fun LearnContentScreen(
+    learnViewModel: LearnViewModel,
+    resultLauncher: ActivityResultLauncher<Intent>
+) {
     val loadVocabularyState = learnViewModel.loadVocabularyState.collectAsState()
+    val curOption = learnViewModel.curOption.collectAsState().value
     Column(modifier = Modifier.padding(10.dp)) {
-
         when (loadVocabularyState.value) {
             is OpResult.Success -> {
-                QuizWordCard(learnViewModel)
-                Button(onClick = { learnViewModel.nextWord() }) {
-                    Text(text = "下一个")
+                // 当前Word
+                TitleWordCard(learnViewModel)
+                if (curOption != "") {
+                    // 若选择完成，则显示完整释义（点击进行联网搜索）
+                    DetailWordCard(learnViewModel)
+                } else {
+                    // 四个选项
+                    OptionWordCard(learnViewModel)
                 }
-                Text(text = learnViewModel.curPlanWord.collectAsState().value.process.toString())
             }
 
             is OpResult.Loading -> {
@@ -185,29 +221,181 @@ fun LearnContentScreen(learnViewModel: LearnViewModel) {
 }
 
 @Composable
-fun QuizWordCard(learnViewModel: LearnViewModel) {
-    // TODO：显示查询的词汇
+fun TranslateOrNextBtn(
+    learnViewModel: LearnViewModel,
+    resultLauncher: ActivityResultLauncher<Intent>
+) {
+    val context = LocalContext.current as Activity
     val curQuizWord = learnViewModel.curQuizWord.collectAsState().value
-    val curPlanWord = learnViewModel.curPlanWord.collectAsState().value
-    val curProcess = learnViewModel.curWordProcess.collectAsState().value
-    Column(modifier = Modifier.padding(10.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        Card(
+            modifier = Modifier
+                .clickable {
+                    // TODO：联网搜索
+                    val intent = Intent(context, TransActivity::class.java)
+                    intent.putExtra("query", curQuizWord.word)
+                    resultLauncher.launch(intent)
+                },
+            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp)
         ) {
             Text(
-                text = curQuizWord.word,
-                fontWeight = FontWeight.Bold,
-                fontSize = 40.sp,
-                modifier = Modifier.padding(10.dp)
-            )
-            Text(
-                text = curProcess.toString(),
-                fontWeight = FontWeight.Bold,
-                fontSize = 40.sp,
-                modifier = Modifier.padding(10.dp)
+                text = "翻译",
+                modifier = Modifier.padding(10.dp),
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
             )
         }
+        Spacer(modifier = Modifier.width(10.dp))
+        Card(
+            modifier = Modifier
+                .clickable {
+                    // TODO：下一个
+                    learnViewModel.nextWord()
+                },
+            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp)
+        ) {
+            Text(
+                text = "下一个",
+                modifier = Modifier.padding(10.dp),
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+@Composable
+fun DetailWordCard(learnViewModel: LearnViewModel) {
+    val curWordItem = learnViewModel.curWordItem.collectAsState().value
+    val phrases = curWordItem.phrases
+    val translations = curWordItem.translations
+    val scrollState = rememberScrollState()
+    Column(
+        modifier = Modifier
+            .padding(start = 10.dp, top = 10.dp)
+            .verticalScroll(scrollState)
+    ) {
+        if (translations.isNotEmpty()) {
+            Text(
+                text = "释义",
+                fontWeight = FontWeight.Bold,
+                fontSize = 22.sp,
+            )
+            TitleBodyDivider()
+            TranslationCard(translations)
+        }
+        Spacer(modifier = Modifier.height(20.dp))
+        if (phrases.isNotEmpty()) {
+            Text(
+                text = "固定搭配",
+                fontWeight = FontWeight.Bold,
+                fontSize = 22.sp,
+            )
+            TitleBodyDivider()
+            PhraseCard(phrases)
+        }
+    }
+}
+
+@Composable
+fun TranslationCard(translation: List<Translation>) {
+    Column(modifier = Modifier.padding(start = 40.dp)) {
+        translation.forEach { translation: Translation ->
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.Black,
+                        contentColor = Color.White
+                    ),
+                    shape = RoundedCornerShape(5.dp)
+                ) {
+                    Text(
+                        text = "${translation.type}.",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(
+                            start = 5.dp,
+                            end = 5.dp,
+                            bottom = 2.dp
+                        ),
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            fontStyle = FontStyle.Italic
+                        )
+                    )
+                }
+                Spacer(modifier = Modifier.width(20.dp))
+                Text(
+                    text = translation.translation,
+                    modifier = Modifier.padding(top = 5.dp, bottom = 8.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun PhraseCard(phrases: List<Phrase>) {
+    Column(modifier = Modifier.padding(start = 40.dp)) {
+        phrases.forEach { phrase: Phrase ->
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.Black,
+                    contentColor = Color.White
+                ),
+                shape = RoundedCornerShape(5.dp)
+            ) {
+                Text(
+                    text = phrase.phrase,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(
+                        start = 5.dp,
+                        end = 5.dp,
+                        bottom = 2.dp
+                    ),
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontStyle = FontStyle.Italic
+                    )
+                )
+            }
+            Text(text = phrase.translation, modifier = Modifier.padding(top = 5.dp, bottom = 8.dp))
+        }
+    }
+}
+
+@Composable
+fun TitleWordCard(learnViewModel: LearnViewModel) {
+    val curQuizWord = learnViewModel.curQuizWord.collectAsState().value
+    val curProcess = learnViewModel.curWordProcess.collectAsState().value
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = curQuizWord.word,
+            fontWeight = FontWeight.Bold,
+            fontSize = 40.sp,
+            modifier = Modifier.padding(start = 10.dp)
+        )
+        // TODO
+        ProcessCard(curProcess)
+    }
+}
+
+@Composable
+fun ProcessCard(curProcess: Int) {
+    // TODO：显示当前进度————球球
+}
+
+@Composable
+fun OptionWordCard(learnViewModel: LearnViewModel) {
+    // TODO：显示查询的词汇
+    val curQuizWord = learnViewModel.curQuizWord.collectAsState().value
+    Column(modifier = Modifier.padding(10.dp)) {
         curQuizWord.options.forEach { option: String ->
             OptionCard(curQuizWord.word, option, curQuizWord.answer, learnViewModel)
         }
@@ -250,13 +438,15 @@ fun OptionCard(word: String, option: String, answer: String, learnViewModel: Lea
             .padding(5.dp)
             .fillMaxWidth()
             .clickable {
-                if (curOption == "")
+                if (curOption == "") {// 只能选择一次
                     learnViewModel.setCurOption(option)
-                // 过两秒自动跳转到下一题
-                thread {
-                    Thread.sleep(1000)
-                    learnViewModel.nextWord()
+                    // 过两秒自动跳转到下一题
+//                thread {
+//                    Thread.sleep(1000)
+//                    learnViewModel.nextWord()
+//                }
                 }
+
             },
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
         colors = CardDefaults.cardColors(
