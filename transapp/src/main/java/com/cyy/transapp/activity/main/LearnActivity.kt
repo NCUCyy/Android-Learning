@@ -230,6 +230,19 @@ fun LearnContentScreen(
                 CircularProgressIndicator(modifier = Modifier.fillMaxSize())
             }
 
+            is OpResult.NotBegin -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(text = "今日学习任务已完成！")
+                }
+                // 延迟1s后退出
+                val scope = rememberCoroutineScope()
+                val context = LocalContext.current as Activity
+                scope.launch {
+                    delay(1000)
+                    context.finish()
+                }
+            }
+
             else -> {
 
             }

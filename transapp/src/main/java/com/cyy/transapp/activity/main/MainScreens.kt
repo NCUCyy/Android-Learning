@@ -55,6 +55,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cyy.transapp.R
 import com.cyy.transapp.TransApp
 import com.cyy.transapp.activity.other.VocabularyActivity
+import com.cyy.transapp.activity.other.WordActivity
 import com.cyy.transapp.model.LearnProcess
 import com.cyy.transapp.model.OpResult
 import com.cyy.transapp.model.daily_sentence.SentenceModel
@@ -462,9 +463,16 @@ fun VocabularyCard(states: StateHolder, learnReviewViewModel: LearnReviewViewMod
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
         modifier = Modifier
             .clickable {
-                // TODO：跳转到VocabularyActivity(选择字典)
-                val intent = Intent(context, VocabularyActivity::class.java)
-                states.resultLauncher.launch(intent)
+                if (curUser.value.vocabulary == "未选择") {
+                    // TODO：跳转到VocabularyActivity(选择字典)
+                    val intent = Intent(context, VocabularyActivity::class.java)
+                    states.resultLauncher.launch(intent)
+                } else {
+                    // TODO：跳转到WordActivity(选择字典)
+                    val intent = Intent(context, WordActivity::class.java)
+                    states.resultLauncher.launch(intent)
+                }
+
             }
             .size(width = 180.dp, height = 150.dp),
         colors = CardDefaults.cardColors(
@@ -557,7 +565,16 @@ fun ProgressCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel
                 )
             } else {
                 // 没选择
-                Text("未选择")
+                Text(
+                    text = "0.0 %",
+                    fontSize = 40.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .fillMaxWidth(),
+                    color = Color(0xFF269C2A)
+                )
             }
         } else {
             // 查询中
@@ -575,11 +592,17 @@ fun LearnAndReviewCard(states: StateHolder, learnReviewViewModel: LearnReviewVie
         Button(onClick = {
             if (plan.value.vocabulary != "" && plan.value.vocabulary != "未选择") {
                 // 已经查询结束，并且不是"未选择"
-                // TODO：跳转到LearnActivity
-                val intent = Intent(context, LearnActivity::class.java)
-                intent.putExtra("userId", curUser.value.id)
-                intent.putExtra("vocabulary", plan.value.vocabulary)
-                states.resultLauncher.launch(intent)
+                val learnProcess = learnReviewViewModel.getLearnProcess(plan.value)
+                if (learnProcess.process.size > 0) {
+                    // TODO：跳转到LearnActivity
+                    val intent = Intent(context, LearnActivity::class.java)
+                    intent.putExtra("userId", curUser.value.id)
+                    intent.putExtra("vocabulary", plan.value.vocabulary)
+                    states.resultLauncher.launch(intent)
+                } else {
+                    // 开启下一组
+                }
+
             }
         }, shape = RoundedCornerShape(5.dp)) {
             if (plan.value.vocabulary != "") {

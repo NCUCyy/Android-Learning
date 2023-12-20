@@ -37,6 +37,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -53,6 +54,8 @@ import com.cyy.transapp.model.OpResult
 import com.cyy.transapp.model.ReviewState
 import com.cyy.transapp.view_model.ReviewViewModel
 import com.cyy.transapp.view_model.ReviewViewModelFactory
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class ReviewActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -241,6 +244,19 @@ fun ReviewContentScreen(
             is OpResult.Loading -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
+                }
+            }
+
+            is OpResult.NotBegin -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(text = "恭喜你完成全部复习任务！")
+                }
+                // 延迟1s后退出
+                val scope = rememberCoroutineScope()
+                val context = LocalContext.current as Activity
+                scope.launch {
+                    delay(1000)
+                    context.finish()
                 }
             }
 

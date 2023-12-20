@@ -140,7 +140,8 @@ class LearnViewModel(
             // 配置下一个词
             configNext(learnProcess)
         } else {
-            // TODO：2、若没有词了，则直接退出
+            // TODO：2、若没有词了，则结束学习！
+            _loadVocabularyState.value = OpResult.NotBegin
         }
     }
 
