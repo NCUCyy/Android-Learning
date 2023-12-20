@@ -722,6 +722,7 @@ fun TodayCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel) {
                 containerColor = Color(0xFFA2D2F8)
             )
         }
+        Spacer(modifier = Modifier.height(10.dp))
     }
 }
 

@@ -145,13 +145,13 @@ class LearnReviewViewModel(
     private fun initLearnProcess() = viewModelScope.launch {
         val user = userRepository.getById(userId)
         if (user.vocabulary != "未选择") {
-            val plan = planRepository.getByUserIdAndVocabulary(userId, user.vocabulary)!!
+            val plan = planRepository.getByUserIdAndVocabulary(userId, user.vocabulary)
             val learnProcess = getLearnProcess(plan)
             // 初始化dailyNum个词汇
             val curNum = learnProcess.process.size
             val addNum = plan.dailyNum - curNum
             for (i in 0 until addNum) {
-                learnProcess.process.add(PlanWord(learnProcess.learnedIdx + curNum))
+                learnProcess.process.add(PlanWord(learnProcess.learnedIdx + i))
             }
             learnProcess.learnedIdx += addNum
             updateLearnProcess(learnProcess)

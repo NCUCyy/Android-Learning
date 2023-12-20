@@ -296,7 +296,6 @@ fun QuizScreen(
             curQuiz.options.forEach { it ->
                 OptionCard(
                     option = it,
-                    answer = curQuiz.answer,
                     quizViewModel
                 )
             }
@@ -400,11 +399,11 @@ fun ConfirmExitDialog(showExitDialog: MutableState<Boolean>) {
 }
 
 @Composable
-fun OptionCard(option: String, answer: String, quizViewModel: QuizViewModel) {
+fun OptionCard(option: String ,quizViewModel: QuizViewModel) {
     val scope = rememberCoroutineScope()
     val containColorState = remember { mutableStateOf(Color.White) }
     val contentColoState = remember { mutableStateOf(Color.Black) }
-
+    val answer = quizViewModel.curQuiz.collectAsState().value.answer
     val curOption = quizViewModel.curOption.collectAsState().value
 
     LaunchedEffect(curOption) {
