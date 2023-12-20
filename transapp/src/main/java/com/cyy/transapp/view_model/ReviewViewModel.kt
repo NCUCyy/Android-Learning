@@ -194,6 +194,8 @@ class ReviewViewModel(
      */
     fun setKnown() = viewModelScope.launch {
         // process直接给3（直接完成）
+        // TODO：及时更新wordProcess用于UI显示
+        _curWordProcess.value = 3
         val plan = planRepository.getByUserIdAndVocabulary(userId, vocabulary)
         val reviewProcess = getReviewProcess(plan)
         // 更新ReviewProcess（process）---直接删掉这个词
@@ -201,8 +203,7 @@ class ReviewViewModel(
         updatePlanByReviewProcess(plan, reviewProcess)
         // 更新Today（reviewNum）
         updateTodayByNewReview()
-        // TODO：及时更新wordProcess用于UI显示
-        _curWordProcess.value = reviewProcess.process[_curIdx.value].process
+
     }
 
     /**
@@ -210,13 +211,14 @@ class ReviewViewModel(
      */
     fun setAmbitious() = viewModelScope.launch {
         // process+1
+        // TODO：及时更新wordProcess用于UI显示
+        _curWordProcess.value++
         val plan = planRepository.getByUserIdAndVocabulary(userId, vocabulary)
         val reviewProcess = getReviewProcess(plan)
         reviewProcess.process[_curIdx.value].process += 1
         // 更新ReviewProcess（process）
         updatePlanByReviewProcess(plan, reviewProcess)
-        // TODO：及时更新wordProcess用于UI显示
-        _curWordProcess.value = reviewProcess.process[_curIdx.value].process
+
     }
 
     /**
@@ -224,13 +226,14 @@ class ReviewViewModel(
      */
     fun setUnknown() = viewModelScope.launch {
         // process清0
+        // TODO：及时更新wordProcess用于UI显示
+        _curWordProcess.value = 0
         val plan = planRepository.getByUserIdAndVocabulary(userId, vocabulary)
         val reviewProcess = getReviewProcess(plan)
         reviewProcess.process[_curIdx.value].process = 0
         // 更新ReviewProcess（process）
         updatePlanByReviewProcess(plan, reviewProcess)
-        // TODO：及时更新wordProcess用于UI显示
-        _curWordProcess.value = reviewProcess.process[_curIdx.value].process
+
     }
 
 

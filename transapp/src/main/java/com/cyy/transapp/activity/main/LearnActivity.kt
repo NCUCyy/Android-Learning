@@ -27,6 +27,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -304,7 +305,7 @@ fun DetailWordCard(learnViewModel: LearnViewModel) {
                 fontWeight = FontWeight.Bold,
                 fontSize = 22.sp,
             )
-            TitleBodyDivider()
+            TitleDivider()
             TranslationCard(translations)
         }
         Spacer(modifier = Modifier.height(20.dp))
@@ -314,10 +315,19 @@ fun DetailWordCard(learnViewModel: LearnViewModel) {
                 fontWeight = FontWeight.Bold,
                 fontSize = 22.sp,
             )
-            TitleBodyDivider()
+            TitleDivider()
             PhraseCard(phrases)
         }
     }
+}
+
+@Composable
+fun TitleDivider() {
+    Divider(
+        modifier = Modifier
+            .fillMaxWidth(),
+        color = Color(0xFFDAD9D9),
+    )
 }
 
 @Composable

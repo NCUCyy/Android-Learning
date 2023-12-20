@@ -240,6 +240,9 @@ class LearnViewModel(
     private suspend fun configLearned(plan: Plan) {
         // 更新ReviewProcess
         val reviewProcess = getReviewProcess(plan)
+        // TODO：清空学习进度！
+        _curPlanWord.value.process = 0
+        _curPlanWord.value.interval = 0
         reviewProcess.process.add(_curPlanWord.value)
         updatePlanByReviewProcess(plan, reviewProcess)
         // 更新Today.newLearnNum
