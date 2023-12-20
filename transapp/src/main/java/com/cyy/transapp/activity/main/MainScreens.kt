@@ -601,6 +601,8 @@ fun LearnAndReviewCard(states: StateHolder, learnReviewViewModel: LearnReviewVie
             // TODO：跳转到ReviewActivity
             if (plan.value.vocabulary != "" && plan.value.vocabulary != "未选择") {
                 val intent = Intent(context, ReviewActivity::class.java)
+                intent.putExtra("userId", curUser.value.id)
+                intent.putExtra("vocabulary", curUser.value.vocabulary)
                 states.resultLauncher.launch(intent)
             }
         }) {
