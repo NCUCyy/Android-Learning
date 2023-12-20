@@ -33,12 +33,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -52,10 +50,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cyy.transapp.R
 import com.cyy.transapp.TransApp
 import com.cyy.transapp.model.OpResult
+import com.cyy.transapp.model.ReviewState
 import com.cyy.transapp.view_model.ReviewViewModel
 import com.cyy.transapp.view_model.ReviewViewModelFactory
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 class ReviewActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -165,12 +162,15 @@ fun ReviewMainScreen(
             )
         },
         bottomBar = {
-            if (showDetail.value)
+            if (showDetail.value) {
                 TranslateOrNextBtn(
                     reviewViewModel = reviewViewModel,
                     resultLauncher = resultLauncher,
                     showDetail = showDetail
                 )
+            } else {
+                ReviewBtnGroup(reviewViewModel, showDetail)
+            }
         },
         content = {
             // 页面的主体部分
@@ -182,6 +182,42 @@ fun ReviewMainScreen(
         })
 }
 
+@Composable
+fun ReviewBtnGroup(reviewViewModel: ReviewViewModel, showDetail: MutableState<Boolean>) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        ReviewBtn(ReviewState.Known, reviewViewModel::setKnown, showDetail)
+        ReviewBtn(ReviewState.Ambitious, reviewViewModel::setAmbitious, showDetail)
+        ReviewBtn(ReviewState.Unknown, reviewViewModel::setUnknown, showDetail)
+    }
+}
+
+@Composable
+fun ReviewBtn(
+    reviewState: ReviewState,
+    action: () -> Unit = {},
+    showDetail: MutableState<Boolean>
+) {
+    Card(
+        modifier = Modifier
+            .clickable {
+                action.invoke()
+                showDetail.value = true
+            },
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp)
+    ) {
+        Text(
+            text = reviewState.desc,
+            modifier = Modifier.padding(10.dp),
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
 
 @Composable
 fun ReviewContentScreen(
@@ -201,9 +237,6 @@ fun ReviewContentScreen(
                 if (showDetail.value) {
                     // 若选择完成，则显示完整释义（点击进行联网搜索）
                     DetailWordCard(reviewViewModel)
-                } else {
-                    // 四个选项
-                    OptionWordCard(reviewViewModel, showDetail)
                 }
             }
 
@@ -319,90 +352,5 @@ fun TitleWordCard(reviewViewModel: ReviewViewModel) {
         )
         // TODO
         ProcessCard(curProcess)
-    }
-}
-
-@Composable
-fun OptionWordCard(reviewViewModel: ReviewViewModel, showDetail: MutableState<Boolean>) {
-    // TODO：显示查询的词汇
-    val curQuizWord = reviewViewModel.curQuizWord.collectAsState().value
-    Column(modifier = Modifier.padding(10.dp)) {
-        curQuizWord.options.forEach { option: String ->
-            OptionCard(curQuizWord.word, option, curQuizWord.answer, reviewViewModel, showDetail)
-        }
-    }
-}
-
-@Composable
-fun OptionCard(
-    word: String,
-    option: String,
-    answer: String,
-    reviewViewModel: ReviewViewModel,
-    showDetail: MutableState<Boolean>
-) {
-    val scope = rememberCoroutineScope()
-    val containColorState = remember { mutableStateOf(Color.White) }
-    val contentColoState = remember { mutableStateOf(Color.Black) }
-
-    val curOption = reviewViewModel.curOption.collectAsState().value
-
-    LaunchedEffect(curOption) {
-        containColorState.value = Color.White
-        contentColoState.value = Color.Black
-        if (curOption != "") {
-            // 若当前选项为正确答案，则显示绿色
-            if (answer == curOption) {
-                if (option == curOption) {
-                    // 正确
-                    containColorState.value = Color(0xFF98FB98)
-                    contentColoState.value = Color.Black
-                }
-            } else {
-                if (option == answer) {
-                    containColorState.value = Color(0xFF98FB98)
-                    contentColoState.value = Color.Black
-                }
-                if (option == curOption) {
-                    containColorState.value = Color(0xFFE90C57)
-                    contentColoState.value = Color.White
-                }
-            }
-        }
-    }
-    Card(
-        modifier = Modifier
-            .padding(5.dp)
-            .fillMaxWidth()
-            .clickable {
-                if (curOption == "") {// 只能选择一次
-                    reviewViewModel.setCurOption(option)
-                    // 过一秒自动显示详细释义
-                    scope.launch {
-                        delay(1000)
-                        showDetail.value = true
-                    }
-                }
-            },
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = containColorState.value,
-            contentColor = contentColoState.value
-        )
-    ) {
-        val type = option.split(". ")[0]
-        val translation = option.split(". ")[1]
-        Text(
-            text = "$type. ",
-            modifier = Modifier.padding(start = 15.dp, top = 10.dp, bottom = 5.dp),
-            color = Color.Gray,
-            fontSize = 15.sp,
-            fontWeight = FontWeight.Bold
-        )
-        Text(
-            text = translation,
-            fontSize = 17.sp,
-            modifier = Modifier.padding(start = 15.dp, bottom = 10.dp)
-        )
     }
 }

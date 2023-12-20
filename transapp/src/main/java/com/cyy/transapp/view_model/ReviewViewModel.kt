@@ -9,6 +9,7 @@ import com.cyy.app.word_bank.model.Word
 import com.cyy.app.word_bank.model.WordItem
 import com.cyy.transapp.model.OpResult
 import com.cyy.transapp.model.PlanWord
+import com.cyy.transapp.model.QuizType
 import com.cyy.transapp.model.QuizWord
 import com.cyy.transapp.model.ReviewProcess
 import com.cyy.transapp.model.Vocabulary
@@ -61,13 +62,6 @@ class ReviewViewModel(
         started = SharingStarted.WhileSubscribed(0)
     )
 
-//    val today =
-//        todayRepository.getFlowByUserIdAndYMD(userId, now.year, now.monthValue, now.dayOfMonth)
-//            .stateIn(
-//                initialValue = Today(),
-//                scope = viewModelScope,
-//                started = SharingStarted.WhileSubscribed(0)
-//            )
 
     // TODO：当前选择的单词的索引（在ReviewProcess的process列表中的索引）
     private val _curIdx = MutableStateFlow(0)
@@ -85,17 +79,11 @@ class ReviewViewModel(
     private val _curWordItem = MutableStateFlow(WordItem())
     val curWordItem = _curWordItem.asStateFlow()
 
-    // TODO：当前的选择（用户的）
-    private val _curOption = MutableStateFlow("")
-    val curOption = _curOption.asStateFlow()
 
     // TODO：当前的单词的process
     private val _curWordProcess = MutableStateFlow(0)
     val curWordProcess = _curWordProcess.asStateFlow()
 
-    // TODO：当前的单词是否被收藏
-//    private val _isCurStared = MutableStateFlow(false)
-//    val isCurStared = _isCurStared.asStateFlow()
 
     // TODO：字典的加载状态
     private val _loadVocabularyState = MutableStateFlow<OpResult<Any>>(OpResult.NotBegin)
@@ -108,7 +96,7 @@ class ReviewViewModel(
     //  （注意是MutableState<StateFLow>的结构：StateFlow用于观察数据库中的变化，MutableState用于nextWord后更换curWord）
     val starWord = mutableStateOf(
         starWordRepository.getFlowStarWordByUserIdAndWord(userId, _curQuizWord.value.word).stateIn(
-            initialValue = StarWord(),
+            initialValue = null,
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(0)
         )
@@ -152,9 +140,7 @@ class ReviewViewModel(
     private fun configNext(reviewProcess: ReviewProcess) {
         _curPlanWord.value = reviewProcess.process[_curIdx.value]
         // 取出在总字典中的索引，根据这个idx，构造出一个QuizWord（随机）
-        _curQuizWord.value = QuizWord(_curPlanWord.value.index, allWords)
-        // 清空原来的选择
-        _curOption.value = ""
+        _curQuizWord.value = QuizWord(_curPlanWord.value.index, allWords, QuizType.Review)
         // 当前PlanWord的process
         _curWordProcess.value = _curPlanWord.value.process
         // 当前单词的WordItem
@@ -204,44 +190,43 @@ class ReviewViewModel(
     }
 
     /**
-     * 设置用户的选项
+     * 选择认识
      */
-    fun setCurOption(option: String) = viewModelScope.launch {
-        _curOption.value = option
+    fun setKnown() = viewModelScope.launch {
+        // process直接给3（直接完成）
         val plan = planRepository.getByUserIdAndVocabulary(userId, vocabulary)
         val reviewProcess = getReviewProcess(plan)
-        // TODO：在ReviewProcess中的idx！！！
-        val idx = _curIdx.value
-        if (option == _curQuizWord.value.answer) {
-            // 答对：process+1
-            reviewProcess.process[idx].process += 1
-        } else {
-            // 答错：process清空
-            reviewProcess.process[idx].process = 0
-        }
-        // TODO：要及时更新页面显示的process！
-        _curWordProcess.value = reviewProcess.process[idx].process
-        if (reviewProcess.process[idx].process >= 3) {
-            // 若process>=3，则从process中删除
-            reviewProcess.process.removeAt(idx)
-            // 更新ReviewProcess（process）和Today（newReviewNum）
-            configReviewed(plan)
-        }
-        // 更新数据库中的ReviewProcess
+        // 更新ReviewProcess（process）---直接删掉这个词
+        reviewProcess.process.removeAt(_curIdx.value)
+        updatePlanByReviewProcess(plan, reviewProcess)
+        // 更新Today（reviewNum）
+        updateTodayByNewReview()
+    }
+
+    /**
+     * 选择模糊
+     */
+    fun setAmbitious() = viewModelScope.launch {
+        // process+1
+        val plan = planRepository.getByUserIdAndVocabulary(userId, vocabulary)
+        val reviewProcess = getReviewProcess(plan)
+        reviewProcess.process[_curIdx.value].process += 1
+        // 更新ReviewProcess（process）
         updatePlanByReviewProcess(plan, reviewProcess)
     }
 
     /**
-     * 当一个词满足了process>=3的时候
+     * 选择不认识
      */
-    private suspend fun configReviewed(plan: Plan) {
-        // 更新ReviewProcess
+    fun setUnknown() = viewModelScope.launch {
+        // process清0
+        val plan = planRepository.getByUserIdAndVocabulary(userId, vocabulary)
         val reviewProcess = getReviewProcess(plan)
-        reviewProcess.process.add(_curPlanWord.value)
+        reviewProcess.process[_curIdx.value].process = 0
+        // 更新ReviewProcess（process）
         updatePlanByReviewProcess(plan, reviewProcess)
-        // 更新Today.newReviewNum
-        updateTodayByNewReview()
     }
+
 
     /**
      * 根据Plan获得ReviewProcess
@@ -290,6 +275,9 @@ class ReviewViewModel(
         nextWord()
     }
 
+    /**
+     * 复习完了一个词，today中的reviewNum要+1
+     */
     private suspend fun updateTodayByNewReview() {
         val today =
             todayRepository.getByUserIdAndYMD(userId, now.year, now.monthValue, now.dayOfMonth)
@@ -338,10 +326,6 @@ class ReviewViewModel(
         today.learnTime += duration.toInt()
         todayRepository.update(today)
     }
-    /**
-     * 选中NextWord，更新所有的interval
-     * 选中一个Option后，更新它的process（>=3了要从ReviewProcess.process中删掉，加入ReviewProcess.process中）
-     */
 }
 
 class ReviewViewModelFactory(

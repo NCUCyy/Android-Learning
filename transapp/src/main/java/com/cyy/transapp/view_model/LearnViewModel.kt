@@ -10,6 +10,7 @@ import com.cyy.app.word_bank.model.WordItem
 import com.cyy.transapp.model.LearnProcess
 import com.cyy.transapp.model.OpResult
 import com.cyy.transapp.model.PlanWord
+import com.cyy.transapp.model.QuizType
 import com.cyy.transapp.model.QuizWord
 import com.cyy.transapp.model.ReviewProcess
 import com.cyy.transapp.model.Vocabulary
@@ -109,7 +110,7 @@ class LearnViewModel(
     //  （注意是MutableState<StateFLow>的结构：StateFlow用于观察数据库中的变化，MutableState用于nextWord后更换curWord）
     val starWord = mutableStateOf(
         starWordRepository.getFlowStarWordByUserIdAndWord(userId, _curQuizWord.value.word).stateIn(
-            initialValue = StarWord(),
+            initialValue = null,
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(0)
         )
@@ -153,7 +154,7 @@ class LearnViewModel(
     private fun configNext(learnProcess: LearnProcess) {
         _curPlanWord.value = learnProcess.process[_curIdx.value]
         // 取出在总字典中的索引，根据这个idx，构造出一个QuizWord（随机）
-        _curQuizWord.value = QuizWord(_curPlanWord.value.index, allWords)
+        _curQuizWord.value = QuizWord(_curPlanWord.value.index, allWords, QuizType.Learn)
         // 清空原来的选择
         _curOption.value = ""
         // 当前PlanWord的process
