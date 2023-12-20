@@ -12,8 +12,10 @@ import com.cyy.transapp.model.QuizWord
 import com.cyy.transapp.model.ReviewProcess
 import com.cyy.transapp.model.Vocabulary
 import com.cyy.transapp.pojo.Plan
+import com.cyy.transapp.pojo.StarWord
 import com.cyy.transapp.pojo.User
 import com.cyy.transapp.repository.PlanRepository
+import com.cyy.transapp.repository.StarWordRepository
 import com.cyy.transapp.repository.TodayRepository
 import com.cyy.transapp.repository.TransRepository
 import com.cyy.transapp.repository.UserRepository
@@ -25,6 +27,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.time.OffsetDateTime
 import kotlin.concurrent.thread
 
 class LearnViewModel(
@@ -36,7 +39,10 @@ class LearnViewModel(
     private val planRepository: PlanRepository,
     private val transRepository: TransRepository,
     private val vocabularyRepository: VocabularyRepository,
+    private val starWordRepository: StarWordRepository
 ) : ViewModel() {
+    private val now = OffsetDateTime.now()
+
     // 当前登录的用户---用于观察
     val curUser = userRepository.getFlowById(userId).stateIn(
         initialValue = User(),
@@ -51,24 +57,29 @@ class LearnViewModel(
         started = SharingStarted.WhileSubscribed(0)
     )
 
-    // 当前选择的单词的索引（在LearnProcess的process列表中的索引）
+    // TODO：当前选择的单词的索引（在LearnProcess的process列表中的索引）
     private val _curIdx = MutableStateFlow(0)
     val curIdx = _curIdx.asStateFlow()
 
-    // 当前选择的————PlanWord
+    // TODO：当前选择的————PlanWord
     private val _curPlanWord = MutableStateFlow(PlanWord())
     val curPlanWord = _curPlanWord.asStateFlow()
 
-    // 当前的题目————QuizWord
+    // TODO：当前的题目————QuizWord
     private val _curQuizWord = MutableStateFlow(QuizWord())
     val curQuizWord = _curQuizWord.asStateFlow()
 
-    // 当前的选择（用户的）
+    // TODO：当前的选择（用户的）
     private val _curOption = MutableStateFlow("")
     val curOption = _curOption.asStateFlow()
 
+    // TODO：当前的单词的process
     private val _curWordProcess = MutableStateFlow(0)
     val curWordProcess = _curWordProcess.asStateFlow()
+
+    // TODO：当前的单词是否被收藏
+    private val _isCurStared = MutableStateFlow(false)
+    val isCurStared = _isCurStared.asStateFlow()
 
     // 字典的加载状态
     private val _loadVocabularyState = MutableStateFlow<OpResult<Any>>(OpResult.NotBegin)
@@ -92,21 +103,36 @@ class LearnViewModel(
         val learnProcess = Gson().fromJson(plan.learnProcess, LearnProcess::class.java)
         // 构造出一个
         if (learnProcess.process.size > 0) {
-            // 若还有词，则构造一个QuizWord
+            // TODO：1、若还有词，则构造一个QuizWord
             // 选中最佳的索引(在LearnProcess的process列表中的索引)
             _curIdx.value = getNextIdx(learnProcess.process)
             // 更新所有的interval
             updateInterval(plan, learnProcess)
-            _curPlanWord.value = learnProcess.process[_curIdx.value]
-            // 取出在总字典中的索引，根据这个idx，构造出一个QuizWord（随机）
-            _curQuizWord.value = QuizWord(_curPlanWord.value.index, allWords)
-            // 清空原来的选择
-            _curOption.value = ""
-            // 当前PlanWord的process
-            _curWordProcess.value = _curPlanWord.value.process
+            // 配置下一个词
+            configNext(learnProcess)
         } else {
-            // 否则，不变
+            // TODO：2、若没有词了，则直接退出
         }
+    }
+
+    /**
+     * 1、curPlanWord
+     * 2、curQuizWord
+     * 3、curOption
+     * 4、curWordProcess
+     * 5、isCurStared
+     */
+    private suspend fun configNext(learnProcess: LearnProcess) {
+        _curPlanWord.value = learnProcess.process[_curIdx.value]
+        // 取出在总字典中的索引，根据这个idx，构造出一个QuizWord（随机）
+        _curQuizWord.value = QuizWord(_curPlanWord.value.index, allWords)
+        // 清空原来的选择
+        _curOption.value = ""
+        // 当前PlanWord的process
+        _curWordProcess.value = _curPlanWord.value.process
+        // 更新isCurStared（给初值）
+        val word = starWordRepository.getStarWordByUserIdAndWord(userId, _curQuizWord.value.word)
+        _isCurStared.value = word != null
     }
 
     /**
@@ -149,7 +175,7 @@ class LearnViewModel(
     fun setCurOption(option: String) = viewModelScope.launch {
         _curOption.value = option
         val plan = planRepository.getByUserIdAndVocabulary(userId, vocabulary)
-        val learnProcess = Gson().fromJson(plan.learnProcess, LearnProcess::class.java)!!
+        val learnProcess = getLearnProcess(plan)
         if (option == _curQuizWord.value.answer) {
             // 答对：process+1
             learnProcess.process[_curIdx.value].process += 1
@@ -160,7 +186,7 @@ class LearnViewModel(
         _curWordProcess.value = learnProcess.process[_curIdx.value].process
         if (learnProcess.process[_curIdx.value].process >= 3) {
             // 若process>=3，则从process中删除
-            val reviewProcess = Gson().fromJson(plan.reviewProcess, ReviewProcess::class.java)!!
+            val reviewProcess = getReviewProcess(plan)
             learnProcess.process.removeAt(_curIdx.value)
             learnProcess.learnedNum++
             reviewProcess.process.add(_curPlanWord.value)
@@ -168,6 +194,13 @@ class LearnViewModel(
         }
         // 更新数据库中的plan
         updatePlanByLearnProcess(plan, learnProcess)
+    }
+
+    /**
+     * 根据Plan获得LearnProcess
+     */
+    private fun getLearnProcess(plan: Plan): LearnProcess {
+        return Gson().fromJson(plan.learnProcess, LearnProcess::class.java)!!
     }
 
     /**
@@ -187,6 +220,68 @@ class LearnViewModel(
             plan.reviewProcess = Gson().toJson(reviewProcess)
             planRepository.update(plan)
         }
+
+    /**
+     * 根据Plan获得ReviewProcess
+     */
+    private fun getReviewProcess(plan: Plan): ReviewProcess {
+        return Gson().fromJson(plan.reviewProcess, ReviewProcess::class.java)!!
+    }
+
+    /**
+     * 取消收藏
+     */
+    fun unstarWord() = viewModelScope.launch {
+        starWordRepository.getStarWordByUserIdAndWord(userId, _curQuizWord.value.word)?.let {
+            starWordRepository.delete(it)
+        }
+        _isCurStared.value = false
+    }
+
+    /**
+     * 收藏
+     */
+    fun starWord() = viewModelScope.launch {
+        starWordRepository.insert(
+            StarWord(userId, _curQuizWord.value.word)
+        )
+        updateTodayByStar()
+        _isCurStared.value = true
+    }
+
+    /**
+     * 移除单词
+     */
+    fun removeWord() = viewModelScope.launch {
+        // 1、更新Plan
+        updatePlanByRemove()
+        // 2、更新Today
+        updateTodayByRemove()
+        nextWord()
+    }
+
+    private suspend fun updatePlanByRemove() {
+        val plan = planRepository.getByUserIdAndVocabulary(userId, vocabulary)
+        val learnProcess = getLearnProcess(plan)
+        // 直接从LearnProcess中移除即可！
+        learnProcess.process.removeAt(_curIdx.value)
+        // 更新数据库中的plan
+        updatePlanByLearnProcess(plan, learnProcess)
+    }
+
+    private suspend fun updateTodayByRemove() {
+        val today =
+            todayRepository.getByUserIdAndYMD(userId, now.year, now.monthValue, now.dayOfMonth)
+        today.removeNum++
+        todayRepository.update(today)
+    }
+
+    private suspend fun updateTodayByStar() {
+        val today =
+            todayRepository.getByUserIdAndYMD(userId, now.year, now.monthValue, now.dayOfMonth)
+        today.starNum++
+        todayRepository.update(today)
+    }
     /**
      * 选中NextWord，更新所有的interval
      * 选中一个Option后，更新它的process（>=3了要从LearnProcess.process中删掉，加入ReviewProcess.process中）
@@ -202,8 +297,8 @@ class LearnViewModelFactory(
     private val planRepository: PlanRepository,
     private val transRepository: TransRepository,
     private val vocabularyRepository: VocabularyRepository,
-
-    ) :
+    private val starWordRepository: StarWordRepository
+) :
     ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(LearnViewModel::class.java)) {
@@ -217,6 +312,7 @@ class LearnViewModelFactory(
                 planRepository,
                 transRepository,
                 vocabularyRepository,
+                starWordRepository
             ) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")

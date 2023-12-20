@@ -2,6 +2,7 @@ package com.cyy.transapp.activity.main
 
 import android.app.Activity
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.clickable
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -71,8 +73,10 @@ fun LearnMainScreen(userId: Int, vocabulary: String) {
             application.planRepository,
             application.transRepository,
             application.vocabularyRepository,
+            application.starWordRepository
         )
     )
+    val isCurStared = learnViewModel.isCurStared.collectAsState()
     Scaffold(
         topBar = {
             TopAppBar(
@@ -94,33 +98,39 @@ fun LearnMainScreen(userId: Int, vocabulary: String) {
                     }
                 },
                 actions = {
-//                    if (isStared.value) {
-//                        IconButton(onClick = {
-//                            // TODO：取消收藏
-//                            transViewModel.unstarWord()
-//                            Toast.makeText(context, "取消成功！", Toast.LENGTH_SHORT).show()
-//                        }, modifier = Modifier.padding(end = 16.dp)) {
-//                            Icon(
-//                                painter = painterResource(id = R.drawable.star_fill),
-//                                contentDescription = null,
-//                                Modifier.size(30.dp),
-//                                tint = Color(0xFFE8C11C)
-//                            )
-//                        }
-//                    } else {
-//                        IconButton(onClick = {
-//                            // TODO：收藏
-//                            transViewModel.starWord()
-//                            Toast.makeText(context, "收藏成功！", Toast.LENGTH_SHORT).show()
-//                        }, modifier = Modifier.padding(end = 16.dp)) {
-//                            Icon(
-//                                painter = painterResource(id = R.drawable.star),
-//                                contentDescription = null,
-//                                Modifier.size(30.dp),
-//                                tint = Color(0xFFE8C11C)
-//                            )
-//                        }
-//                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        if (isCurStared.value) {
+                            StarIconButton(
+                                action = {
+                                    // TODO：取消收藏
+                                    learnViewModel.unstarWord()
+                                    Toast.makeText(context, "取消收藏成功！", Toast.LENGTH_SHORT)
+                                        .show()
+                                },
+                                icon = R.drawable.star_fill
+                            )
+                        } else {
+                            StarIconButton(
+                                action = {
+                                    // TODO：收藏
+                                    learnViewModel.starWord()
+                                    Toast.makeText(context, "收藏成功！", Toast.LENGTH_SHORT).show()
+                                },
+                                icon = R.drawable.star
+                            )
+                        }
+                        IconButton(onClick = {
+                            // TODO：移除
+                            learnViewModel.removeWord()
+                        }) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.delete),
+                                contentDescription = null,
+                                Modifier.size(30.dp),
+                                tint = Color(0xFFE90C57)
+                            )
+                        }
+                    }
                 }
             )
         },
@@ -132,6 +142,20 @@ fun LearnMainScreen(userId: Int, vocabulary: String) {
         },
         floatingActionButton = {
         })
+}
+
+@Composable
+fun StarIconButton(action: () -> Unit, icon: Int) {
+    IconButton(onClick = {
+        action.invoke()
+    }, modifier = Modifier.padding(end = 16.dp)) {
+        Icon(
+            painter = painterResource(id = icon),
+            contentDescription = null,
+            Modifier.size(30.dp),
+            tint = Color(0xFFE8C11C)
+        )
+    }
 }
 
 @Composable

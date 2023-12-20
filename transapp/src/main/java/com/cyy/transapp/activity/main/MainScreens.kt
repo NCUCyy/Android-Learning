@@ -535,9 +535,8 @@ fun ProgressCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel
                 // 有选择
                 val learnProcess =
                     Gson().fromJson(plan.value.learnProcess, LearnProcess::class.java)
-                val process = String.format(
-                    (learnProcess.learnedNum * 100 / vocabularySize.toFloat()).toString(), "0.1f"
-                )
+                val process =
+                    "%.1f".format(learnProcess.learnedNum * 100 / vocabularySize.toFloat())
                 Text(
                     text = "$process %",
                     fontSize = 40.sp,
