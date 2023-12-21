@@ -62,6 +62,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -150,7 +151,7 @@ fun MainScreen(
             application.vocabularyRepository
         )
     )
-
+    val curUser = learnReviewViewModel.curUser.collectAsStateWithLifecycle()
     if (vocabulary != "") {
         // 选择Vocabulary后执行（仅一次）
         learnReviewViewModel.updateVocabulary(vocabulary)
@@ -167,98 +168,94 @@ fun MainScreen(
     // 脚手架
     Scaffold(
         topBar = {
-            if (states.drawerState.isClosed) {
-                // 抽屉关
-                TopAppBar(
-                    title = {
-                        Row(modifier = Modifier.fillMaxWidth()) {
-                            Text(
-                                text = states.currentScreen.value.title,
-                                textAlign = TextAlign.Center
-                            )
+            // 抽屉关
+            TopAppBar(
+                title = {
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            text = states.currentScreen.value.title,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                },
+                // 左侧图标
+                navigationIcon = {
+                    // 图标按钮
+                    IconButton(onClick = {
+                        // 点击按钮，开启异步操作---协程
+                        if (states.drawerState.isClosed) {
+                            // 当前为关闭：当用户点击时，打开drawer
+                            states.scope.launch {
+                                states.drawerState.open()
+                            }
+                        } else {
+                            // 当前为打开：当用户点击时，关闭drawer
+                            states.scope.launch {
+                                states.drawerState.close()
+                            }
                         }
-                    },
-                    // 左侧图标
-                    navigationIcon = {
-                        // 图标按钮
-                        IconButton(onClick = {
-                            // 点击按钮，开启异步操作---协程
-                            if (states.drawerState.isClosed) {
-                                // 当前为关闭：当用户点击时，打开drawer
-                                states.scope.launch {
-                                    states.drawerState.open()
-                                }
-                            } else {
-                                // 当前为打开：当用户点击时，关闭drawer
-                                states.scope.launch {
-                                    states.drawerState.close()
-                                }
+                    }) {
+                        Icon(
+                            painter = painterResource(id = curUser.value.iconId),
+                            contentDescription = null,
+                            modifier = Modifier.size(30.dp)
+                        )
+                    }
+                },
+                actions = {
+                    when (states.currentScreen.value.route) {
+                        Screen.QueryPage.route -> {
+                            // 查词页面
+                            IconButton(onClick = {
+                                states.showDeleteDialog.value = true
+                            }, modifier = Modifier.padding(end = 10.dp)) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.delete_history),
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(30.dp)
+                                )
                             }
-                        }) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.user),
-                                contentDescription = null,
-                                modifier = Modifier.size(30.dp)
-                            )
                         }
-                    },
-                    actions = {
-                        when (states.currentScreen.value.route) {
-                            Screen.QueryPage.route -> {
-                                // 查词页面
-                                IconButton(onClick = {
-                                    states.showDeleteDialog.value = true
-                                }) {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.delete_history),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(30.dp)
-                                    )
-                                }
-                            }
 
-                            Screen.ListenPage.route -> {
-                                IconButton(onClick = {
-                                    // 听力页面
-                                    val intent = Intent(context, StarWordActivity::class.java)
-                                    intent.putExtra("userId", userId)
-                                    states.resultLauncher.launch(intent)
-                                }) {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.book),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(30.dp)
-                                    )
-                                }
+                        Screen.ListenPage.route -> {
+                            IconButton(onClick = {
+                                // 听力页面
+                                val intent = Intent(context, StarWordActivity::class.java)
+                                intent.putExtra("userId", userId)
+                                states.resultLauncher.launch(intent)
+                            }, modifier = Modifier.padding(end = 10.dp)) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.book),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(30.dp)
+                                )
                             }
+                        }
 
-                            Screen.LearnPage.route -> {
-                                // 学习页面
-                                IconButton(onClick = {
-                                    // 听力页面
-                                    val intent =
-                                        Intent(context, VocabularySettingActivity::class.java)
-                                    intent.putExtra("userId", userId)
-                                    intent.putExtra(
-                                        "vocabulary",
-                                        learnReviewViewModel.curUser.value.vocabulary
-                                    )
-                                    states.resultLauncher.launch(intent)
-                                }) {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.dictionary),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(30.dp)
-                                    )
-                                }
+                        Screen.LearnPage.route -> {
+                            // 学习页面
+                            IconButton(onClick = {
+                                // 听力页面
+                                val intent =
+                                    Intent(context, VocabularySettingActivity::class.java)
+                                intent.putExtra("userId", userId)
+                                intent.putExtra(
+                                    "vocabulary",
+                                    learnReviewViewModel.curUser.value.vocabulary
+                                )
+                                states.resultLauncher.launch(intent)
+                            }, modifier = Modifier.padding(end = 10.dp)) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.dictionary),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(30.dp)
+                                )
                             }
                         }
                     }
-                )
-            } else {
-                // 抽屉开
-                TopAppBar(title = { })
-            }
+                }
+            )
         },
         bottomBar = {
             BottomAppBar {

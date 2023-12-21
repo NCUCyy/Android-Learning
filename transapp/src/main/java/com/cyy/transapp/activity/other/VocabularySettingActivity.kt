@@ -6,13 +6,15 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
@@ -35,7 +37,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -50,7 +54,8 @@ class VocabularySettingActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val userId = intent.getIntExtra("userId", 20)
-        val vocabulary = intent.getStringExtra("vocabulary")!!
+//        val vocabulary = intent.getStringExtra("未选择")!!
+        val vocabulary = "未选择"
         setContent {
             VocabularySettingMainScreen(userId, vocabulary)
         }
@@ -79,10 +84,9 @@ fun VocabularySettingMainScreen(userId: Int, vocabulary: String) {
                 title = {
                     // TODO：显示查询的词汇
                     Text(
-                        text = "切换到单词本",
+                        text = "切换单词本",
                         fontWeight = FontWeight.Bold,
-                        fontSize = 25.sp,
-                        maxLines = 1
+                        fontSize = 20.sp,
                     )
                 },
                 // 左侧图标
@@ -128,7 +132,9 @@ fun VocabularySettingScreen(vocabularySettingViewModel: VocabularySettingViewMod
             .padding(start = 10.dp, end = 10.dp)
             .verticalScroll(scrollState)
     ) {
+        Spacer(modifier = Modifier.padding(5.dp))
         SelectDailyNumCard(vocabularySettingViewModel)
+        Spacer(modifier = Modifier.padding(10.dp))
         vocabularySettingViewModel.getAllVocabulary().forEach { vocabulary ->
             VocabularySettingItem(vocabulary, vocabularySettingViewModel)
         }
@@ -142,58 +148,56 @@ fun SelectDailyNumCard(vocabularySettingViewModel: VocabularySettingViewModel) {
     val expanded = remember { mutableStateOf(false) }
     val options = listOf(10, 20, 30, 50, 100, 200)
     val selectedOptionText = remember { mutableStateOf(plan.value.dailyNum) }
-    Column(
+    Card(
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
         modifier = Modifier
-            .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .size(width = 200.dp, height = Dp.Infinity),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
-        Card(
-            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .padding(10.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
+        ExposedDropdownMenuBox(
+            expanded = expanded.value,
+            onExpandedChange = {
+                expanded.value = !expanded.value
+            }, modifier = Modifier.fillMaxWidth()
         ) {
-            ExposedDropdownMenuBox(
+            TextField(
+                textStyle = TextStyle(
+                    fontSize = 18.sp,
+                ),
+                readOnly = true,
+                value = plan.value.dailyNum.toString(),
+                onValueChange = {},
+                label = { Text(text = "每组单词的数量") },
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(
+                        expanded = expanded.value
+                    )
+                },
+                colors = ExposedDropdownMenuDefaults.textFieldColors(
+                    unfocusedIndicatorColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent,
+                ),
+                modifier = Modifier
+                    .menuAnchor()
+                    .fillMaxWidth()
+            )
+            ExposedDropdownMenu(
                 expanded = expanded.value,
-                onExpandedChange = {
-                    expanded.value = !expanded.value
-                }
+                onDismissRequest = {
+                    expanded.value = false
+                },
             ) {
-                TextField(
-                    readOnly = true,
-                    value = plan.value.dailyNum.toString(),
-                    onValueChange = {},
-                    label = { Text(text = "每组单词数量") },
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(
-                            expanded = expanded.value
-                        )
-                    },
-                    colors = ExposedDropdownMenuDefaults.textFieldColors(
-
-                    ),
-                    modifier = Modifier.menuAnchor()
-                )
-                ExposedDropdownMenu(
-                    expanded = expanded.value,
-                    onDismissRequest = {
-                        expanded.value = false
-                    },
-                ) {
-                    options.forEach { selectionOption ->
-                        DropdownMenuItem(
-                            text = {
-                                Text(selectionOption.toString())
-                            },
-                            onClick = {
-                                selectedOptionText.value = selectionOption
-                                vocabularySettingViewModel.updateDailyNum(selectionOption)
-                                expanded.value = false
-                            }
-                        )
-                    }
+                options.forEach { selectionOption ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(selectionOption.toString())
+                        },
+                        onClick = {
+                            selectedOptionText.value = selectionOption
+                            vocabularySettingViewModel.updateDailyNum(selectionOption)
+                            expanded.value = false
+                        }
+                    )
                 }
             }
         }
@@ -228,6 +232,7 @@ fun VocabularySettingItem(
                 text = vocabulary.desc,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(start = 15.dp)
             )
             if (isSelected.value) {
                 IsSelectCard()
@@ -243,38 +248,39 @@ fun NotSelectedCard(
     vocabulary: Vocabulary,
     vocabularySettingViewModel: VocabularySettingViewModel
 ) {
-    Card(
-        modifier = Modifier
-            .clickable {
-                // TODO：切换单词本
-                vocabularySettingViewModel.updateVocabulary(vocabulary)
-            }
-            .fillMaxWidth()
-            .padding(start = 250.dp)
-    ) {
-        Text(
-            text = "切换",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF75994B),
-            modifier = Modifier.padding(10.dp)
-        )
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+        Card(
+            modifier = Modifier
+                .clickable {
+                    // TODO：切换单词本
+                    vocabularySettingViewModel.updateVocabulary(vocabulary)
+                }
+                .padding(10.dp)
+        ) {
+            Text(
+                text = "切换",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF75994B),
+                modifier = Modifier.padding(10.dp)
+            )
+        }
     }
 }
 
 @Composable
 fun IsSelectCard() {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 250.dp),
-    ) {
-        Text(
-            text = "当前单词本",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.Gray,
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+        Card(
             modifier = Modifier.padding(10.dp)
-        )
+        ) {
+            Text(
+                text = "当前单词本",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Gray,
+                modifier = Modifier.padding(10.dp)
+            )
+        }
     }
 }
