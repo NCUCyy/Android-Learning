@@ -5,8 +5,6 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultCallback
@@ -98,16 +96,14 @@ class MainActivity : ComponentActivity() {
                 if (it.resultCode == RESULT_OK) {
                     if (it.data!!.hasExtra("vocabulary")) {
                         // 返回的data数据是个intent类型，里面存储了一段文本内容
+                        // vocabulary更新后，会重组整个UI界面
                         vocabulary.value =
                             it.data?.getStringExtra("vocabulary")!!
-                        // vocabulary更新后，会重组整个UI界面
                     }
-                    Toast.makeText(this, "回到MainActivity", Toast.LENGTH_LONG).show()
                 }
             }
         )
         setContent {
-            Log.i("MainActivity---Look", vocabulary.toString())
             MainScreen(userId, resultLauncher, vocabulary.value)
         }
     }

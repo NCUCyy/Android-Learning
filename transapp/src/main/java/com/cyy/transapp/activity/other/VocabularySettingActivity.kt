@@ -54,8 +54,7 @@ class VocabularySettingActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val userId = intent.getIntExtra("userId", 20)
-//        val vocabulary = intent.getStringExtra("未选择")!!
-        val vocabulary = "未选择"
+        val vocabulary = intent.getStringExtra("vocabulary")!!
         setContent {
             VocabularySettingMainScreen(userId, vocabulary)
         }

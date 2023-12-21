@@ -196,15 +196,16 @@ fun DrawerView(
                         label = {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text("正在学习", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                                Spacer(modifier = Modifier.width(60.dp))
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.End
+                                    horizontalArrangement = Arrangement.End,
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
                                         text = curUser.value.vocabulary,
                                         fontSize = 20.sp,
-                                        fontWeight = FontWeight.W900
+                                        fontWeight = FontWeight.W900,
+                                        color = Color.Gray
                                     )
                                     Spacer(modifier = Modifier.width(10.dp))
                                     Icon(
