@@ -12,6 +12,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -242,7 +243,7 @@ fun MainScreen(
                                 states.resultLauncher.launch(intent)
                             }) {
                                 Icon(
-                                    painter = painterResource(id = R.drawable.change_vocabulary),
+                                    painter = painterResource(id = R.drawable.dictionary),
                                     contentDescription = null,
                                     modifier = Modifier.size(30.dp)
                                 )
@@ -323,7 +324,26 @@ fun QueryDialog(states: StateHolder, queryViewModel: QueryViewModel) {
                         queryViewModel.updateQuery(it)
                     },
                     placeholder = {
-                        Text(text = "随处翻译")
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(text = "随处翻译")
+                        }
+                    },
+                    trailingIcon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.search),
+                            contentDescription = null,
+                            modifier = Modifier.clickable {
+                                toTransActivity(
+                                    context,
+                                    states.resultLauncher,
+                                    query.value,
+                                    queryViewModel.userId
+                                )
+                            }
+                        )
                     },
                     shape = MaterialTheme.shapes.extraSmall, // 设置边框形状
                     textStyle = TextStyle.Default.copy(
@@ -507,5 +527,5 @@ sealed class Screen(val route: String, val title: String, val icon: Int) {
         Screen(route = "listen", title = "听力", icon = R.drawable.listen)
 
     object LearnPage :
-        Screen(route = "learn", title = "学习", icon = R.drawable.dictionary)
+        Screen(route = "learn", title = "学习", icon = R.drawable.school)
 }

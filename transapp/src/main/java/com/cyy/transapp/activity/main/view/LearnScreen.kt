@@ -76,10 +76,9 @@ fun LearnScreen(states: StateHolder, learnReviewViewModel: LearnReviewViewModel)
                     ProgressCard(states, learnReviewViewModel)
                 }
                 DailyAttendanceCard(states, learnReviewViewModel)
-                TodayCard(states, learnReviewViewModel)
                 LearnAndReviewCard(states, learnReviewViewModel)
+                TodayCard(states, learnReviewViewModel)
             }
-
 
             is OpResult.Loading -> {
                 // TODO：显示加载中
@@ -122,7 +121,7 @@ fun VocabularyCard(states: StateHolder, learnReviewViewModel: LearnReviewViewMod
         Row {
             Text(
                 text = "Vocabulary",
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.W900,
                 fontSize = 20.sp,
                 modifier = Modifier.padding(10.dp)
             )
@@ -138,7 +137,7 @@ fun VocabularyCard(states: StateHolder, learnReviewViewModel: LearnReviewViewMod
         Text(
             text = curUser.value.vocabulary,
             fontSize = 40.sp,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.W900,
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .padding(10.dp)
@@ -167,7 +166,7 @@ fun ProgressCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel
         Row {
             Text(
                 text = "Progress",
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.W900,
                 fontSize = 20.sp,
                 modifier = Modifier.padding(10.dp)
             )
@@ -189,7 +188,7 @@ fun ProgressCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel
                 Text(
                     text = "$process %",
                     fontSize = 40.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.W900,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .padding(10.dp)
@@ -318,7 +317,7 @@ fun LearnReviewText(type: String, num: Int) {
         modifier = Modifier
             .padding(start = 20.dp, top = 10.dp, bottom = 10.dp)
     ) {
-        Text(text = type, fontWeight = FontWeight.Bold, fontSize = 25.sp)
+        Text(text = type, fontWeight = FontWeight.W900, fontSize = 25.sp)
         Text(
             text = num.toString(),
             color = Color(0xFFFF5722),
@@ -337,11 +336,71 @@ fun toVocabularyActivity(context: Activity, states: StateHolder) {
 
 @Composable
 fun DailyAttendanceCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel) {
-    val todays = learnReviewViewModel.todays.collectAsStateWithLifecycle()
-    LazyRow {
-        items(todays.value) {
-            Card {
-                Text(text = it.day.toString())
+    val todaysState = learnReviewViewModel.todays.collectAsStateWithLifecycle()
+    // 初始化
+    val todays = mutableListOf<Int>().apply {
+        for (today in todaysState.value) {
+            this.add(today.day)
+        }
+    }
+    val now = learnReviewViewModel.now
+    val days = mutableListOf<Int>()
+    for (i in 1..now.dayOfMonth) {
+        days.add(i)
+    }
+    days.reverse()
+    Card(
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White,
+        )
+    ) {
+        Text(
+            text = "Daily Attendance", fontWeight = FontWeight.W900,
+            fontSize = 20.sp,
+            modifier = Modifier.padding(10.dp)
+        )
+        LazyRow(
+            modifier = Modifier.padding(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(7.dp)
+        ) {
+            items(days) { day: Int ->
+                DailyCardItem(day, now.month.name, todays)
+            }
+        }
+    }
+}
+
+@Composable
+fun DailyCardItem(day: Int, month: String, days: List<Int>) {
+    val iconSize = 40.dp
+    Card {
+        Column(
+            modifier = Modifier.padding(10.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            val showMonth = month[0] + month.lowercase().substring(1, 3)
+            Text(text = "$showMonth $day", color = Color(0xFF269C2A), fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(10.dp))
+            if (days.contains(day)) {
+                Icon(
+                    painter = painterResource(id = R.drawable.done),
+                    contentDescription = null,
+                    tint = Color(0xFFFFC107),
+                    modifier = Modifier
+                        .size(iconSize)
+                )
+            } else {
+                Icon(
+                    painter = painterResource(id = R.drawable.undone),
+                    contentDescription = null,
+                    tint = Color(0xFFC70044),
+                    modifier = Modifier.size(iconSize)
+                )
             }
         }
     }
@@ -361,7 +420,7 @@ fun TodayCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel) {
     ) {
         Text(
             text = "Today",
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.W900,
             fontSize = 20.sp,
             modifier = Modifier.padding(10.dp)
         )

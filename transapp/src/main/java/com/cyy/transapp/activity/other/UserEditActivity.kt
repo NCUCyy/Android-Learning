@@ -13,7 +13,7 @@ import com.cyy.transapp.view_model.user.UserConfigViewModelFactory
 /**
  * 用户信息活动
  */
-class UserActivity : ComponentActivity() {
+class UserEditActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val userId = intent.getIntExtra("userId", 0)

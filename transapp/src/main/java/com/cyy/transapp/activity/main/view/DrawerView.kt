@@ -31,6 +31,7 @@ import com.cyy.transapp.TransApp
 import com.cyy.transapp.activity.main.StateHolder
 import com.cyy.transapp.activity.other.StarWordActivity
 import com.cyy.transapp.activity.other.SystemSettingActivity
+import com.cyy.transapp.activity.other.UserEditActivity
 import com.cyy.transapp.activity.other.VocabularySettingActivity
 import com.cyy.transapp.view_model.CurUserViewModel
 import com.cyy.transapp.view_model.CurUserViewModelFactory
@@ -88,6 +89,25 @@ fun DrawerView(
                     )
                     Text(text = curUser.value.username, fontSize = 30.sp)
                 }
+                // TODO：0、个人信息
+                NavigationDrawerItem(
+                    label = {
+                        Text("个人信息", fontSize = 20.sp)
+                    },
+                    icon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.person_edit),
+                            tint = Color.DarkGray,
+                            contentDescription = null,
+                            modifier = Modifier.size(25.dp)
+                        )
+                    },
+                    selected = false,
+                    onClick = {
+                        val intent =
+                            Intent(states.navController.context, UserEditActivity::class.java)
+                        states.resultLauncher.launch(intent)
+                    })
                 // TODO：1、我的单词本
                 NavigationDrawerItem(
                     label = {
@@ -146,7 +166,7 @@ fun DrawerView(
                     },
                     icon = {
                         Icon(
-                            painter = painterResource(id = R.drawable.change_vocabulary),
+                            painter = painterResource(id = R.drawable.dictionary),
                             tint = Color.DarkGray,
                             contentDescription = null,
                             modifier = Modifier.size(25.dp)
@@ -163,7 +183,7 @@ fun DrawerView(
                 // TODO：4、设置
                 NavigationDrawerItem(
                     label = {
-                        Text("个性化配置", fontSize = 20.sp)
+                        Text("设置", fontSize = 20.sp)
                     },
                     icon = {
                         Icon(

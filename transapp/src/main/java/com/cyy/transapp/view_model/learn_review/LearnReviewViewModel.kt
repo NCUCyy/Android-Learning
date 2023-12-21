@@ -41,7 +41,7 @@ class LearnReviewViewModel(
     private val vocabularyRepository: VocabularyRepository
 ) :
     ViewModel() {
-    private val now: OffsetDateTime = OffsetDateTime.now()
+    val now: OffsetDateTime = OffsetDateTime.now()
 
     // 当前登录的用户---用于观察
     var curUser: StateFlow<User> = MutableStateFlow(User())

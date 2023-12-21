@@ -70,32 +70,70 @@ fun QueryScreen(states: StateHolder, queryViewModel: QueryViewModel) {
             .padding(10.dp)
     ) {
         // 1、输入框
-        TextField(
-            value = query.value,
-            modifier = Modifier
-                .fillMaxWidth(),
-            onValueChange = { it: String ->
-                queryViewModel.updateQuery(it)
-            },
-            placeholder = {
-                Text(text = "查询单词或句子")
-            },
-            shape = MaterialTheme.shapes.extraSmall, // 设置边框形状
-            textStyle = TextStyle.Default.copy(color = Color.Black, fontSize = 16.sp), // 设置文本颜色
-            colors = TextFieldDefaults.textFieldColors(
-                containerColor = Color.Transparent,
-//                focusedIndicatorColor = Color.DarkGray,
-//                unfocusedIndicatorColor = Color.DarkGray,
-                disabledIndicatorColor = Color.Transparent,
-                placeholderColor = Color.Gray,
-            ), keyboardOptions = KeyboardOptions(
-                imeAction = ImeAction.Search
-            ),
-            keyboardActions = KeyboardActions(onSearch = {
-                // TODO:跳转到TransActivity
-                toTransActivity(context, states.resultLauncher, query.value, queryViewModel.userId)
-            })
-        )
+        Card(
+                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White,
+                ),
+                modifier = Modifier
+                    .fillMaxWidth(),
+            ) {
+                TextField(
+                    value = query.value,
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    onValueChange = { it: String ->
+                        queryViewModel.updateQuery(it)
+                    },
+                    placeholder = {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(text = "查询单词或句子")
+                        }
+                    },
+                    trailingIcon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.search),
+                            contentDescription = null,
+                            modifier = Modifier.clickable {
+                                toTransActivity(
+                                    context,
+                                    states.resultLauncher,
+                                    query.value,
+                                    queryViewModel.userId
+                                )
+                            }
+                        )
+                    },
+                    shape = MaterialTheme.shapes.extraSmall, // 设置边框形状
+                    textStyle = TextStyle.Default.copy(
+                        color = Color.Black,
+                        fontSize = 16.sp
+                    ), // 设置文本颜色
+                    colors = TextFieldDefaults.textFieldColors(
+                        containerColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent,
+                        placeholderColor = Color.Gray,
+                    ), keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Search
+                    ),
+                    keyboardActions = KeyboardActions(onSearch = {
+                        // TODO:跳转到TransActivity
+                        toTransActivity(
+                            context,
+                            states.resultLauncher,
+                            query.value,
+                            queryViewModel.userId
+                        )
+                        // 关闭输入框
+                        states.showQueryDialog.value = false
+                    })
+                )
+            }
         Spacer(modifier = Modifier.height(10.dp))
         // 2、每日一句
         Box(
@@ -309,6 +347,7 @@ fun toTransActivity(
     query: String,
     userId: Int
 ) {
+    if (query.isEmpty()) return
     val intent = Intent(context, TransActivity::class.java)
     intent.putExtra("query", query)
     intent.putExtra("userId", userId)
