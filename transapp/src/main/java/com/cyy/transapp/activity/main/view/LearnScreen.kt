@@ -41,6 +41,7 @@ import com.cyy.transapp.activity.main.LearnActivity
 import com.cyy.transapp.activity.main.ReviewActivity
 import com.cyy.transapp.activity.main.StateHolder
 import com.cyy.transapp.activity.other.VocabularyActivity
+import com.cyy.transapp.activity.other.VocabularySettingActivity
 import com.cyy.transapp.activity.other.WordActivity
 import com.cyy.transapp.model.LearnProcess
 import com.cyy.transapp.model.OpResult
@@ -289,21 +290,19 @@ fun LearnAndReviewCard(states: StateHolder, learnReviewViewModel: LearnReviewVie
                     elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(10.dp)
                         .clickable {
                             // TODO：跳转到VocabularyActivity---选择词汇
-                            toVocabularyActivity(context, states)
+                            toVocabularySettingActivity(context, states)
                         },
                 ) {
                     // 没选择
                     Text(
-                        text = "请先选择词汇表",
+                        text = "请选择单词本",
                         textAlign = TextAlign.Center,
                         fontWeight = FontWeight.Bold,
                         fontSize = 25.sp,
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(10.dp)
+                            .fillMaxWidth().padding(10.dp)
                     )
                 }
             }
@@ -328,8 +327,8 @@ fun LearnReviewText(type: String, num: Int) {
 }
 
 // 跳转到VocabularyActivity---选Vocabulary
-fun toVocabularyActivity(context: Activity, states: StateHolder) {
-    val intent = Intent(context, VocabularyActivity::class.java)
+fun toVocabularySettingActivity(context: Activity, states: StateHolder) {
+    val intent = Intent(context, VocabularySettingActivity::class.java)
     states.resultLauncher.launch(intent)
 }
 

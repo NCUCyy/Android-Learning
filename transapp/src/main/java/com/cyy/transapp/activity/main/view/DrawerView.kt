@@ -46,7 +46,6 @@ import com.cyy.transapp.activity.other.UserEditActivity
 import com.cyy.transapp.activity.other.VocabularySettingActivity
 import com.cyy.transapp.view_model.CurUserViewModel
 import com.cyy.transapp.view_model.CurUserViewModelFactory
-import com.cyy.transapp.view_model.learn_review.LearnReviewViewModel
 import kotlinx.coroutines.launch
 
 
@@ -59,7 +58,6 @@ fun DrawerView(
     states: StateHolder,
     userId: Int,
     vocabulary: String,
-    learnReviewViewModel: LearnReviewViewModel
 ) {
     val context = LocalContext.current as Activity
     val application = LocalContext.current.applicationContext as TransApp
@@ -292,6 +290,6 @@ fun DrawerView(
         },
         content = {
             // 主体是导航图
-            NavigationGraphScreen(states, userId, vocabulary, learnReviewViewModel)
+            NavigationGraphScreen(states, userId, vocabulary)
         })
 }

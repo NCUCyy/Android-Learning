@@ -72,8 +72,8 @@ import com.cyy.transapp.activity.main.view.DrawerView
 import com.cyy.transapp.activity.main.view.toTransActivity
 import com.cyy.transapp.activity.other.StarWordActivity
 import com.cyy.transapp.activity.other.VocabularySettingActivity
-import com.cyy.transapp.view_model.learn_review.LearnReviewViewModel
-import com.cyy.transapp.view_model.learn_review.LearnReviewViewModelFactory
+import com.cyy.transapp.view_model.CurUserViewModel
+import com.cyy.transapp.view_model.CurUserViewModelFactory
 import com.cyy.transapp.view_model.trans.QueryViewModel
 import com.cyy.transapp.view_model.trans.QueryViewModelFactory
 import kotlinx.coroutines.CoroutineScope
@@ -140,22 +140,14 @@ fun MainScreen(
         )
     // 清空输入框
     queryViewModel.clearQuery()
-    // 2、学习页面
-    val learnReviewViewModel = viewModel<LearnReviewViewModel>(
-        factory = LearnReviewViewModelFactory(
+    // 2、当前
+    val curUserViewModel = viewModel<CurUserViewModel>(
+        factory = CurUserViewModelFactory(
             userId,
-            context,
-            application.userRepository,
-            application.todayRepository,
-            application.planRepository,
-            application.vocabularyRepository
+            application.userRepository
         )
     )
-    val curUser = learnReviewViewModel.curUser.collectAsStateWithLifecycle()
-    if (vocabulary != "") {
-        // 选择Vocabulary后执行（仅一次）
-        learnReviewViewModel.updateVocabulary(vocabulary)
-    }
+    val curUser = curUserViewModel.curUser.collectAsStateWithLifecycle()
 
     // 删除翻译记录的对话框
     if (states.showDeleteDialog.value) {
@@ -242,7 +234,7 @@ fun MainScreen(
                                 intent.putExtra("userId", userId)
                                 intent.putExtra(
                                     "vocabulary",
-                                    learnReviewViewModel.curUser.value.vocabulary
+                                    curUser.value.vocabulary
                                 )
                                 states.resultLauncher.launch(intent)
                             }, modifier = Modifier.padding(end = 10.dp)) {
@@ -283,7 +275,7 @@ fun MainScreen(
             // 页面的主体部分
             Box(modifier = Modifier.padding(it)) {
                 // 侧滑导航视图（侧滑界面+导航图）
-                DrawerView(states, userId, vocabulary, learnReviewViewModel)
+                DrawerView(states, userId, vocabulary)
             }
         },
         floatingActionButton = {

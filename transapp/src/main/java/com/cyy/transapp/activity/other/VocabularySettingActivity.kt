@@ -151,7 +151,7 @@ fun SelectDailyNumCard(vocabularySettingViewModel: VocabularySettingViewModel) {
     Card(
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
         modifier = Modifier
-            .size(width = 200.dp, height = Dp.Infinity),
+            .size(width = 180.dp, height = Dp.Infinity),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         ExposedDropdownMenuBox(
@@ -259,7 +259,7 @@ fun NotSelectedCard(
         ) {
             Text(
                 text = "切换",
-                fontSize = 20.sp,
+                fontSize = 17.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF75994B),
                 modifier = Modifier.padding(10.dp)
@@ -276,7 +276,7 @@ fun IsSelectCard() {
         ) {
             Text(
                 text = "当前单词本",
-                fontSize = 20.sp,
+                fontSize = 17.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Gray,
                 modifier = Modifier.padding(10.dp)
