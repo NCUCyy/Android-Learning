@@ -62,8 +62,8 @@ import com.cyy.transapp.TransApp
 import com.cyy.transapp.activity.main.view.DrawerView
 import com.cyy.transapp.activity.main.view.MenuView
 import com.cyy.transapp.model.Vocabulary
-import com.cyy.transapp.view_model.QueryViewModel
-import com.cyy.transapp.view_model.QueryViewModelFactory
+import com.cyy.transapp.view_model.trans.QueryViewModel
+import com.cyy.transapp.view_model.trans.QueryViewModelFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 

@@ -2,10 +2,12 @@ package com.cyy.transapp.view_model
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.cyy.transapp.pojo.User
 import com.cyy.transapp.repository.UserRepository
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 
 /**
  * 保存当前登录的用户---curUser（根据UserId查询得到，ViewModel初始化的时候得到）
@@ -16,7 +18,11 @@ class CurUserViewModel(
 ) :
     ViewModel() {
     // 当前登录的用户
-    var curUser: StateFlow<User> = MutableStateFlow(User())
+    var curUser: StateFlow<User> = userRepository.getFlowById(userId).stateIn(
+        initialValue = User(),
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(0)
+    )
 }
 
 class CurUserViewModelFactory(

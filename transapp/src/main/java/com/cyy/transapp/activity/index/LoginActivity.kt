@@ -31,8 +31,8 @@ import com.cyy.transapp.R
 import com.cyy.transapp.TransApp
 import com.cyy.transapp.model.LoginState
 import com.cyy.transapp.model.UsernameAndPasswordState
-import com.cyy.transapp.view_model.UserViewModel
-import com.cyy.transapp.view_model.UserViewModelFactory
+import com.cyy.transapp.view_model.user.UserViewModel
+import com.cyy.transapp.view_model.user.UserViewModelFactory
 
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

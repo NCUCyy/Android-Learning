@@ -56,10 +56,10 @@ import com.cyy.transapp.model.trans.TransRes
 import com.cyy.transapp.model.trans.Web
 import com.cyy.transapp.pojo.TransRecord
 import com.cyy.transapp.service.VoiceService
-import com.cyy.transapp.view_model.TransRecordViewModel
-import com.cyy.transapp.view_model.TransRecordViewModelFactory
-import com.cyy.transapp.view_model.TransViewModel
-import com.cyy.transapp.view_model.TransViewModelFactory
+import com.cyy.transapp.view_model.trans.TransRecordViewModel
+import com.cyy.transapp.view_model.trans.TransRecordViewModelFactory
+import com.cyy.transapp.view_model.trans.TransViewModel
+import com.cyy.transapp.view_model.trans.TransViewModelFactory
 
 class TransActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

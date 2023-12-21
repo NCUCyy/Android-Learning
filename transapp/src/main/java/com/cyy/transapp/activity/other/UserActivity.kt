@@ -7,8 +7,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cyy.transapp.TransApp
-import com.cyy.transapp.view_model.UserConfigViewModel
-import com.cyy.transapp.view_model.UserConfigViewModelFactory
+import com.cyy.transapp.view_model.user.UserConfigViewModel
+import com.cyy.transapp.view_model.user.UserConfigViewModelFactory
 
 /**
  * 用户信息活动

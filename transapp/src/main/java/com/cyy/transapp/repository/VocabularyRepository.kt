@@ -10,7 +10,9 @@ import com.google.gson.JsonParser
 import kotlinx.serialization.json.Json
 
 class VocabularyRepository {
-    val vocabularies = listOf(Vocabulary.CET4, Vocabulary.CET6, Vocabulary.TOEFL)
+    val vocabularies =
+        listOf(Vocabulary.NOT_SELECTED, Vocabulary.CET4, Vocabulary.CET6, Vocabulary.TOEFL)
+
     fun getVocabularyByStr(str: String): Vocabulary {
         return when (str) {
             "CET4" -> Vocabulary.CET4

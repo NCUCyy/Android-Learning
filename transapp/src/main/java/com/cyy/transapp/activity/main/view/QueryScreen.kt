@@ -52,7 +52,7 @@ import com.cyy.transapp.activity.main.TransActivity
 import com.cyy.transapp.model.OpResult
 import com.cyy.transapp.model.daily_sentence.SentenceModel
 import com.cyy.transapp.pojo.TransRecord
-import com.cyy.transapp.view_model.QueryViewModel
+import com.cyy.transapp.view_model.trans.QueryViewModel
 
 
 // ----------------------------------------------------①QueryScreen----------------------------------------------------

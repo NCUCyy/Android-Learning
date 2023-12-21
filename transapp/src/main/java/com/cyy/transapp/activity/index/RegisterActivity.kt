@@ -34,8 +34,8 @@ import com.cyy.transapp.model.ConfirmPasswordState
 import com.cyy.transapp.model.RegisterState
 import com.cyy.transapp.model.UsernameState
 import com.cyy.transapp.pojo.User
-import com.cyy.transapp.view_model.UserViewModel
-import com.cyy.transapp.view_model.UserViewModelFactory
+import com.cyy.transapp.view_model.user.UserViewModel
+import com.cyy.transapp.view_model.user.UserViewModelFactory
 
 class RegisterActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

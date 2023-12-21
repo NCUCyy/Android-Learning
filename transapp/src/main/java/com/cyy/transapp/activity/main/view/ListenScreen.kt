@@ -30,8 +30,8 @@ import com.cyy.transapp.activity.main.ListenActivity
 import com.cyy.transapp.activity.main.StateHolder
 import com.cyy.transapp.pojo.ListenResource
 import com.cyy.transapp.util.FileUtil
-import com.cyy.transapp.view_model.ListenViewModel
-import com.cyy.transapp.view_model.ListenViewModelFactory
+import com.cyy.transapp.view_model.listen.ListenViewModel
+import com.cyy.transapp.view_model.listen.ListenViewModelFactory
 
 
 // ----------------------------------------------------②ListenScreen----------------------------------------------------

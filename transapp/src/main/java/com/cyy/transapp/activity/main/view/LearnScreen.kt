@@ -44,7 +44,7 @@ import com.cyy.transapp.activity.other.VocabularyActivity
 import com.cyy.transapp.activity.other.WordActivity
 import com.cyy.transapp.model.LearnProcess
 import com.cyy.transapp.model.OpResult
-import com.cyy.transapp.view_model.LearnReviewViewModel
+import com.cyy.transapp.view_model.learn_review.LearnReviewViewModel
 import com.google.gson.Gson
 
 

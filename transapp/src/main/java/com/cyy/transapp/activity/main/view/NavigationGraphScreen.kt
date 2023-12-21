@@ -11,14 +11,18 @@ import com.cyy.transapp.TransApp
 import com.cyy.transapp.activity.main.Screen
 import com.cyy.transapp.activity.main.StateHolder
 import com.cyy.transapp.model.Vocabulary
-import com.cyy.transapp.view_model.LearnReviewViewModel
-import com.cyy.transapp.view_model.LearnReviewViewModelFactory
-import com.cyy.transapp.view_model.QueryViewModel
-import com.cyy.transapp.view_model.QueryViewModelFactory
+import com.cyy.transapp.view_model.learn_review.LearnReviewViewModel
+import com.cyy.transapp.view_model.learn_review.LearnReviewViewModelFactory
+import com.cyy.transapp.view_model.trans.QueryViewModel
+import com.cyy.transapp.view_model.trans.QueryViewModelFactory
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-fun NavigationGraphScreen(states: StateHolder, userId: Int, vocabulary: Vocabulary) {
+fun NavigationGraphScreen(
+    states: StateHolder,
+    userId: Int,
+    vocabulary: Vocabulary,
+) {
     val application = LocalContext.current.applicationContext as TransApp
     val context = LocalContext.current as Activity
     val queryViewModel = viewModel<QueryViewModel>(

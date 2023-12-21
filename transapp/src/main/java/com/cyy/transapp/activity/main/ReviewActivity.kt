@@ -53,8 +53,8 @@ import com.cyy.transapp.TransApp
 import com.cyy.transapp.activity.main.view.toTransActivity
 import com.cyy.transapp.model.OpResult
 import com.cyy.transapp.model.ReviewState
-import com.cyy.transapp.view_model.ReviewViewModel
-import com.cyy.transapp.view_model.ReviewViewModelFactory
+import com.cyy.transapp.view_model.learn_review.ReviewViewModel
+import com.cyy.transapp.view_model.learn_review.ReviewViewModelFactory
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 

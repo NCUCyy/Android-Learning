@@ -1,12 +1,15 @@
 package com.cyy.transapp.activity.main.view
 
+import android.app.Activity
 import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -26,6 +29,7 @@ import com.cyy.transapp.R
 import com.cyy.transapp.TransApp
 import com.cyy.transapp.activity.main.StateHolder
 import com.cyy.transapp.activity.other.StarWordActivity
+import com.cyy.transapp.activity.other.VocabularySettingActivity
 import com.cyy.transapp.model.Vocabulary
 import com.cyy.transapp.view_model.CurUserViewModel
 import com.cyy.transapp.view_model.CurUserViewModelFactory
@@ -42,6 +46,7 @@ fun DrawerView(
     userId: Int,
     vocabulary: Vocabulary,
 ) {
+    val context = LocalContext.current as Activity
     val application = LocalContext.current.applicationContext as TransApp
     // MainActivity中管理User的ViewModel
     val curUserViewModel = viewModel<CurUserViewModel>(
@@ -77,7 +82,7 @@ fun DrawerView(
                             }
                         }
                     )
-                    Text(text = "用户名", fontSize = 30.sp)
+                    Text(text = curUser.value.username, fontSize = 30.sp)
                 }
                 // TODO：1、我的单词本
                 NavigationDrawerItem(
@@ -88,14 +93,12 @@ fun DrawerView(
                         Icon(
                             painter = painterResource(id = R.drawable.book),
                             tint = Color.DarkGray,
-                            contentDescription = "我的生词本",
+                            contentDescription = null,
+                            modifier = Modifier.size(25.dp)
                         )
                     },
                     selected = false,
                     onClick = {
-                        states.scope.launch {
-                            states.drawerState.close()
-                        }
                         val intent =
                             Intent(states.navController.context, StarWordActivity::class.java)
                         intent.putExtra("userId", userId)
@@ -110,7 +113,8 @@ fun DrawerView(
                         Icon(
                             painter = painterResource(id = R.drawable.delete_history),
                             tint = Color.DarkGray,
-                            contentDescription = "我的单词本",
+                            contentDescription = null,
+                            modifier = Modifier.size(25.dp)
                         )
                     },
                     selected = false,
@@ -118,26 +122,39 @@ fun DrawerView(
                         states.scope.launch {
                             states.drawerState.close()
                         }
+                        // 弹出确认删除的对话框
                         states.showDeleteDialog.value = true
                     })
                 // TODO：3、更换单词本
                 NavigationDrawerItem(
                     label = {
-                        Text("更换单词本", fontSize = 20.sp)
+                        Row {
+                            Text("正在学习", fontSize = 20.sp)
+                            Spacer(modifier = Modifier.width(60.dp))
+                            Text(text = curUser.value.vocabulary, fontSize = 20.sp)
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Icon(
+                                painter = painterResource(id = R.drawable.right),
+                                contentDescription = null,
+                                tint = Color.Gray,
+                            )
+                        }
                     },
                     icon = {
                         Icon(
                             painter = painterResource(id = R.drawable.change_vocabulary),
                             tint = Color.DarkGray,
                             contentDescription = null,
+                            modifier = Modifier.size(25.dp)
                         )
                     },
                     selected = false,
                     onClick = {
-                        states.scope.launch {
-                            states.drawerState.close()
-                        }
-                        states.showDeleteDialog.value = true
+                        // 前往VocabularyActivity
+                        val intent = Intent(context, VocabularySettingActivity::class.java)
+                        intent.putExtra("userId", userId)
+                        intent.putExtra("vocabulary", curUser.value.vocabulary)
+                        states.resultLauncher.launch(intent)
                     })
             }
         },

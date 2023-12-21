@@ -18,7 +18,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.cyy.transapp.TransApp
 import com.cyy.transapp.model.Vocabulary
-import com.cyy.transapp.view_model.VocabularyViewModel
+import com.cyy.transapp.view_model.vocabulary.VocabularyViewModel
 
 class VocabularyActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
