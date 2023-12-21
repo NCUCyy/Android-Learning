@@ -2,6 +2,7 @@ package com.cyy.transapp.activity.main.view
 
 import android.app.Activity
 import android.content.Intent
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -30,7 +31,6 @@ import com.cyy.transapp.TransApp
 import com.cyy.transapp.activity.main.StateHolder
 import com.cyy.transapp.activity.other.StarWordActivity
 import com.cyy.transapp.activity.other.VocabularySettingActivity
-import com.cyy.transapp.model.Vocabulary
 import com.cyy.transapp.view_model.CurUserViewModel
 import com.cyy.transapp.view_model.CurUserViewModelFactory
 import kotlinx.coroutines.launch
@@ -44,7 +44,7 @@ import kotlinx.coroutines.launch
 fun DrawerView(
     states: StateHolder,
     userId: Int,
-    vocabulary: Vocabulary,
+    vocabulary: String,
 ) {
     val context = LocalContext.current as Activity
     val application = LocalContext.current.applicationContext as TransApp
@@ -73,6 +73,7 @@ fun DrawerView(
                     .padding(top = 100.dp)
             ) {
                 Row(modifier = Modifier.padding(bottom = 50.dp)) {
+                    Log.i("DrawerView", "curUser.value.iconId: ${curUser.value.username}")
                     Icon(
                         painter = painterResource(id = curUser.value.iconId),
                         contentDescription = null,

@@ -10,7 +10,6 @@ import androidx.navigation.compose.composable
 import com.cyy.transapp.TransApp
 import com.cyy.transapp.activity.main.Screen
 import com.cyy.transapp.activity.main.StateHolder
-import com.cyy.transapp.model.Vocabulary
 import com.cyy.transapp.view_model.learn_review.LearnReviewViewModel
 import com.cyy.transapp.view_model.learn_review.LearnReviewViewModelFactory
 import com.cyy.transapp.view_model.trans.QueryViewModel
@@ -21,7 +20,7 @@ import com.cyy.transapp.view_model.trans.QueryViewModelFactory
 fun NavigationGraphScreen(
     states: StateHolder,
     userId: Int,
-    vocabulary: Vocabulary,
+    vocabulary: String,
 ) {
     val application = LocalContext.current.applicationContext as TransApp
     val context = LocalContext.current as Activity
@@ -44,7 +43,7 @@ fun NavigationGraphScreen(
         )
     )
 
-    if (vocabulary != Vocabulary.NOT_SELECTED) {
+    if (vocabulary != "") {
         // 选择Vocabulary后执行（仅一次）
         learnReviewViewModel.updateVocabulary(vocabulary)
     }

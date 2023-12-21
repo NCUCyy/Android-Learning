@@ -1,6 +1,7 @@
 package com.cyy.transapp.view_model.vocabulary
 
 import android.app.Activity
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -62,16 +63,15 @@ class VocabularySettingViewModel(
         // 修改user中的vocabulary
         curUser.value.vocabulary = vocabulary.desc
         userRepository.update(curUser.value)
-        // 修改Plan（有则赋值，没有则插入后赋值）
         updatePlan()
-        // 更新
+        // TODO：可以去掉
         loadVocabulary()
     }
 
     /**
      * 在updateVocabulary()内部调用，更新Plan（有则赋值，没有则插入后赋值）
      */
-    private fun updatePlan() = viewModelScope.launch {
+    private suspend fun updatePlan() {
         val selectedPlan = planRepository.getByUserIdAndVocabulary(userId, curUser.value.vocabulary)
         if (selectedPlan != null) {
             curPlanState.value =
@@ -93,8 +93,8 @@ class VocabularySettingViewModel(
                         started = SharingStarted.WhileSubscribed(5000)
                     )
             // 刚创建完Plan后，需要初始化LearnProcess
-            initLearnProcess()
         }
+        initLearnProcess()
     }
 
     private fun loadVocabulary() {
@@ -114,7 +114,7 @@ class VocabularySettingViewModel(
         }
     }
 
-    fun initLearnProcess() = viewModelScope.launch {
+    private suspend fun initLearnProcess() {
         val user = userRepository.getById(userId)
         if (user.vocabulary != "未选择") {
             val plan = planRepository.getByUserIdAndVocabulary(userId, user.vocabulary)
@@ -127,10 +127,11 @@ class VocabularySettingViewModel(
             }
             learnProcess.learnedIdx += addNum
             updateLearnProcess(learnProcess)
+            Log.i("VocabularySettingViewModel", "initLearnProcess: ${learnProcess.process}")
         }
     }
 
-    private fun updateLearnProcess(learnProcess: LearnProcess) = viewModelScope.launch {
+    private suspend fun updateLearnProcess(learnProcess: LearnProcess) {
         val learnProcessStr = Gson().toJson(learnProcess)
         val user = userRepository.getById(userId)
         val plan = planRepository.getByUserIdAndVocabulary(userId, user.vocabulary)
@@ -138,7 +139,7 @@ class VocabularySettingViewModel(
         planRepository.update(plan)
     }
 
-    fun getLearnProcess(plan: Plan): LearnProcess {
+    private fun getLearnProcess(plan: Plan): LearnProcess {
         val learnProcessStr = plan.learnProcess
         return Gson().fromJson(learnProcessStr, LearnProcess::class.java)
     }

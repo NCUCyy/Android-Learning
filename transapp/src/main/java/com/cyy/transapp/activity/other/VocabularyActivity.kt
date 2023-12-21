@@ -51,7 +51,7 @@ fun VocabularyOptionCard(vocabulary: Vocabulary) {
                 val intent = Intent()
                 context.setResult(
                     Activity.RESULT_OK,
-                    intent.putExtra("vocabulary", vocabulary)
+                    intent.putExtra("vocabulary", vocabulary.desc)
                 )
                 context.finish()
             }

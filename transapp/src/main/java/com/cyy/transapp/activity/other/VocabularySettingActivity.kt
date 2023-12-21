@@ -1,6 +1,7 @@
 package com.cyy.transapp.activity.other
 
 import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -57,6 +58,18 @@ class VocabularySettingActivity : ComponentActivity() {
 @Composable
 fun VocabularySettingMainScreen(userId: Int, vocabulary: String) {
     val context = LocalContext.current as Activity
+    val application = LocalContext.current.applicationContext as TransApp
+    val vocabularySettingViewModel = viewModel<VocabularySettingViewModel>(
+        factory = VocabularySettingViewModelFactory(
+            userId,
+            vocabulary,
+            context,
+            application.userRepository,
+            application.planRepository,
+            application.vocabularyRepository
+        )
+    )
+    val plan = vocabularySettingViewModel.curPlanState.value.collectAsStateWithLifecycle()
     Scaffold(
         topBar = {
             TopAppBar(
@@ -74,6 +87,11 @@ fun VocabularySettingMainScreen(userId: Int, vocabulary: String) {
                     // 图标按钮
                     IconButton(onClick = {
                         // TODO：返回
+                        val intent = Intent()
+                        context.setResult(
+                            Activity.RESULT_OK,
+                            intent.putExtra("vocabulary", plan.value.vocabulary)
+                        )
                         context.finish()
                     }) {
                         Icon(
@@ -91,7 +109,7 @@ fun VocabularySettingMainScreen(userId: Int, vocabulary: String) {
         content = {
             // 页面的主体部分
             Box(modifier = Modifier.padding(it)) {
-                VocabularySettingScreen(userId, vocabulary)
+                VocabularySettingScreen(vocabularySettingViewModel)
             }
         },
         floatingActionButton = {
@@ -99,19 +117,8 @@ fun VocabularySettingMainScreen(userId: Int, vocabulary: String) {
 }
 
 @Composable
-fun VocabularySettingScreen(userId: Int, vocabulary: String) {
+fun VocabularySettingScreen(vocabularySettingViewModel: VocabularySettingViewModel) {
     val context = LocalContext.current as Activity
-    val application = LocalContext.current.applicationContext as TransApp
-    val vocabularySettingViewModel = viewModel<VocabularySettingViewModel>(
-        factory = VocabularySettingViewModelFactory(
-            userId,
-            vocabulary,
-            context,
-            application.userRepository,
-            application.planRepository,
-            application.vocabularyRepository
-        )
-    )
     val loadVocabularyState =
         vocabularySettingViewModel.loadVocabularyState.collectAsState()
     when (loadVocabularyState.value) {

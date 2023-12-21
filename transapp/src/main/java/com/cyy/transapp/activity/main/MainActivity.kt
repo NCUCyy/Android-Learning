@@ -61,7 +61,6 @@ import com.cyy.transapp.R
 import com.cyy.transapp.TransApp
 import com.cyy.transapp.activity.main.view.DrawerView
 import com.cyy.transapp.activity.main.view.MenuView
-import com.cyy.transapp.model.Vocabulary
 import com.cyy.transapp.view_model.trans.QueryViewModel
 import com.cyy.transapp.view_model.trans.QueryViewModelFactory
 import kotlinx.coroutines.CoroutineScope
@@ -73,10 +72,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         // TODO：登录成功后，只是传过来了一个userId！
         // 默认给个id = 1，用于测试
-        val userId = intent.getIntExtra("userId", 20)
+        val userId = intent.getIntExtra("userId", 22)
 
         // TODO：注意要定义为MutableState！
-        val vocabulary = mutableStateOf(Vocabulary.NOT_SELECTED)
+        val vocabulary = mutableStateOf("")
 
         // 使用ActivityResultLauncher进行意图跳转
         val resultLauncher: ActivityResultLauncher<Intent> = registerForActivityResult(
@@ -87,7 +86,7 @@ class MainActivity : ComponentActivity() {
                     if (it.data!!.hasExtra("vocabulary")) {
                         // 返回的data数据是个intent类型，里面存储了一段文本内容
                         vocabulary.value =
-                            it.data?.getSerializableExtra("vocabulary", Vocabulary::class.java)!!
+                            it.data?.getStringExtra("vocabulary")!!
                         // vocabulary更新后，会重组整个UI界面
                     }
                     Toast.makeText(this, "回到MainActivity", Toast.LENGTH_LONG).show()
@@ -111,7 +110,7 @@ class MainActivity : ComponentActivity() {
 fun MainScreen(
     userId: Int,
     resultLauncher: ActivityResultLauncher<Intent>,
-    vocabulary: Vocabulary
+    vocabulary: String
 ) {
     val states = rememberStates(resultLauncher)
     val context = LocalContext.current as Activity

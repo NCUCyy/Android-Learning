@@ -207,9 +207,9 @@ class LearnReviewViewModel(
      * 更换Vocabulary后，更新user中的Vocabulary，更新要展示的plan（可能不存在，则要创建）
      */
     // 外部调用（选择字典的时候）
-    fun updateVocabulary(vocabulary: Vocabulary) = viewModelScope.launch {
+    fun updateVocabulary(vocabulary: String) = viewModelScope.launch {
         // 修改user中的vocabulary
-        curUser.value.vocabulary = vocabulary.desc
+        curUser.value.vocabulary = vocabulary
         userRepository.update(curUser.value)
         // 修改Plan（有则赋值，没有则插入后赋值）
         updatePlan()
@@ -241,9 +241,9 @@ class LearnReviewViewModel(
                         scope = viewModelScope,
                         started = SharingStarted.WhileSubscribed(5000)
                     )
-            // 刚创建完Plan后，需要初始化LearnProcess
-            initLearnProcess()
         }
+        // 切换字典后，需要初始化LearnProcess
+        initLearnProcess()
     }
 }
 
