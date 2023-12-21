@@ -8,7 +8,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.cyy.app.word_bank.model.Word
 import com.cyy.transapp.model.LearnProcess
-import com.cyy.transapp.model.OpResult
 import com.cyy.transapp.model.PlanWord
 import com.cyy.transapp.model.Vocabulary
 import com.cyy.transapp.pojo.Plan
@@ -23,7 +22,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlin.concurrent.thread
 
 class VocabularySettingViewModel(
     private val userId: Int,
@@ -46,8 +44,6 @@ class VocabularySettingViewModel(
         )
     )
 
-    private val _loadVocabularyState = MutableStateFlow<OpResult<Any>>(OpResult.NotBegin)
-    val loadVocabularyState: StateFlow<OpResult<Any>> = _loadVocabularyState.asStateFlow()
 
     private val _curVocabulary = MutableStateFlow(Word())
     val curVocabulary: StateFlow<Word> = _curVocabulary.asStateFlow()
@@ -64,8 +60,6 @@ class VocabularySettingViewModel(
         curUser.value.vocabulary = vocabulary.desc
         userRepository.update(curUser.value)
         updatePlan()
-        // TODO：可以去掉
-        loadVocabulary()
     }
 
     /**
@@ -95,23 +89,6 @@ class VocabularySettingViewModel(
             // 刚创建完Plan后，需要初始化LearnProcess
         }
         initLearnProcess()
-    }
-
-    private fun loadVocabulary() {
-        _loadVocabularyState.value = OpResult.Loading
-        viewModelScope.launch {
-            val user = userRepository.getById(userId)
-            thread {
-                if (user.vocabulary != "未选择") {
-                    _curVocabulary.value =
-                        vocabularyRepository.getVocabularyWord(
-                            context,
-                            Vocabulary.valueOf(user.vocabulary)
-                        )
-                }
-                _loadVocabularyState.value = OpResult.Success("加载完成")
-            }
-        }
     }
 
     private suspend fun initLearnProcess() {

@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -23,7 +22,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -38,7 +36,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cyy.transapp.R
 import com.cyy.transapp.TransApp
-import com.cyy.transapp.model.OpResult
 import com.cyy.transapp.model.Vocabulary
 import com.cyy.transapp.view_model.vocabulary.VocabularySettingViewModel
 import com.cyy.transapp.view_model.vocabulary.VocabularySettingViewModelFactory
@@ -118,33 +115,15 @@ fun VocabularySettingMainScreen(userId: Int, vocabulary: String) {
 
 @Composable
 fun VocabularySettingScreen(vocabularySettingViewModel: VocabularySettingViewModel) {
-    val context = LocalContext.current as Activity
-    val loadVocabularyState =
-        vocabularySettingViewModel.loadVocabularyState.collectAsState()
-    when (loadVocabularyState.value) {
-        is OpResult.Success, OpResult.NotBegin -> {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(start = 10.dp, end = 10.dp)
-            ) {
-                items(vocabularySettingViewModel.getAllVocabulary()) { vocabulary ->
-                    VocabularySettingItem(vocabulary, vocabularySettingViewModel)
-                }
-            }
-        }
-
-        is OpResult.Loading -> {
-            Box(modifier = Modifier.fillMaxSize()) {
-                CircularProgressIndicator(modifier = Modifier.fillMaxSize())
-            }
-        }
-
-        else -> {
-
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(start = 10.dp, end = 10.dp)
+    ) {
+        items(vocabularySettingViewModel.getAllVocabulary()) { vocabulary ->
+            VocabularySettingItem(vocabulary, vocabularySettingViewModel)
         }
     }
-
 }
 
 @Composable
