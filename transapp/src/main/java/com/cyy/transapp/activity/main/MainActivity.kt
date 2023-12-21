@@ -328,12 +328,15 @@ fun QueryDialog(states: StateHolder, queryViewModel: QueryViewModel) {
                             painter = painterResource(id = R.drawable.search),
                             contentDescription = null,
                             modifier = Modifier.clickable {
+                                // TODO:跳转到TransActivity
                                 toTransActivity(
                                     context,
                                     states.resultLauncher,
                                     query.value,
                                     queryViewModel.userId
                                 )
+                                // 关闭输入框
+                                states.showQueryDialog.value = false
                             }
                         )
                     },

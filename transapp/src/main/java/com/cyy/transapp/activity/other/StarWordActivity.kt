@@ -9,6 +9,7 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,6 +26,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -33,7 +35,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cyy.transapp.R
 import com.cyy.transapp.TransApp
@@ -51,7 +52,6 @@ class StarWordActivity : ComponentActivity() {
             ActivityResultContracts.StartActivityForResult(),
             // 意图结束后，执行这个「回调函数」
             ActivityResultCallback {
-
             }
         )
         setContent {
@@ -135,27 +135,24 @@ fun StarWordCard(starWord: StarWord, resultLauncher: ActivityResultLauncher<Inte
             },
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
-        ConstraintLayout {
-            val (wordRef, addTimeRef) = createRefs()
-            val vGuideline = createGuidelineFromStart(0.5f)
-            val hGuideline = createGuidelineFromTop(0.5f)
-            Text(text = starWord.word, modifier = Modifier.constrainAs(wordRef) {
-                start.linkTo(parent.start)
-                end.linkTo(vGuideline)
-                top.linkTo(parent.top, margin = 20.dp)
-                bottom.linkTo(parent.bottom, margin = 20.dp)
-            }, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(
-                color = Color.Gray,
-                fontSize = 15.sp,
-                text = TimeUtil.formatTime(starWord.addTime),
-                modifier = Modifier.constrainAs(addTimeRef) {
-                    start.linkTo(vGuideline)
-                    end.linkTo(parent.end)
-                    top.linkTo(hGuideline)
-                    bottom.linkTo(parent.bottom)
-                }
+                text = starWord.word,
+                modifier = Modifier.padding(20.dp),
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp
             )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                Text(
+                    text = TimeUtil.formatTime(starWord.addTime),
+                    color = Color.Gray,
+                    fontSize = 15.sp,
+                    modifier = Modifier.padding(top = 40.dp, end = 10.dp)
+                )
+            }
         }
     }
 }
