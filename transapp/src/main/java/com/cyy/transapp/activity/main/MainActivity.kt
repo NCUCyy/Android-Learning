@@ -84,7 +84,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         // TODO：登录成功后，只是传过来了一个userId！
         // 默认给个id = 1，用于测试
-        val userId = intent.getIntExtra("userId", 22)
+        val userId = intent.getIntExtra("userId", 1)
 
         // TODO：注意要定义为MutableState！
         val vocabulary = mutableStateOf("")
@@ -167,91 +167,98 @@ fun MainScreen(
     // 脚手架
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        Text(
-                            text = states.currentScreen.value.title,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                },
-                // 左侧图标
-                navigationIcon = {
-                    // 图标按钮
-                    IconButton(onClick = {
-                        // 点击按钮，开启异步操作---协程
-                        if (states.drawerState.isClosed) {
-                            // 当前为关闭：当用户点击时，打开drawer
-                            states.scope.launch {
-                                states.drawerState.open()
-                            }
-                        } else {
-                            // 当前为打开：当用户点击时，关闭drawer
-                            states.scope.launch {
-                                states.drawerState.close()
-                            }
+            if (states.drawerState.isClosed) {
+                // 抽屉关
+                TopAppBar(
+                    title = {
+                        Row(modifier = Modifier.fillMaxWidth()) {
+                            Text(
+                                text = states.currentScreen.value.title,
+                                textAlign = TextAlign.Center
+                            )
                         }
-                    }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.user),
-                            contentDescription = null,
-                            modifier = Modifier.size(30.dp)
-                        )
-                    }
-                },
-                actions = {
-                    when (states.currentScreen.value.route) {
-                        Screen.QueryPage.route -> {
-                            // 查词页面
-                            IconButton(onClick = {
-                                states.showDeleteDialog.value = true
-                            }) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.delete_history),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(30.dp)
-                                )
+                    },
+                    // 左侧图标
+                    navigationIcon = {
+                        // 图标按钮
+                        IconButton(onClick = {
+                            // 点击按钮，开启异步操作---协程
+                            if (states.drawerState.isClosed) {
+                                // 当前为关闭：当用户点击时，打开drawer
+                                states.scope.launch {
+                                    states.drawerState.open()
+                                }
+                            } else {
+                                // 当前为打开：当用户点击时，关闭drawer
+                                states.scope.launch {
+                                    states.drawerState.close()
+                                }
                             }
+                        }) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.user),
+                                contentDescription = null,
+                                modifier = Modifier.size(30.dp)
+                            )
                         }
+                    },
+                    actions = {
+                        when (states.currentScreen.value.route) {
+                            Screen.QueryPage.route -> {
+                                // 查词页面
+                                IconButton(onClick = {
+                                    states.showDeleteDialog.value = true
+                                }) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.delete_history),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(30.dp)
+                                    )
+                                }
+                            }
 
-                        Screen.ListenPage.route -> {
-                            IconButton(onClick = {
-                                // 听力页面
-                                val intent = Intent(context, StarWordActivity::class.java)
-                                intent.putExtra("userId", userId)
-                                states.resultLauncher.launch(intent)
-                            }) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.book),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(30.dp)
-                                )
+                            Screen.ListenPage.route -> {
+                                IconButton(onClick = {
+                                    // 听力页面
+                                    val intent = Intent(context, StarWordActivity::class.java)
+                                    intent.putExtra("userId", userId)
+                                    states.resultLauncher.launch(intent)
+                                }) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.book),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(30.dp)
+                                    )
+                                }
                             }
-                        }
 
-                        Screen.LearnPage.route -> {
-                            // 学习页面
-                            IconButton(onClick = {
-                                // 听力页面
-                                val intent = Intent(context, VocabularySettingActivity::class.java)
-                                intent.putExtra("userId", userId)
-                                intent.putExtra(
-                                    "vocabulary",
-                                    learnReviewViewModel.curUser.value.vocabulary
-                                )
-                                states.resultLauncher.launch(intent)
-                            }) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.dictionary),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(30.dp)
-                                )
+                            Screen.LearnPage.route -> {
+                                // 学习页面
+                                IconButton(onClick = {
+                                    // 听力页面
+                                    val intent =
+                                        Intent(context, VocabularySettingActivity::class.java)
+                                    intent.putExtra("userId", userId)
+                                    intent.putExtra(
+                                        "vocabulary",
+                                        learnReviewViewModel.curUser.value.vocabulary
+                                    )
+                                    states.resultLauncher.launch(intent)
+                                }) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.dictionary),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(30.dp)
+                                    )
+                                }
                             }
                         }
                     }
-                }
-            )
+                )
+            } else {
+                // 抽屉开
+                TopAppBar(title = { })
+            }
         },
         bottomBar = {
             BottomAppBar {
