@@ -12,14 +12,10 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -27,9 +23,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -37,14 +31,10 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -64,25 +54,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.core.app.ActivityCompat.finishAffinity
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.cyy.transapp.R
 import com.cyy.transapp.TransApp
+import com.cyy.transapp.activity.main.view.DrawerView
+import com.cyy.transapp.activity.main.view.MenuView
 import com.cyy.transapp.model.Vocabulary
-import com.cyy.transapp.view_model.CurUserViewModel
-import com.cyy.transapp.view_model.CurUserViewModelFactory
-import com.cyy.transapp.view_model.LearnReviewViewModel
-import com.cyy.transapp.view_model.LearnReviewViewModelFactory
 import com.cyy.transapp.view_model.QueryViewModel
 import com.cyy.transapp.view_model.QueryViewModelFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import kotlin.system.exitProcess
 
 
 class MainActivity : ComponentActivity() {
@@ -143,9 +126,10 @@ fun MainScreen(
                 application.sentenceRepository
             )
         )
-    val showDeleteDialog = remember { mutableStateOf(false) }
-    if (showDeleteDialog.value) {
-        DeleteDialog(showDeleteDialog, queryViewModel::clearAllTransRecords)
+
+    // 删除翻译记录的对话框
+    if (states.showDeleteDialog.value) {
+        DeleteDialog(states, queryViewModel::clearAllTransRecords)
     }
     // 脚手架
     Scaffold(
@@ -186,7 +170,7 @@ fun MainScreen(
                 actions = {
                     if (states.currentScreen.value.route == Screen.QueryPage.route) {
                         IconButton(onClick = {
-                            showDeleteDialog.value = true
+                            states.showDeleteDialog.value = true
                         }) {
                             Icon(
                                 painter = painterResource(id = R.drawable.delete_history),
@@ -240,9 +224,9 @@ fun MainScreen(
 }
 
 @Composable
-fun DeleteDialog(showDeleteDialog: MutableState<Boolean>, action: () -> Unit) {
+fun DeleteDialog(states: StateHolder, action: () -> Unit) {
     Dialog(onDismissRequest = {
-        showDeleteDialog.value = false
+        states.showDeleteDialog.value = false
     }) {
         Box(
             modifier = Modifier
@@ -286,7 +270,7 @@ fun DeleteDialog(showDeleteDialog: MutableState<Boolean>, action: () -> Unit) {
                         text = "取消",
                         icon = R.drawable.cancel
                     ) {
-                        showDeleteDialog.value = false
+                        states.showDeleteDialog.value = false
                     }
                     Spacer(
                         modifier = Modifier.width(20.dp)
@@ -297,7 +281,7 @@ fun DeleteDialog(showDeleteDialog: MutableState<Boolean>, action: () -> Unit) {
                         icon = R.drawable.check
                     ) {
                         action.invoke()
-                        showDeleteDialog.value = false
+                        states.showDeleteDialog.value = false
                     }
                 }
                 Spacer(modifier = Modifier.height(10.dp))
@@ -328,172 +312,6 @@ fun DialogButton(color: Color, text: String, icon: Int, action: () -> Unit) {
     }
 }
 
-/**
- * Drawer（侧滑菜单） + NavGraph（页面主体）
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun DrawerView(states: StateHolder, userId: Int, vocabulary: Vocabulary) {
-    val application = LocalContext.current.applicationContext as TransApp
-    // MainActivity中管理User的ViewModel
-    val curUserViewModel = viewModel<CurUserViewModel>(
-        factory = CurUserViewModelFactory(
-            userId,
-            application.userRepository,
-        )
-    )
-    Log.i("vocabulary-------", vocabulary.desc)
-    val curUser = curUserViewModel.curUser.collectAsStateWithLifecycle()
-    ModalNavigationDrawer(
-        // 抽屉是否可以通过手势进行交互
-        gesturesEnabled = true,
-        // 抽屉打开后，遮挡内容的蒙层的颜色
-        scrimColor = Color.Gray,
-        // 抽屉是否打开
-        drawerState = states.drawerState,
-        // 抽屉的内容
-        drawerContent = {
-            Column(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .width(360.dp)
-                    .background(Color.White)
-                    .padding(top = 100.dp)
-            ) {
-                Row(modifier = Modifier.padding(bottom = 50.dp)) {
-                    Icon(
-                        painter = painterResource(id = curUser.value.iconId),
-                        contentDescription = null,
-                        modifier = Modifier.clickable {
-                            states.scope.launch {
-                                states.drawerState.close()
-                            }
-                        }
-                    )
-                    Text(text = "用户名", fontSize = 30.sp)
-                }
-                // 抽屉中要显示的内容
-                screens.forEach { it: Screen ->
-                    NavigationDrawerItem(
-                        label = {
-                            Text(it.title, fontSize = 20.sp)
-                        },
-                        icon = {
-                            Icon(
-                                painter = painterResource(id = it.icon),
-                                tint = Color.DarkGray,
-                                contentDescription = it.title,
-                            )
-                        },
-                        // 选中的按钮被高亮显示
-                        selected = it.route == states.currentScreen.value.route,
-                        onClick = {
-                            states.scope.launch {
-                                states.currentScreen.value = it
-                                states.navController.navigate(states.currentScreen.value.route)
-                                states.drawerState.close()
-                            }
-                        })
-                }
-            }
-        },
-        content = {
-            // 主体是导航图
-            NavigationGraphScreen(states, userId, vocabulary)
-        })
-}
-
-@SuppressLint("StateFlowValueCalledInComposition")
-@Composable
-fun NavigationGraphScreen(states: StateHolder, userId: Int, vocabulary: Vocabulary) {
-    val application = LocalContext.current.applicationContext as TransApp
-    val context = LocalContext.current as Activity
-    val queryViewModel = viewModel<QueryViewModel>(
-        factory = QueryViewModelFactory(
-            userId,
-            application.transRepository,
-            application.sentenceRepository
-        )
-    )
-
-    val learnReviewViewModel = viewModel<LearnReviewViewModel>(
-        factory = LearnReviewViewModelFactory(
-            userId,
-            context,
-            application.userRepository,
-            application.todayRepository,
-            application.planRepository,
-            application.vocabularyRepository
-        )
-    )
-
-    if (vocabulary != Vocabulary.NOT_SELECTED) {
-        // 选择Vocabulary后执行（仅一次）
-        learnReviewViewModel.updateVocabulary(vocabulary)
-    }
-
-    // 定义宿主(需要：导航控制器、导航起点---String类型)
-    NavHost(navController = states.navController, startDestination = states.startDestination) {
-        // 根据route进行页面的匹配
-        // 页面1：翻译
-        composable(route = Screen.QueryPage.route) {
-            // 1、更新当前显示的Screen
-            states.currentScreen.value = Screen.QueryPage
-            // 2、此语句处才会展示指定的Screen
-            QueryScreen(states, queryViewModel)
-        }
-        // 页面2：听力
-        composable(route = Screen.ListenPage.route) {
-            // 1、更新当前显示的Screen
-            states.currentScreen.value = Screen.ListenPage
-            // 2、此语句处才会展示指定的Screen
-            ListenScreen(states)
-        }
-        // 页面3
-        composable(route = Screen.LearnPage.route) {
-            // 1、更新当前显示的Screen
-            states.currentScreen.value = Screen.LearnPage
-            // 2、此语句处才会展示指定的Screen
-            LearnScreen(states, learnReviewViewModel)
-        }
-    }
-}
-
-@Composable
-fun MenuView(states: StateHolder) {
-    val context = LocalContext.current as Activity
-    DropdownMenu(expanded = states.dropState.value,
-        onDismissRequest = {
-            // 点击其他地方，则关闭下拉框
-            states.dropState.value = false
-        }) {
-        DropdownMenuItem(
-            // 在前面的Icon
-            leadingIcon = {
-                Icon(imageVector = Icons.Filled.Star, contentDescription = null)
-            },
-            text = {
-                Text(text = "点赞App", fontSize = 20.sp)
-            }, onClick = {
-                // 点击完之后，关闭下拉框
-                states.dropState.value = false
-                Toast.makeText(context, "感谢支持！", Toast.LENGTH_LONG).show()
-            })
-        DropdownMenuItem(
-            // 在前面的Icon
-            leadingIcon = {
-                Icon(imageVector = Icons.Filled.ExitToApp, contentDescription = null)
-            },
-            text = {
-                Text(text = "退出App", fontSize = 20.sp)
-            }, onClick = {
-                // 点击完之后，关闭下拉框
-                states.dropState.value = false
-                finishAffinity(context)
-                exitProcess(-1)
-            })
-    }
-}
 
 /**
  * 状态集合（对状态的统一管理）
@@ -511,7 +329,8 @@ class StateHolder(
     val scope: CoroutineScope,
     // 用于判断Drawer 是否打开
     val drawerState: DrawerState,
-    val dropState: MutableState<Boolean>
+    val dropState: MutableState<Boolean>,
+    val showDeleteDialog: MutableState<Boolean>
 )
 
 /**
@@ -526,7 +345,8 @@ fun rememberStates(
     startDestination: String = Screen.LearnPage.route,
     scope: CoroutineScope = rememberCoroutineScope(),
     drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
-    dropState: MutableState<Boolean> = mutableStateOf(false)
+    dropState: MutableState<Boolean> = mutableStateOf(false),
+    showDeleteDialog: MutableState<Boolean> = mutableStateOf(false)
 ) = StateHolder(
     resultLauncher,
     currentScreen,
@@ -534,5 +354,22 @@ fun rememberStates(
     startDestination,
     scope,
     drawerState,
-    dropState
+    dropState,
+    showDeleteDialog
 )
+
+val screens = listOf(Screen.QueryPage, Screen.ListenPage, Screen.LearnPage)
+
+/**
+ *Screen类（与用于显示的Screen实体不同！要区分开！Screen类只用于提供页面需要的元数据metaData：icon、title、"route"【用于导航】）
+ */
+sealed class Screen(val route: String, val title: String, val icon: Int) {
+    object QueryPage :
+        Screen(route = "query", title = "查词", icon = R.drawable.trans)
+
+    object ListenPage :
+        Screen(route = "listen", title = "听力", icon = R.drawable.listen)
+
+    object LearnPage :
+        Screen(route = "learn", title = "学习", icon = R.drawable.dictionary)
+}
