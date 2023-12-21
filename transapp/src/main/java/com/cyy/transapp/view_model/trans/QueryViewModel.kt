@@ -58,6 +58,11 @@ class QueryViewModel(
             }
         }
     }
+
+    fun clearQuery() {
+        // 清空输入框
+        _query.value = ""
+    }
 }
 
 class QueryViewModelFactory(

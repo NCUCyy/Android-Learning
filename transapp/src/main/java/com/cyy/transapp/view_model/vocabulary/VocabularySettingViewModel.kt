@@ -121,6 +121,14 @@ class VocabularySettingViewModel(
         return Gson().fromJson(learnProcessStr, LearnProcess::class.java)
     }
 
+    /**
+     * 更新dailyNum
+     */
+    fun updateDailyNum(dailyNum: Int) = viewModelScope.launch {
+        curPlanState.value.value.dailyNum = dailyNum
+        planRepository.update(curPlanState.value.value)
+        initLearnProcess()
+    }
 }
 
 class VocabularySettingViewModelFactory(

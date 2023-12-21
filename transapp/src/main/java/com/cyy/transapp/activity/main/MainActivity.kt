@@ -22,8 +22,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -32,15 +32,20 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -49,7 +54,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -60,7 +67,11 @@ import androidx.navigation.compose.rememberNavController
 import com.cyy.transapp.R
 import com.cyy.transapp.TransApp
 import com.cyy.transapp.activity.main.view.DrawerView
-import com.cyy.transapp.activity.main.view.MenuView
+import com.cyy.transapp.activity.main.view.toTransActivity
+import com.cyy.transapp.activity.other.StarWordActivity
+import com.cyy.transapp.activity.other.VocabularySettingActivity
+import com.cyy.transapp.view_model.learn_review.LearnReviewViewModel
+import com.cyy.transapp.view_model.learn_review.LearnReviewViewModelFactory
 import com.cyy.transapp.view_model.trans.QueryViewModel
 import com.cyy.transapp.view_model.trans.QueryViewModelFactory
 import kotlinx.coroutines.CoroutineScope
@@ -116,7 +127,7 @@ fun MainScreen(
     val context = LocalContext.current as Activity
     val application = context.application as TransApp
 
-    // TODO：查词记录的ViewModel
+    // 1、翻译页面
     val queryViewModel =
         viewModel<QueryViewModel>(
             factory = QueryViewModelFactory(
@@ -125,10 +136,32 @@ fun MainScreen(
                 application.sentenceRepository
             )
         )
+    // 清空输入框
+    queryViewModel.clearQuery()
+    // 2、学习页面
+    val learnReviewViewModel = viewModel<LearnReviewViewModel>(
+        factory = LearnReviewViewModelFactory(
+            userId,
+            context,
+            application.userRepository,
+            application.todayRepository,
+            application.planRepository,
+            application.vocabularyRepository
+        )
+    )
+
+    if (vocabulary != "") {
+        // 选择Vocabulary后执行（仅一次）
+        learnReviewViewModel.updateVocabulary(vocabulary)
+    }
 
     // 删除翻译记录的对话框
     if (states.showDeleteDialog.value) {
-        DeleteDialog(states, queryViewModel::clearAllTransRecords)
+        DeleteDialog(states, queryViewModel)
+    }
+    // 随处翻译的输入框
+    if (states.showQueryDialog.value) {
+        QueryDialog(states, queryViewModel)
     }
     // 脚手架
     Scaffold(
@@ -167,23 +200,53 @@ fun MainScreen(
                     }
                 },
                 actions = {
-                    if (states.currentScreen.value.route == Screen.QueryPage.route) {
-                        IconButton(onClick = {
-                            states.showDeleteDialog.value = true
-                        }) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.delete_history),
-                                contentDescription = null,
-                                modifier = Modifier.size(30.dp)
-                            )
+                    when (states.currentScreen.value.route) {
+                        Screen.QueryPage.route -> {
+                            // 查词页面
+                            IconButton(onClick = {
+                                states.showDeleteDialog.value = true
+                            }) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.delete_history),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(30.dp)
+                                )
+                            }
                         }
-                    } else if (states.currentScreen.value.route == Screen.ListenPage.route) {
-                        IconButton(onClick = {
-                            states.dropState.value = !states.dropState.value
-                        }) {
-                            Icon(imageVector = Icons.Filled.MoreVert, contentDescription = null)
-                            if (states.dropState.value)
-                                MenuView(states)
+
+                        Screen.ListenPage.route -> {
+                            IconButton(onClick = {
+                                // 听力页面
+                                val intent = Intent(context, StarWordActivity::class.java)
+                                intent.putExtra("userId", userId)
+                                states.resultLauncher.launch(intent)
+                            }) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.book),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(30.dp)
+                                )
+                            }
+                        }
+
+                        Screen.LearnPage.route -> {
+                            // 学习页面
+                            IconButton(onClick = {
+                                // 听力页面
+                                val intent = Intent(context, VocabularySettingActivity::class.java)
+                                intent.putExtra("userId", userId)
+                                intent.putExtra(
+                                    "vocabulary",
+                                    learnReviewViewModel.curUser.value.vocabulary
+                                )
+                                states.resultLauncher.launch(intent)
+                            }) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.change_vocabulary),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(30.dp)
+                                )
+                            }
                         }
                     }
                 }
@@ -215,15 +278,86 @@ fun MainScreen(
             // 页面的主体部分
             Box(modifier = Modifier.padding(it)) {
                 // 侧滑导航视图（侧滑界面+导航图）
-                DrawerView(states, userId, vocabulary)
+                DrawerView(states, userId, vocabulary, learnReviewViewModel)
             }
         },
         floatingActionButton = {
-        })
+            FloatingActionButton(onClick = {
+                states.showQueryDialog.value = true
+            }, shape = RoundedCornerShape(100.dp)) {
+                Icon(
+                    painter = painterResource(id = R.drawable.search_online),
+                    contentDescription = null
+                )
+            }
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun QueryDialog(states: StateHolder, queryViewModel: QueryViewModel) {
+    val context = LocalContext.current as Activity
+    val query = queryViewModel.query.collectAsState()
+    Dialog(onDismissRequest = {
+        states.showQueryDialog.value = false
+    }) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            Card(
+                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White,
+                ),
+                modifier = Modifier
+                    .fillMaxWidth(),
+            ) {
+                TextField(
+                    value = query.value,
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    onValueChange = { it: String ->
+                        queryViewModel.updateQuery(it)
+                    },
+                    placeholder = {
+                        Text(text = "随处翻译")
+                    },
+                    shape = MaterialTheme.shapes.extraSmall, // 设置边框形状
+                    textStyle = TextStyle.Default.copy(
+                        color = Color.Black,
+                        fontSize = 16.sp
+                    ), // 设置文本颜色
+                    colors = TextFieldDefaults.textFieldColors(
+                        containerColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent,
+                        placeholderColor = Color.Gray,
+                    ), keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Search
+                    ),
+                    keyboardActions = KeyboardActions(onSearch = {
+                        // TODO:跳转到TransActivity
+                        toTransActivity(
+                            context,
+                            states.resultLauncher,
+                            query.value,
+                            queryViewModel.userId
+                        )
+                        // 关闭输入框
+                        states.showQueryDialog.value = false
+                    })
+                )
+            }
+        }
+    }
 }
 
 @Composable
-fun DeleteDialog(states: StateHolder, action: () -> Unit) {
+fun DeleteDialog(states: StateHolder, queryViewModel: QueryViewModel) {
     Dialog(onDismissRequest = {
         states.showDeleteDialog.value = false
     }) {
@@ -279,7 +413,7 @@ fun DeleteDialog(states: StateHolder, action: () -> Unit) {
                         text = "确认",
                         icon = R.drawable.check
                     ) {
-                        action.invoke()
+                        queryViewModel.clearAllTransRecords()
                         states.showDeleteDialog.value = false
                     }
                 }
@@ -329,7 +463,8 @@ class StateHolder(
     // 用于判断Drawer 是否打开
     val drawerState: DrawerState,
     val dropState: MutableState<Boolean>,
-    val showDeleteDialog: MutableState<Boolean>
+    val showDeleteDialog: MutableState<Boolean>,
+    val showQueryDialog: MutableState<Boolean>
 )
 
 /**
@@ -345,7 +480,8 @@ fun rememberStates(
     scope: CoroutineScope = rememberCoroutineScope(),
     drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
     dropState: MutableState<Boolean> = mutableStateOf(false),
-    showDeleteDialog: MutableState<Boolean> = remember { mutableStateOf(false) }
+    showDeleteDialog: MutableState<Boolean> = remember { mutableStateOf(false) },
+    showQueryDialog: MutableState<Boolean> = remember { mutableStateOf(false) }
 ) = StateHolder(
     resultLauncher,
     currentScreen,
@@ -354,7 +490,8 @@ fun rememberStates(
     scope,
     drawerState,
     dropState,
-    showDeleteDialog
+    showDeleteDialog,
+    showQueryDialog
 )
 
 val screens = listOf(Screen.QueryPage, Screen.ListenPage, Screen.LearnPage)

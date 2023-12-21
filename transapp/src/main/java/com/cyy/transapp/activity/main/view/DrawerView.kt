@@ -30,9 +30,11 @@ import com.cyy.transapp.R
 import com.cyy.transapp.TransApp
 import com.cyy.transapp.activity.main.StateHolder
 import com.cyy.transapp.activity.other.StarWordActivity
+import com.cyy.transapp.activity.other.SystemSettingActivity
 import com.cyy.transapp.activity.other.VocabularySettingActivity
 import com.cyy.transapp.view_model.CurUserViewModel
 import com.cyy.transapp.view_model.CurUserViewModelFactory
+import com.cyy.transapp.view_model.learn_review.LearnReviewViewModel
 import kotlinx.coroutines.launch
 
 
@@ -45,6 +47,7 @@ fun DrawerView(
     states: StateHolder,
     userId: Int,
     vocabulary: String,
+    learnReviewViewModel: LearnReviewViewModel
 ) {
     val context = LocalContext.current as Activity
     val application = LocalContext.current.applicationContext as TransApp
@@ -157,10 +160,29 @@ fun DrawerView(
                         intent.putExtra("vocabulary", curUser.value.vocabulary)
                         states.resultLauncher.launch(intent)
                     })
+                // TODO：4、设置
+                NavigationDrawerItem(
+                    label = {
+                        Text("个性化配置", fontSize = 20.sp)
+                    },
+                    icon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.settings),
+                            tint = Color.DarkGray,
+                            contentDescription = null,
+                            modifier = Modifier.size(25.dp)
+                        )
+                    },
+                    selected = false,
+                    onClick = {
+                        val intent =
+                            Intent(states.navController.context, SystemSettingActivity::class.java)
+                        states.resultLauncher.launch(intent)
+                    })
             }
         },
         content = {
             // 主体是导航图
-            NavigationGraphScreen(states, userId, vocabulary)
+            NavigationGraphScreen(states, userId, vocabulary, learnReviewViewModel)
         })
 }
