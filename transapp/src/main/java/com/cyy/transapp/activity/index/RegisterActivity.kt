@@ -45,9 +45,7 @@ class RegisterActivity : ComponentActivity() {
             ActivityResultContracts.StartActivityForResult(),
             // 意图结束后，执行这个「回调函数」
             ActivityResultCallback {
-                if (it.resultCode == RESULT_OK) {
-                    Toast.makeText(this, "退出登录成", Toast.LENGTH_LONG).show()
-                }
+                this.finish()
             }
         )
         setContent {

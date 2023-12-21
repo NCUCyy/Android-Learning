@@ -43,10 +43,7 @@ class LoginActivity : ComponentActivity() {
             ActivityResultContracts.StartActivityForResult(),
             // 意图结束后，执行这个「回调函数」
             ActivityResultCallback {
-                if (it.resultCode == RESULT_OK) {
-                    isLogout.value = it.data!!.getBooleanExtra("isLogout", false)
-                    Toast.makeText(this, "退出登录成", Toast.LENGTH_LONG).show()
-                }
+                this.finish()
             }
         )
         setContent {
@@ -64,7 +61,12 @@ class LoginActivity : ComponentActivity() {
 fun LoginScreen(resultLauncher: ActivityResultLauncher<Intent>) {
     val application = LocalContext.current.applicationContext as TransApp
     val userViewModel =
-        viewModel<UserViewModel>(factory = UserViewModelFactory(application.userRepository,application.planRepository))
+        viewModel<UserViewModel>(
+            factory = UserViewModelFactory(
+                application.userRepository,
+                application.planRepository
+            )
+        )
     val username = userViewModel.username.collectAsState()
     val password = userViewModel.password.collectAsState()
     val usernameAndPasswordState = userViewModel.usernameAndPasswordState.collectAsState().value
