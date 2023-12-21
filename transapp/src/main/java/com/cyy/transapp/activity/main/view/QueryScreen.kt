@@ -2,6 +2,7 @@ package com.cyy.transapp.activity.main.view
 
 import android.app.Activity
 import android.content.Intent
+import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -92,7 +93,7 @@ fun QueryScreen(states: StateHolder, queryViewModel: QueryViewModel) {
             ),
             keyboardActions = KeyboardActions(onSearch = {
                 // TODO:跳转到TransActivity
-                toTransActivity(context, states, query.value, queryViewModel.userId)
+                toTransActivity(context, states.resultLauncher, query.value, queryViewModel.userId)
             })
         )
         Spacer(modifier = Modifier.height(10.dp))
@@ -177,7 +178,7 @@ fun DailySentenceCard(sentenceModel: SentenceModel, states: StateHolder, userId:
             containerColor = Color(0xFFEBF4FA),
             contentColor = Color.Black
         ), modifier = Modifier.clickable {
-            toTransActivity(context, states, data.en, userId)
+            toTransActivity(context, states.resultLauncher, data.en, userId)
         }
     ) {
         Column(modifier = Modifier.padding(10.dp)) {
@@ -215,7 +216,7 @@ fun TransRecordCard(transRecord: TransRecord, isLast: Boolean, states: StateHold
             .fillMaxWidth()
             .clickable {
                 // 点击卡片即可翻译查询
-                toTransActivity(context, states, transRecord.word, userId)
+                toTransActivity(context, states.resultLauncher, transRecord.word, userId)
             }, colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
         ConstraintLayout {
@@ -302,9 +303,14 @@ fun TransRecordCard(transRecord: TransRecord, isLast: Boolean, states: StateHold
 /**
  * 跳转到TransActivity---进行翻译
  */
-fun toTransActivity(context: Activity, states: StateHolder, query: String, userId: Int) {
+fun toTransActivity(
+    context: Activity,
+    resultLauncher: ActivityResultLauncher<Intent>,
+    query: String,
+    userId: Int
+) {
     val intent = Intent(context, TransActivity::class.java)
     intent.putExtra("query", query)
     intent.putExtra("userId", userId)
-    states.resultLauncher.launch(intent)
+    resultLauncher.launch(intent)
 }

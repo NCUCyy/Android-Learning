@@ -73,7 +73,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         // TODO：登录成功后，只是传过来了一个userId！
         // 默认给个id = 1，用于测试
-        val userId = intent.getIntExtra("userId", 14)
+        val userId = intent.getIntExtra("userId", 20)
 
         // TODO：注意要定义为MutableState！
         val vocabulary = mutableStateOf(Vocabulary.NOT_SELECTED)
@@ -346,7 +346,7 @@ fun rememberStates(
     scope: CoroutineScope = rememberCoroutineScope(),
     drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
     dropState: MutableState<Boolean> = mutableStateOf(false),
-    showDeleteDialog: MutableState<Boolean> = mutableStateOf(false)
+    showDeleteDialog: MutableState<Boolean> = remember { mutableStateOf(false) }
 ) = StateHolder(
     resultLauncher,
     currentScreen,

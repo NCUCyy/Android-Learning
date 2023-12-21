@@ -57,6 +57,7 @@ import com.cyy.app.word_bank.model.Phrase
 import com.cyy.app.word_bank.model.Translation
 import com.cyy.transapp.R
 import com.cyy.transapp.TransApp
+import com.cyy.transapp.activity.main.view.toTransActivity
 import com.cyy.transapp.model.OpResult
 import com.cyy.transapp.view_model.LearnViewModel
 import com.cyy.transapp.view_model.LearnViewModelFactory
@@ -267,10 +268,12 @@ fun TranslateOrNextBtn(
             modifier = Modifier
                 .clickable {
                     // TODO：联网搜索
-                    val intent = Intent(context, TransActivity::class.java)
-                    intent.putExtra("userId", learnViewModel.userId)
-                    intent.putExtra("query", curQuizWord.word)
-                    resultLauncher.launch(intent)
+                    toTransActivity(
+                        context,
+                        resultLauncher,
+                        curQuizWord.word,
+                        learnViewModel.userId
+                    )
                 },
             elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp)
         ) {

@@ -1,7 +1,6 @@
 package com.cyy.transapp.activity.main.view
 
 import android.content.Intent
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -26,7 +25,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cyy.transapp.R
 import com.cyy.transapp.TransApp
 import com.cyy.transapp.activity.main.StateHolder
-import com.cyy.transapp.activity.other.WordActivity
+import com.cyy.transapp.activity.other.StarWordActivity
 import com.cyy.transapp.model.Vocabulary
 import com.cyy.transapp.view_model.CurUserViewModel
 import com.cyy.transapp.view_model.CurUserViewModelFactory
@@ -51,7 +50,6 @@ fun DrawerView(
             application.userRepository,
         )
     )
-    Log.i("vocabulary-------", vocabulary.desc)
     val curUser = curUserViewModel.curUser.collectAsStateWithLifecycle()
     ModalNavigationDrawer(
         // 抽屉是否可以通过手势进行交互
@@ -81,15 +79,16 @@ fun DrawerView(
                     )
                     Text(text = "用户名", fontSize = 30.sp)
                 }
+                // TODO：1、我的单词本
                 NavigationDrawerItem(
                     label = {
-                        Text("我的单词本", fontSize = 20.sp)
+                        Text("我的生词本", fontSize = 20.sp)
                     },
                     icon = {
                         Icon(
                             painter = painterResource(id = R.drawable.book),
                             tint = Color.DarkGray,
-                            contentDescription = "我的单词本",
+                            contentDescription = "我的生词本",
                         )
                     },
                     selected = false,
@@ -97,10 +96,12 @@ fun DrawerView(
                         states.scope.launch {
                             states.drawerState.close()
                         }
-                        val intent = Intent(states.navController.context, WordActivity::class.java)
-                        intent.putExtra("vocabulary", curUser.value.vocabulary)
+                        val intent =
+                            Intent(states.navController.context, StarWordActivity::class.java)
+                        intent.putExtra("userId", userId)
                         states.resultLauncher.launch(intent)
                     })
+                // TODO：2、清空翻译记录
                 NavigationDrawerItem(
                     label = {
                         Text("清空翻译记录", fontSize = 20.sp)
@@ -119,7 +120,25 @@ fun DrawerView(
                         }
                         states.showDeleteDialog.value = true
                     })
-
+                // TODO：3、更换单词本
+                NavigationDrawerItem(
+                    label = {
+                        Text("更换单词本", fontSize = 20.sp)
+                    },
+                    icon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.change_vocabulary),
+                            tint = Color.DarkGray,
+                            contentDescription = null,
+                        )
+                    },
+                    selected = false,
+                    onClick = {
+                        states.scope.launch {
+                            states.drawerState.close()
+                        }
+                        states.showDeleteDialog.value = true
+                    })
             }
         },
         content = {

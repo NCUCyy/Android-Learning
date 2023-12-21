@@ -50,6 +50,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cyy.transapp.R
 import com.cyy.transapp.TransApp
+import com.cyy.transapp.activity.main.view.toTransActivity
 import com.cyy.transapp.model.OpResult
 import com.cyy.transapp.model.ReviewState
 import com.cyy.transapp.view_model.ReviewViewModel
@@ -284,10 +285,12 @@ fun TranslateOrNextBtn(
             modifier = Modifier
                 .clickable {
                     // TODO：联网搜索
-                    val intent = Intent(context, TransActivity::class.java)
-                    intent.putExtra("userId", reviewViewModel.userId)
-                    intent.putExtra("query", curQuizWord.word)
-                    resultLauncher.launch(intent)
+                    toTransActivity(
+                        context,
+                        resultLauncher,
+                        curQuizWord.word,
+                        reviewViewModel.userId
+                    )
                 },
             elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp)
         ) {

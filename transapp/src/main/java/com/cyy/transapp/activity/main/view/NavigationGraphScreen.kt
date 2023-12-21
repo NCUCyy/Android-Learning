@@ -8,13 +8,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.cyy.transapp.TransApp
+import com.cyy.transapp.activity.main.Screen
 import com.cyy.transapp.activity.main.StateHolder
 import com.cyy.transapp.model.Vocabulary
 import com.cyy.transapp.view_model.LearnReviewViewModel
 import com.cyy.transapp.view_model.LearnReviewViewModelFactory
 import com.cyy.transapp.view_model.QueryViewModel
 import com.cyy.transapp.view_model.QueryViewModelFactory
-
 
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
