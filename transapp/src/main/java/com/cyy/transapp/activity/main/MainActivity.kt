@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultCallback
@@ -101,6 +102,7 @@ class MainActivity : ComponentActivity() {
                         // vocabulary更新后，会重组整个UI界面
                         vocabulary.value =
                             it.data?.getStringExtra("vocabulary")!!
+                        Log.i("s", "vocabulary: ${vocabulary.value}")
                     }
                 }
             }

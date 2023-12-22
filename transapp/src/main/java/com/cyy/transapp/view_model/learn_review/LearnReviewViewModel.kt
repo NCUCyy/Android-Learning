@@ -209,8 +209,10 @@ class LearnReviewViewModel(
     // 外部调用（选择字典的时候）
     fun updateVocabulary(vocabulary: String) = viewModelScope.launch {
         // 修改user中的vocabulary
-        curUser.value.vocabulary = vocabulary
-        userRepository.update(curUser.value)
+//        curUser.value.vocabulary = vocabulary TODO：这样写不行！
+        val user = userRepository.getById(userId)
+        user.vocabulary = vocabulary
+        userRepository.update(user)
         // 修改Plan（有则赋值，没有则插入后赋值）
         updatePlan()
         // 更新

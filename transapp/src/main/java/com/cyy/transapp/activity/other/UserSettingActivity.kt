@@ -171,6 +171,7 @@ fun UserScreen(userId: Int = 1) {
             uri?.let {
                 // 更新头像
                 userSettingViewModel.updateAvatar(it)
+                Toast.makeText(context, "修改成功！", Toast.LENGTH_SHORT).show()
             }
         }
     )
@@ -191,7 +192,6 @@ fun UserScreen(userId: Int = 1) {
             Box(modifier = Modifier.clickable {
                 // TODO：选择头像
                 galleryLauncher.launch("image/*")
-
             }) {
                 AvatarImage(
                     avatar = curUser.value.avatar,

@@ -5,6 +5,7 @@ import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.cyy.transapp.model.LearnProcess
 import com.cyy.transapp.model.ReviewProcess
+import com.cyy.transapp.model.Vocabulary
 import com.google.gson.Gson
 
 @Entity(tableName = "plans")
@@ -14,7 +15,7 @@ class Plan {
 
     // 用于唯一定位
     var userId: Int = 0
-    var vocabulary: String = ""
+    var vocabulary: String = Vocabulary.NOT_SELECTED.desc
 
     // 学习进度
     var learnProcess: String = ""

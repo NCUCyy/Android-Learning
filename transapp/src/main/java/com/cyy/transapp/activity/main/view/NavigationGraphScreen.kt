@@ -2,6 +2,7 @@ package com.cyy.transapp.activity.main.view
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -43,6 +44,7 @@ fun NavigationGraphScreen(
         )
     )
     if (vocabulary != "") {
+        Log.i("CYYYYYYY-Look", "vocabulary: $vocabulary")
         // 选择Vocabulary后执行（仅一次）
         learnReviewViewModel.updateVocabulary(vocabulary)
     }
