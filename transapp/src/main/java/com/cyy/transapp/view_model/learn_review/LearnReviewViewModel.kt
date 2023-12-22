@@ -214,7 +214,7 @@ class LearnReviewViewModel(
         user.vocabulary = vocabulary
         userRepository.update(user)
         // 修改Plan（有则赋值，没有则插入后赋值）
-        updatePlan()
+        updatePlan(vocabulary)
         // 更新
         loadVocabulary()
     }
@@ -222,11 +222,11 @@ class LearnReviewViewModel(
     /**
      * 在updateVocabulary()内部调用，更新Plan（有则赋值，没有则插入后赋值）
      */
-    private fun updatePlan() = viewModelScope.launch {
-        val selectedPlan = planRepository.getByUserIdAndVocabulary(userId, curUser.value.vocabulary)
+    private suspend fun updatePlan(vocabulary: String) {
+        val selectedPlan = planRepository.getByUserIdAndVocabulary(userId, vocabulary)
         if (selectedPlan != null) {
             plan.value =
-                planRepository.getFlowByUserIdAndVocabulary(userId, curUser.value.vocabulary)
+                planRepository.getFlowByUserIdAndVocabulary(userId, vocabulary)
                     .stateIn(
                         initialValue = Plan(),
                         scope = viewModelScope,
@@ -234,10 +234,10 @@ class LearnReviewViewModel(
                     )
         } else {
             // 先插进去
-            planRepository.insert(Plan(userId, curUser.value.vocabulary))
+            planRepository.insert(Plan(userId, vocabulary))
             // 再查出来（这样LearnProcess和ReviewProcess就有值了————虽然也是空的）
             plan.value =
-                planRepository.getFlowByUserIdAndVocabulary(userId, curUser.value.vocabulary)
+                planRepository.getFlowByUserIdAndVocabulary(userId, vocabulary)
                     .stateIn(
                         initialValue = Plan(),
                         scope = viewModelScope,
