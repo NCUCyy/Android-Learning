@@ -235,7 +235,7 @@ fun LearnAndReviewCard(states: StateHolder, learnReviewViewModel: LearnReviewVie
     ) {
         if (plan.value.vocabulary != "") {
             // 为""表示还没查询好(先不显示)
-            if (curUser.value.vocabulary != "未选择") {
+            if (plan.value.vocabulary != "未选择") {
                 // 有选择
                 // TODO：Learn-Part
                 Card(

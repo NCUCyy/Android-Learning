@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -107,6 +108,7 @@ fun DrawerView(
                             borderWidth = 4.dp
                         )
                     }
+                    Spacer(modifier = Modifier.height(5.dp))
                     Text(
                         text = curUser.value.username,
                         fontSize = 30.sp,
@@ -121,7 +123,12 @@ fun DrawerView(
                     )
                 }
                 Card(
-                    modifier = Modifier.padding(20.dp),
+                    modifier = Modifier.padding(
+                        start = 20.dp,
+                        end = 20.dp,
+                        top = 15.dp,
+                        bottom = 20.dp
+                    ),
                     elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = Color.Transparent,

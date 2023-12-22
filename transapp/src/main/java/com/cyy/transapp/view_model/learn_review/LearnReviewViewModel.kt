@@ -214,7 +214,7 @@ class LearnReviewViewModel(
         user.vocabulary = vocabulary
         userRepository.update(user)
         // 修改Plan（有则赋值，没有则插入后赋值）
-        updatePlan(vocabulary)
+        updatePlanByVocabulary(vocabulary)
         // 更新
         loadVocabulary()
     }
@@ -222,7 +222,7 @@ class LearnReviewViewModel(
     /**
      * 在updateVocabulary()内部调用，更新Plan（有则赋值，没有则插入后赋值）
      */
-    private suspend fun updatePlan(vocabulary: String) {
+    private suspend fun updatePlanByVocabulary(vocabulary: String) {
         val selectedPlan = planRepository.getByUserIdAndVocabulary(userId, vocabulary)
         if (selectedPlan != null) {
             plan.value =
@@ -244,7 +244,7 @@ class LearnReviewViewModel(
                         started = SharingStarted.WhileSubscribed(5000)
                     )
         }
-        // 切换字典后，需要初始化LearnProcess
+        // TODO：切换字典后，需要初始化LearnProcess
         initLearnProcess()
     }
 }
