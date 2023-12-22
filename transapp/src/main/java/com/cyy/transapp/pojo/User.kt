@@ -3,7 +3,6 @@ package com.cyy.transapp.pojo
 import androidx.room.Entity
 import androidx.room.Ignore
 import androidx.room.PrimaryKey
-import com.cyy.transapp.R
 
 @Entity(tableName = "users")
 class User {
@@ -11,9 +10,9 @@ class User {
     var id: Int = 0
     var username: String = ""
     var password: String = ""
-    var nickname: String = ""
     var profile: String = ""
-    var iconId: Int = R.drawable.user
+    // 头像（String的形式存，转为Bitmap显示）
+    var avatar: String = ""
     var vocabulary: String = "未选择"
 
 

@@ -2,9 +2,9 @@ package com.cyy.transapp.activity.main.view
 
 import android.app.Activity
 import android.content.Intent
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -40,6 +40,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cyy.transapp.R
 import com.cyy.transapp.TransApp
 import com.cyy.transapp.activity.main.StateHolder
+import com.cyy.transapp.activity.other.AvatarImage
 import com.cyy.transapp.activity.other.StarWordActivity
 import com.cyy.transapp.activity.other.SystemSettingActivity
 import com.cyy.transapp.activity.other.UserSettingActivity
@@ -89,22 +90,21 @@ fun DrawerView(
                 Column(
                     modifier = Modifier
                         .padding(bottom = 30.dp)
-                        .fillMaxWidth()
-                        .clickable {
-                            val intent = Intent(context, UserSettingActivity::class.java)
-                            intent.putExtra("userId", userId)
-                            states.resultLauncher.launch(intent)
-                        },
+                        .fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Log.i("DrawerView", "DrawerView: ${curUser.value.iconId}")
-                    Icon(
-                        painter = painterResource(id = curUser.value.iconId),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(80.dp)
-                    )
+                    Box(modifier = Modifier.clickable {
+                        val intent = Intent(context, UserSettingActivity::class.java)
+                        intent.putExtra("userId", userId)
+                        states.resultLauncher.launch(intent)
+                    }) {
+                        AvatarImage(
+                            avatar = curUser.value.avatar,
+                            avatarSize = 80.dp,
+                            borderWidth = 4.dp
+                        )
+                    }
                     Text(text = curUser.value.username, fontSize = 30.sp)
                 }
                 Card(

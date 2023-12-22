@@ -1,11 +1,14 @@
 package com.cyy.transapp.view_model.user
 
+import android.app.Activity
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.cyy.transapp.model.UsernameState
 import com.cyy.transapp.pojo.User
 import com.cyy.transapp.repository.UserRepository
+import com.cyy.transapp.util.FileUtil
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -15,6 +18,7 @@ import kotlinx.coroutines.launch
 
 class UserSettingViewModel(
     private val userId: Int,
+    private val context: Activity,
     private val userRepository: UserRepository,
 ) :
     ViewModel() {
@@ -29,15 +33,15 @@ class UserSettingViewModel(
         viewModelScope.launch {
             val user = userRepository.getById(userId)
             // 属性的初始化
-            _iconId.value = user.iconId
+            _avatar.value = user.avatar
             _username.value = user.username
             _password.value = user.password
             _profile.value = user.profile
         }
     }
 
-    private val _iconId = MutableStateFlow(0)
-    val iconId = _iconId.asStateFlow()
+    private val _avatar = MutableStateFlow("")
+    val avatar = _avatar.asStateFlow()
 
     private val _username = MutableStateFlow("")
     val username = _username.asStateFlow()
@@ -60,7 +64,7 @@ class UserSettingViewModel(
         if (_usernameState.value == UsernameState.AVAILABLE || _usernameState.value == UsernameState.NOT_BEGIN) {
             viewModelScope.launch {
                 val user = userRepository.getById(userId)
-                user.iconId = _iconId.value
+                user.avatar = _avatar.value
                 user.username = _username.value
                 user.password = _password.value
                 user.profile = _profile.value
@@ -105,17 +109,23 @@ class UserSettingViewModel(
     fun updateProfile(profile: String) {
         _profile.value = profile
     }
+
+    fun updateAvatar(imageUri: Uri) {
+        _avatar.value = FileUtil.uriToString(context, imageUri)
+        saveEdit()
+    }
 }
 
 class UserSettingViewModelFactory(
     private val userId: Int,
+    private val context: Activity,
     private val userRepository: UserRepository,
 ) :
     ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(UserSettingViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return UserSettingViewModel(userId, userRepository) as T
+            return UserSettingViewModel(userId, context, userRepository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

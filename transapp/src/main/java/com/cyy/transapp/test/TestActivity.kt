@@ -127,12 +127,12 @@ fun TestScreen2() {
 //    val bytes = stream.toByteArray();// 转为byte数组
 //    val string = Base64.encodeToString(bytes, Base64.DEFAULT);
 
-
     Column(modifier = Modifier.fillMaxSize()) {
         if (imageUri != null) {
             val stream = ByteArrayOutputStream()
-            val bitmap: Bitmap =
-                MediaStore.Images.Media.getBitmap(context.contentResolver, imageUri)
+            val bitmap =
+                BitmapFactory.decodeStream(context.contentResolver.openInputStream(imageUri!!));
+
             Log.i("TestScreen2---", bitmap.toString())
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
             val bytes = stream.toByteArray();// 转为byte数组
@@ -143,6 +143,7 @@ fun TestScreen2() {
             Log.i("TestScreen2---", bitmap2.toString())
             Image(bitmap = bitmap2.asImageBitmap(), contentDescription = null)
         }
+
 
         Image(
             painter = painterResource(id = R.drawable.user),

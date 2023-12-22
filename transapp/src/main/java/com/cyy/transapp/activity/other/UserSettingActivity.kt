@@ -2,11 +2,14 @@ package com.cyy.transapp.activity.other
 
 import android.app.Activity
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,6 +22,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -38,7 +42,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -51,7 +57,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cyy.transapp.R
 import com.cyy.transapp.TransApp
+import com.cyy.transapp.activity.main.rainbowColorsBrush
 import com.cyy.transapp.model.UsernameState
+import com.cyy.transapp.util.FileUtil
 import com.cyy.transapp.view_model.user.UserSettingViewModel
 import com.cyy.transapp.view_model.user.UserSettingViewModelFactory
 
@@ -112,6 +120,37 @@ fun UserMainScreen(userId: Int) {
         })
 }
 
+@Composable
+fun AvatarImage(avatar: String, avatarSize: Dp = 36.dp, borderWidth: Dp) {
+    if (avatar == "") {
+        Image(
+            painter = painterResource(id = R.drawable.user),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .border(
+                    BorderStroke(4.dp, rainbowColorsBrush),
+                    CircleShape
+                )
+                .size(avatarSize)
+                .clip(CircleShape)
+        )
+    } else {
+        Image(
+            bitmap = FileUtil.stringToImageBitmap(avatar),
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .border(
+                    BorderStroke(borderWidth, rainbowColorsBrush),
+                    CircleShape
+                )
+                .size(avatarSize)
+                .clip(CircleShape)
+        )
+    }
+}
+
 @Preview
 @Composable
 fun UserScreen(userId: Int = 1) {
@@ -120,8 +159,18 @@ fun UserScreen(userId: Int = 1) {
     val userSettingViewModel = viewModel<UserSettingViewModel>(
         factory = UserSettingViewModelFactory(
             userId,
+            context,
             application.userRepository
         )
+    )
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri ->
+            uri?.let {
+                // 更新头像
+                userSettingViewModel.updateAvatar(it)
+            }
+        }
     )
     val curUser = userSettingViewModel.curUser.collectAsStateWithLifecycle()
     val username = userSettingViewModel.username.collectAsState()
@@ -137,16 +186,17 @@ fun UserScreen(userId: Int = 1) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Log.i("DrawerView", "DrawerView: ${curUser.value.iconId}")
-            Image(
-                painter = painterResource(id = curUser.value.iconId),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(100.dp)
-                    .clickable {
-                        // TODO: 更换头像（待完成）
-                    }
-            )
+            Box(modifier = Modifier.clickable {
+                // TODO：选择头像
+                galleryLauncher.launch("image/*")
+
+            }) {
+                AvatarImage(
+                    avatar = curUser.value.avatar,
+                    avatarSize = 100.dp,
+                    borderWidth = 4.dp
+                )
+            }
             Spacer(modifier = Modifier.height(20.dp))
             Card(
                 elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
@@ -167,46 +217,64 @@ fun UserScreen(userId: Int = 1) {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Spacer(modifier = Modifier.height(80.dp))
-                    TextFieldCard(username.value, userSettingViewModel::updateUsername, label = {
-                        Text(text = "用户名", fontWeight = FontWeight.Bold)
-                    }, leadingIcon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.person),
-                            contentDescription = null,
-                        )
-                    }, isEdit.value, trailingIcon = {
-                        // 若已开始输入
-                        if (usernameState != UsernameState.NOT_BEGIN) {
-                            if (usernameState in listOf(UsernameState.EXIST, UsernameState.EMPTY)
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(text = "用户名已存在", color = Color.Red)
+                    TextFieldCard(
+                        username.value,
+                        userSettingViewModel::updateUsername,
+                        label = {
+                            Text(text = "用户名", fontWeight = FontWeight.Bold)
+                        },
+                        leadingIcon = {
+                            Icon(
+                                painter = painterResource(id = R.drawable.person),
+                                contentDescription = null,
+                            )
+                        },
+                        isEdit.value,
+                        trailingIcon = {
+                            // 若已开始输入
+                            if (usernameState != UsernameState.NOT_BEGIN) {
+                                if (usernameState in listOf(
+                                        UsernameState.EXIST,
+                                        UsernameState.EMPTY
+                                    )
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(text = "用户名已存在", color = Color.Red)
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.error),
+                                            contentDescription = null,
+                                            tint = Color.Red,
+                                            modifier = Modifier.padding(
+                                                start = 8.dp,
+                                                end = 8.dp
+                                            )
+                                        )
+                                    }
+
+                                } else {
                                     Icon(
-                                        painter = painterResource(id = R.drawable.error),
+                                        painter = painterResource(id = R.drawable.correct),
                                         contentDescription = null,
-                                        tint = Color.Red,
-                                        modifier = Modifier.padding(start = 8.dp, end = 8.dp)
+                                        tint = Color(0xFF08A808)
                                     )
                                 }
-
-                            } else {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.correct),
-                                    contentDescription = null,
-                                    tint = Color(0xFF08A808)
-                                )
                             }
-                        }
-                    })
+                        })
                     Spacer(modifier = Modifier.height(20.dp))
-                    TextFieldCard(password.value, userSettingViewModel::updatePassword, label = {
-                        Text(text = "密码", fontWeight = FontWeight.Bold)
-                    }, leadingIcon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.password),
-                            contentDescription = null
-                        )
-                    }, isEdit.value)
+                    TextFieldCard(
+                        password.value,
+                        userSettingViewModel::updatePassword,
+                        label = {
+                            Text(text = "密码", fontWeight = FontWeight.Bold)
+                        },
+                        leadingIcon = {
+                            Icon(
+                                painter = painterResource(id = R.drawable.password),
+                                contentDescription = null
+                            )
+                        },
+                        isEdit.value
+                    )
                     Spacer(modifier = Modifier.height(20.dp))
                     TextFieldCard(
                         profile.value,
@@ -226,14 +294,20 @@ fun UserScreen(userId: Int = 1) {
                     if (isEdit.value) {
                         Button(
                             elevation = ButtonDefaults.elevatedButtonElevation(defaultElevation = 10.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE91E63)),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(
+                                    0xFFE91E63
+                                )
+                            ),
                             shape = RoundedCornerShape(15.dp),
                             onClick = {
                                 // 提示
                                 if (usernameState == UsernameState.AVAILABLE || usernameState == UsernameState.NOT_BEGIN) {
-                                    Toast.makeText(context, "修改成功！", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, "修改成功！", Toast.LENGTH_SHORT)
+                                        .show()
                                 } else {
-                                    Toast.makeText(context, "修改失败！", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, "修改失败！", Toast.LENGTH_SHORT)
+                                        .show()
                                 }
                                 // 保存修改
                                 userSettingViewModel.saveEdit()

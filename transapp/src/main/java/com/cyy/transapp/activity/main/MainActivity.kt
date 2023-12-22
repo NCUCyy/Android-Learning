@@ -50,6 +50,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -68,6 +69,7 @@ import com.cyy.transapp.R
 import com.cyy.transapp.TransApp
 import com.cyy.transapp.activity.main.view.DrawerView
 import com.cyy.transapp.activity.main.view.toTransActivity
+import com.cyy.transapp.activity.other.AvatarImage
 import com.cyy.transapp.activity.other.StarWordActivity
 import com.cyy.transapp.activity.other.VocabularySettingActivity
 import com.cyy.transapp.view_model.CurUserViewModel
@@ -183,11 +185,7 @@ fun MainScreen(
                             }
                         }
                     }) {
-                        Icon(
-                            painter = painterResource(id = curUser.value.iconId),
-                            contentDescription = null,
-                            modifier = Modifier.size(30.dp)
-                        )
+                        AvatarImage(avatar = curUser.value.avatar, avatarSize = 36.dp, borderWidth = 2.dp)
                     }
                 },
                 actions = {
@@ -262,7 +260,10 @@ fun MainScreen(
                         },
                         // 图标
                         icon = {
-                            Icon(painter = painterResource(id = it.icon), contentDescription = null)
+                            Icon(
+                                painter = painterResource(id = it.icon),
+                                contentDescription = null
+                            )
                         })
                 }
             }
@@ -524,3 +525,17 @@ sealed class Screen(val route: String, val title: String, val icon: Int) {
     object LearnPage :
         Screen(route = "learn", title = "学习", icon = R.drawable.school)
 }
+
+val rainbowColorsBrush =
+    Brush.sweepGradient(
+        listOf(
+            Color(0xFF9575CD),
+            Color(0xFFBA68C8),
+            Color(0xFFE57373),
+            Color(0xFFFFB74D),
+            Color(0xFFFFF176),
+            Color(0xFFAED581),
+            Color(0xFF4DD0E1),
+            Color(0xFF9575CD)
+        )
+    )
