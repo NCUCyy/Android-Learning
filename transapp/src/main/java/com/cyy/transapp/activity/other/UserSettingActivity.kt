@@ -6,6 +6,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -137,7 +138,7 @@ fun UserScreen(userId: Int = 1) {
             verticalArrangement = Arrangement.Center
         ) {
             Log.i("DrawerView", "DrawerView: ${curUser.value.iconId}")
-            Icon(
+            Image(
                 painter = painterResource(id = curUser.value.iconId),
                 contentDescription = null,
                 modifier = Modifier

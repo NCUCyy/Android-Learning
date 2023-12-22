@@ -1,7 +1,13 @@
 package com.cyy.transapp.test
 
+import android.app.Activity
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
+import android.util.Base64
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -25,13 +31,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.cyy.transapp.R
 import com.drake.net.Get
 import com.drake.net.utils.scopeNet
+import java.io.ByteArrayOutputStream
+
 
 class TestActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -75,6 +85,7 @@ fun TestScreen2() {
             }
         }
     )
+
     val rainbowColorsBrush = remember {
         Brush.sweepGradient(
             listOf(
@@ -89,8 +100,50 @@ fun TestScreen2() {
             )
         )
     }
+    val context = LocalContext.current as Activity
+    if (imageUri != null) {
+//        Log.i("TestScreen2", imageUri!!.toString())
+////        val file = File(imageUri!!.path);
+//        val log = Uri.parse(imageUri!!.toString())
+//        Log.i("TestScreen2---", log.toString())
+
+        val stream = ByteArrayOutputStream()
+        val bitmap: Bitmap = MediaStore.Images.Media.getBitmap(context.contentResolver, imageUri)
+        Log.i("TestScreen2---", bitmap.toString())
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+        val bytes = stream.toByteArray();// 转为byte数组
+
+        val string2 = Base64.encodeToString(bytes, Base64.DEFAULT)
+        val bytes2 = Base64.decode(string2, Base64.DEFAULT);
+        val bitmap2 = BitmapFactory.decodeByteArray(bytes, 0, bytes2.size);
+        Log.i("TestScreen2---", bitmap2.toString())
+    }
+
+
+//    val bitmap: Bitmap = MediaStore.Images.Media.getBitmap(context.contentResolver, imageUri);
+//
+//    val stream = ByteArrayOutputStream();
+//    bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+//    val bytes = stream.toByteArray();// 转为byte数组
+//    val string = Base64.encodeToString(bytes, Base64.DEFAULT);
+
 
     Column(modifier = Modifier.fillMaxSize()) {
+        if (imageUri != null) {
+            val stream = ByteArrayOutputStream()
+            val bitmap: Bitmap =
+                MediaStore.Images.Media.getBitmap(context.contentResolver, imageUri)
+            Log.i("TestScreen2---", bitmap.toString())
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+            val bytes = stream.toByteArray();// 转为byte数组
+            Image(bitmap = bitmap.asImageBitmap(), contentDescription = null)
+            val string2 = Base64.encodeToString(bytes, Base64.DEFAULT)
+            val bytes2 = Base64.decode(string2, Base64.DEFAULT);
+            val bitmap2 = BitmapFactory.decodeByteArray(bytes, 0, bytes2.size);
+            Log.i("TestScreen2---", bitmap2.toString())
+            Image(bitmap = bitmap2.asImageBitmap(), contentDescription = null)
+        }
+
         Image(
             painter = painterResource(id = R.drawable.user),
             contentDescription = null,
