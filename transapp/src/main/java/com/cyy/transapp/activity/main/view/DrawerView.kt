@@ -104,7 +104,7 @@ fun DrawerView(
                     }) {
                         AvatarImage(
                             avatar = curUser.value.avatar,
-                            avatarSize = 80.dp,
+                            avatarSize = 100.dp,
                             borderWidth = 4.dp
                         )
                     }
@@ -126,7 +126,7 @@ fun DrawerView(
                     modifier = Modifier.padding(
                         start = 20.dp,
                         end = 20.dp,
-                        top = 15.dp,
+                        top = 5.dp,
                         bottom = 20.dp
                     ),
                     elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),

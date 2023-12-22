@@ -38,6 +38,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -272,10 +273,12 @@ fun MainScreen(
             }
         },
         content = {
-            // 页面的主体部分
-            Box(modifier = Modifier.padding(it)) {
-                // 侧滑导航视图（侧滑界面+导航图）
-                DrawerView(states, userId, vocabulary)
+            Surface(color = Color.Transparent) {
+                // 页面的主体部分
+                Box(modifier = Modifier.padding(it)) {
+                    // 侧滑导航视图（侧滑界面+导航图）
+                    DrawerView(states, userId, vocabulary)
+                }
             }
         },
         floatingActionButton = {

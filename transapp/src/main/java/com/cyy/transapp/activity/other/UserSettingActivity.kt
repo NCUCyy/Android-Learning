@@ -195,7 +195,7 @@ fun UserScreen(userId: Int = 1) {
             }) {
                 AvatarImage(
                     avatar = curUser.value.avatar,
-                    avatarSize = 100.dp,
+                    avatarSize = 150.dp,
                     borderWidth = 4.dp
                 )
             }
