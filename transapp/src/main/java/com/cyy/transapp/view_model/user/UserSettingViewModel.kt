@@ -3,6 +3,7 @@ package com.cyy.transapp.view_model.user
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.cyy.transapp.model.UsernameState
 import com.cyy.transapp.pojo.User
 import com.cyy.transapp.repository.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,13 +41,61 @@ class UserSettingViewModel(
 
     private val _username = MutableStateFlow("")
     val username = _username.asStateFlow()
+
     private val _password = MutableStateFlow("")
     val password = _password.asStateFlow()
     private val _profile = MutableStateFlow("")
     val profile = _profile.asStateFlow()
 
+    private val _usernameState = MutableStateFlow(UsernameState.NOT_BEGIN)
+    val usernameState = _usernameState.asStateFlow()
+
+    private val _isEdit = MutableStateFlow(false)
+    val isEdit = _isEdit.asStateFlow()
+    fun beginEdit() {
+        this._isEdit.value = true
+    }
+
+    fun saveEdit() {
+        if (_usernameState.value == UsernameState.AVAILABLE || _usernameState.value == UsernameState.NOT_BEGIN) {
+            viewModelScope.launch {
+                val user = userRepository.getById(userId)
+                user.iconId = _iconId.value
+                user.username = _username.value
+                user.password = _password.value
+                user.profile = _profile.value
+                userRepository.update(user)
+            }
+            _usernameState.value = UsernameState.NOT_BEGIN
+            _isEdit.value = false
+        }
+    }
+
+    private fun judgeExist(username: String) = viewModelScope.launch {
+        val user = userRepository.getByUsername(username)
+        if (user != null) {
+            _usernameState.value = UsernameState.EXIST
+        } else {
+            _usernameState.value = UsernameState.AVAILABLE
+        }
+    }
+
     fun updateUsername(username: String) {
         _username.value = username
+        when (username) {
+            "" -> {
+                _usernameState.value = UsernameState.EMPTY
+            }
+
+            curUser.value.username -> {
+                _usernameState.value = UsernameState.AVAILABLE
+            }
+
+            else -> {
+                // 同步修改
+                judgeExist(username)
+            }
+        }
     }
 
     fun updatePassword(password: String) {
