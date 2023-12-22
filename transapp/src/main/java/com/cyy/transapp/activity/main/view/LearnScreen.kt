@@ -2,6 +2,7 @@ package com.cyy.transapp.activity.main.view
 
 import android.app.Activity
 import android.content.Intent
+import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -292,7 +293,12 @@ fun LearnAndReviewCard(states: StateHolder, learnReviewViewModel: LearnReviewVie
                         .fillMaxWidth()
                         .clickable {
                             // TODO：跳转到VocabularyActivity---选择词汇
-                            toVocabularySettingActivity(context, states)
+                            toVocabularySettingActivity(
+                                curUser.value.id,
+                                curUser.value.vocabulary,
+                                context,
+                                states.resultLauncher
+                            )
                         },
                 ) {
                     // 没选择
@@ -302,7 +308,8 @@ fun LearnAndReviewCard(states: StateHolder, learnReviewViewModel: LearnReviewVie
                         fontWeight = FontWeight.Bold,
                         fontSize = 25.sp,
                         modifier = Modifier
-                            .fillMaxWidth().padding(10.dp)
+                            .fillMaxWidth()
+                            .padding(10.dp)
                     )
                 }
             }
@@ -327,9 +334,16 @@ fun LearnReviewText(type: String, num: Int) {
 }
 
 // 跳转到VocabularyActivity---选Vocabulary
-fun toVocabularySettingActivity(context: Activity, states: StateHolder) {
+fun toVocabularySettingActivity(
+    userId: Int,
+    vocabulary: String,
+    context: Activity,
+    resultLauncher: ActivityResultLauncher<Intent>
+) {
     val intent = Intent(context, VocabularySettingActivity::class.java)
-    states.resultLauncher.launch(intent)
+    intent.putExtra("userId", userId)
+    intent.putExtra("vocabulary", vocabulary)
+    resultLauncher.launch(intent)
 }
 
 

@@ -44,7 +44,6 @@ import com.cyy.transapp.activity.other.AvatarImage
 import com.cyy.transapp.activity.other.StarWordActivity
 import com.cyy.transapp.activity.other.SystemSettingActivity
 import com.cyy.transapp.activity.other.UserSettingActivity
-import com.cyy.transapp.activity.other.VocabularySettingActivity
 import com.cyy.transapp.view_model.CurUserViewModel
 import com.cyy.transapp.view_model.CurUserViewModelFactory
 
@@ -230,10 +229,12 @@ fun DrawerView(
                         selected = false,
                         onClick = {
                             // 前往VocabularyActivity
-                            val intent = Intent(context, VocabularySettingActivity::class.java)
-                            intent.putExtra("userId", userId)
-                            intent.putExtra("vocabulary", curUser.value.vocabulary)
-                            states.resultLauncher.launch(intent)
+                            toVocabularySettingActivity(
+                                userId,
+                                vocabulary,
+                                context,
+                                states.resultLauncher
+                            )
                         })
                     Divider(thickness = 1.dp)
                     // TODO：4、设置

@@ -69,9 +69,9 @@ import com.cyy.transapp.R
 import com.cyy.transapp.TransApp
 import com.cyy.transapp.activity.main.view.DrawerView
 import com.cyy.transapp.activity.main.view.toTransActivity
+import com.cyy.transapp.activity.main.view.toVocabularySettingActivity
 import com.cyy.transapp.activity.other.AvatarImage
 import com.cyy.transapp.activity.other.StarWordActivity
-import com.cyy.transapp.activity.other.VocabularySettingActivity
 import com.cyy.transapp.view_model.CurUserViewModel
 import com.cyy.transapp.view_model.CurUserViewModelFactory
 import com.cyy.transapp.view_model.trans.QueryViewModel
@@ -222,15 +222,7 @@ fun MainScreen(
                         Screen.LearnPage.route -> {
                             // 学习页面
                             IconButton(onClick = {
-                                // 听力页面
-                                val intent =
-                                    Intent(context, VocabularySettingActivity::class.java)
-                                intent.putExtra("userId", userId)
-                                intent.putExtra(
-                                    "vocabulary",
-                                    curUser.value.vocabulary
-                                )
-                                states.resultLauncher.launch(intent)
+                                toVocabularySettingActivity(userId, vocabulary, context, states.resultLauncher)
                             }, modifier = Modifier.padding(end = 10.dp)) {
                                 Icon(
                                     painter = painterResource(id = R.drawable.dictionary),

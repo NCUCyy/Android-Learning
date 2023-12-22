@@ -44,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -124,16 +125,17 @@ fun UserMainScreen(userId: Int) {
 fun AvatarImage(avatar: String, avatarSize: Dp = 36.dp, borderWidth: Dp) {
     if (avatar == "") {
         Image(
-            painter = painterResource(id = R.drawable.user),
+            painter = painterResource(id = R.drawable.face),
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .border(
-                    BorderStroke(4.dp, rainbowColorsBrush),
+                    BorderStroke(borderWidth, rainbowColorsBrush),
                     CircleShape
                 )
                 .size(avatarSize)
-                .clip(CircleShape)
+                .clip(CircleShape),
+            colorFilter = ColorFilter.lighting(Color.Black, Color.Black)
         )
     } else {
         Image(
