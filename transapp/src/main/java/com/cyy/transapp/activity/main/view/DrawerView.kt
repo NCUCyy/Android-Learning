@@ -42,11 +42,10 @@ import com.cyy.transapp.TransApp
 import com.cyy.transapp.activity.main.StateHolder
 import com.cyy.transapp.activity.other.StarWordActivity
 import com.cyy.transapp.activity.other.SystemSettingActivity
-import com.cyy.transapp.activity.other.UserEditActivity
+import com.cyy.transapp.activity.other.UserSettingActivity
 import com.cyy.transapp.activity.other.VocabularySettingActivity
 import com.cyy.transapp.view_model.CurUserViewModel
 import com.cyy.transapp.view_model.CurUserViewModelFactory
-import kotlinx.coroutines.launch
 
 
 /**
@@ -90,7 +89,12 @@ fun DrawerView(
                 Column(
                     modifier = Modifier
                         .padding(bottom = 30.dp)
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
+                        .clickable {
+                            val intent = Intent(context, UserSettingActivity::class.java)
+                            intent.putExtra("userId", userId)
+                            states.resultLauncher.launch(intent)
+                        },
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
@@ -99,11 +103,6 @@ fun DrawerView(
                         painter = painterResource(id = curUser.value.iconId),
                         contentDescription = null,
                         modifier = Modifier
-                            .clickable {
-                                states.scope.launch {
-                                    states.drawerState.close()
-                                }
-                            }
                             .size(80.dp)
                     )
                     Text(text = curUser.value.username, fontSize = 30.sp)
@@ -135,7 +134,10 @@ fun DrawerView(
                         selected = false,
                         onClick = {
                             val intent =
-                                Intent(states.navController.context, UserEditActivity::class.java)
+                                Intent(
+                                    states.navController.context,
+                                    UserSettingActivity::class.java
+                                )
                             states.resultLauncher.launch(intent)
                         })
                     Divider(thickness = 1.dp)

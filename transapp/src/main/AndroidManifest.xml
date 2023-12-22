@@ -66,7 +66,7 @@
                 android:exported="true" />
 
         <activity
-                android:name=".activity.other.UserEditActivity"
+                android:name=".activity.other.UserSettingActivity"
                 android:exported="true" />
         <activity
                 android:name=".activity.main.LearnActivity"
