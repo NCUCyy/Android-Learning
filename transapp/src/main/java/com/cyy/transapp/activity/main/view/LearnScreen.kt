@@ -41,7 +41,6 @@ import com.cyy.transapp.R
 import com.cyy.transapp.activity.main.LearnActivity
 import com.cyy.transapp.activity.main.ReviewActivity
 import com.cyy.transapp.activity.main.StateHolder
-import com.cyy.transapp.activity.other.VocabularyActivity
 import com.cyy.transapp.activity.other.VocabularySettingActivity
 import com.cyy.transapp.activity.other.WordActivity
 import com.cyy.transapp.model.LearnProcess
@@ -105,12 +104,18 @@ fun VocabularyCard(states: StateHolder, learnReviewViewModel: LearnReviewViewMod
         modifier = Modifier
             .clickable {
                 if (curUser.value.vocabulary == "未选择") {
-                    // TODO：跳转到VocabularyActivity(选择字典)
-                    val intent = Intent(context, VocabularyActivity::class.java)
-                    states.resultLauncher.launch(intent)
+                    // TODO：跳转到VocabularySettingActivity(选择字典)
+                    toVocabularySettingActivity(
+                        curUser.value.id,
+                        curUser.value.vocabulary,
+                        context,
+                        states.resultLauncher
+                    )
                 } else {
-                    // TODO：跳转到WordActivity(选择字典)
+                    // TODO：跳转到WordActivity(查看所有单词)
                     val intent = Intent(context, WordActivity::class.java)
+                    intent.putExtra("userId", curUser.value.id)
+                    intent.putExtra("vocabulary", curUser.value.vocabulary)
                     states.resultLauncher.launch(intent)
                 }
 
