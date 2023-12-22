@@ -29,9 +29,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -104,7 +107,18 @@ fun DrawerView(
                             borderWidth = 4.dp
                         )
                     }
-                    Text(text = curUser.value.username, fontSize = 30.sp)
+                    Text(
+                        text = curUser.value.username,
+                        fontSize = 30.sp,
+                        fontWeight = FontWeight.Bold,
+                        style = TextStyle(
+                            shadow = Shadow(
+                                color = Color.Gray,
+                                offset = Offset(5.0f, 5.0f),
+                                blurRadius = 3f
+                            )
+                        )
+                    )
                 }
                 Card(
                     modifier = Modifier.padding(20.dp),
@@ -215,7 +229,6 @@ fun DrawerView(
                                         tint = Color.Gray,
                                     )
                                 }
-
                             }
                         },
                         icon = {
@@ -231,7 +244,7 @@ fun DrawerView(
                             // 前往VocabularyActivity
                             toVocabularySettingActivity(
                                 userId,
-                                vocabulary,
+                                curUser.value.vocabulary,
                                 context,
                                 states.resultLauncher
                             )

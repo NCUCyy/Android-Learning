@@ -16,5 +16,4 @@ class SystemSettingActivity : ComponentActivity() {
 
 @Composable
 fun SettingScreen() {
-
 }

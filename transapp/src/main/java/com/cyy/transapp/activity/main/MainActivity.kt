@@ -85,7 +85,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         // TODO：登录成功后，只是传过来了一个userId！
         // 默认给个id = 1，用于测试
-        val userId = intent.getIntExtra("userId", 1)
+        val userId = intent.getIntExtra("userId", 2)
 
         // TODO：注意要定义为MutableState！
         val vocabulary = mutableStateOf("")
@@ -185,7 +185,11 @@ fun MainScreen(
                             }
                         }
                     }) {
-                        AvatarImage(avatar = curUser.value.avatar, avatarSize = 36.dp, borderWidth = 2.dp)
+                        AvatarImage(
+                            avatar = curUser.value.avatar,
+                            avatarSize = 36.dp,
+                            borderWidth = 2.dp
+                        )
                     }
                 },
                 actions = {
@@ -222,7 +226,12 @@ fun MainScreen(
                         Screen.LearnPage.route -> {
                             // 学习页面
                             IconButton(onClick = {
-                                toVocabularySettingActivity(userId, vocabulary, context, states.resultLauncher)
+                                toVocabularySettingActivity(
+                                    userId,
+                                    curUser.value.vocabulary,
+                                    context,
+                                    states.resultLauncher
+                                )
                             }, modifier = Modifier.padding(end = 10.dp)) {
                                 Icon(
                                     painter = painterResource(id = R.drawable.dictionary),
@@ -484,7 +493,7 @@ fun rememberStates(
     resultLauncher: ActivityResultLauncher<Intent>,
     currentScreen: MutableState<Screen> = remember { mutableStateOf(Screen.QueryPage) },
     navController: NavHostController = rememberNavController(),
-    startDestination: String = Screen.LearnPage.route,
+    startDestination: String = Screen.QueryPage.route,
     scope: CoroutineScope = rememberCoroutineScope(),
     drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
     dropState: MutableState<Boolean> = mutableStateOf(false),

@@ -3,6 +3,7 @@ package com.cyy.transapp.activity.other
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.clickable
@@ -55,6 +56,7 @@ class VocabularySettingActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val userId = intent.getIntExtra("userId", 20)
         val vocabulary = intent.getStringExtra("vocabulary")!!
+        Log.i("VocabularySettingActivity", "userId: $userId, vocabulary: $vocabulary")
         setContent {
             VocabularySettingMainScreen(userId, vocabulary)
         }

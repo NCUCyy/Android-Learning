@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.cyy.transapp.R
@@ -47,7 +48,7 @@ class TestActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            TestScreen2()
+            TestScreen3()
         }
     }
 }
@@ -176,4 +177,18 @@ fun TestScreen2() {
             )
         }
     }
+}
+
+@Preview
+@Composable
+fun TestScreen3() {
+    Image(
+        painter = painterResource(id = R.drawable.user),
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
+        modifier = Modifier
+            .size(20.dp)
+            .clip(CircleShape),
+        colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(Color.Red)
+    )
 }

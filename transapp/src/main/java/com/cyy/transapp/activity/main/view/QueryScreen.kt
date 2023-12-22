@@ -211,7 +211,7 @@ fun DailySentenceCard(sentenceModel: SentenceModel, states: StateHolder, userId:
     val data = sentenceModel.data
     Card(
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
-        shape = RoundedCornerShape(5.dp),
+        shape = RoundedCornerShape(10.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color(0xFFEBF4FA),
             contentColor = Color.Black

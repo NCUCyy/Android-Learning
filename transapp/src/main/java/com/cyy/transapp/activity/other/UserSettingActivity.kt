@@ -135,7 +135,7 @@ fun AvatarImage(avatar: String, avatarSize: Dp = 36.dp, borderWidth: Dp) {
                 )
                 .size(avatarSize)
                 .clip(CircleShape),
-            colorFilter = ColorFilter.lighting(Color.Black, Color.Black)
+            colorFilter = ColorFilter.tint(Color.Black)
         )
     } else {
         Image(
