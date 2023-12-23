@@ -1,5 +1,6 @@
 package com.cyy.transapp.activity.index
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
@@ -9,15 +10,27 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
@@ -25,7 +38,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cyy.transapp.R
 import com.cyy.transapp.TransApp
@@ -49,9 +66,49 @@ class RegisterActivity : ComponentActivity() {
             }
         )
         setContent {
-            RegisterScreen(resultLauncher)
+            RegisterMainScreen(resultLauncher)
         }
     }
+}
+
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RegisterMainScreen(resultLauncher: ActivityResultLauncher<Intent>) {
+    val context = LocalContext.current as Activity
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    // TODO：显示查询的词汇
+                    Text(
+                        text = "Back",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp,
+                        maxLines = 1
+                    )
+                },
+                // 左侧图标
+                navigationIcon = {
+                    // 图标按钮
+                    IconButton(onClick = {
+                        // TODO：返回Index
+                        context.finish()
+                    }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.back),
+                            contentDescription = null,
+                        )
+                    }
+                },
+            )
+        },
+        content = {
+            // 页面的主体部分
+            RegisterScreen(resultLauncher)
+        },
+        floatingActionButton = {
+        })
 }
 
 /**
@@ -78,7 +135,6 @@ fun RegisterScreen(resultLauncher: ActivityResultLauncher<Intent>) {
                 application.planRepository
             )
         )
-
     // 输入的用户名、密码、确认密码
     val username = userViewModel.username.collectAsState()
     val password = userViewModel.password.collectAsState()
@@ -109,27 +165,52 @@ fun RegisterScreen(resultLauncher: ActivityResultLauncher<Intent>) {
     }
 
     // TODO：UI
-    Column {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(text = "Welcome！", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(10.dp))
+        Text(text = "Sign up", fontSize = 50.sp, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(50.dp))
+        Card(
+            modifier = Modifier.size(width = 300.dp, height = 80.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+            shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = Color(0xFFDDDDDD),
+            )
+        ) {
             TextField(
+                textStyle = TextStyle(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                ),
+                modifier = Modifier.fillMaxSize(),
                 value = username.value,
                 onValueChange = userViewModel::updateUsername,
-                label = { Text(text = "用户名") },
-                isError = usernameState in listOf(
-                    UsernameState.EXIST,
-                    UsernameState.EMPTY
-                ),
+                label = { Text(text = "Username") },
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.person),
+                        contentDescription = null
+                    )
+                },
                 trailingIcon = {
                     // 若已开始输入
                     if (usernameState != UsernameState.NOT_BEGIN) {
                         if (usernameState in listOf(UsernameState.EXIST, UsernameState.EMPTY)
                         ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.error),
-                                contentDescription = null,
-                                tint = Color.Red,
-                                modifier = Modifier.padding(start = 8.dp, end = 8.dp)
-                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(text = usernameState.desc, color = Color.Red)
+                                Icon(
+                                    painter = painterResource(id = R.drawable.error),
+                                    contentDescription = null,
+                                    tint = Color.Red,
+                                    modifier = Modifier.padding(start = 8.dp, end = 8.dp)
+                                )
+                            }
                         } else {
                             Icon(
                                 painter = painterResource(id = R.drawable.correct),
@@ -139,32 +220,94 @@ fun RegisterScreen(resultLauncher: ActivityResultLauncher<Intent>) {
                         }
                     }
                 },
-                colors = TextFieldDefaults.textFieldColors()
+                colors = TextFieldDefaults.textFieldColors(
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledLabelColor = Color.Black,
+                    focusedLabelColor = Color.Black
+                ),
+                maxLines = 1
             )
-            Text(text = usernameState.desc)
         }
-        TextField(
-            value = password.value,
-            onValueChange = userViewModel::updatePassword,
-            label = { Text(text = "密码") },
-            colors = TextFieldDefaults.textFieldColors()
-        )
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Spacer(modifier = Modifier.height(10.dp))
+        Card(
+            modifier = Modifier.size(width = 300.dp, height = 80.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+            shape = RoundedCornerShape(0.dp, 0.dp, 0.dp, 0.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = Color(0xFFDDDDDD),
+            )
+        ) {
             TextField(
+                modifier = Modifier.fillMaxSize(),
+                textStyle = TextStyle(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    lineHeight = 50.sp
+                ),
+                value = password.value,
+                onValueChange = userViewModel::updatePassword,
+                label = { Text(text = "Password", modifier = Modifier.padding(bottom = 10.dp)) },
+                colors = TextFieldDefaults.textFieldColors(
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledLabelColor = Color.Black,
+                    focusedLabelColor = Color.Black
+                ),
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.password),
+                        contentDescription = null
+                    )
+                },
+                visualTransformation = PasswordVisualTransformation(),
+                maxLines = 1
+            )
+        }
+        Spacer(modifier = Modifier.height(10.dp))
+        Card(
+            modifier = Modifier.size(width = 300.dp, height = 80.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+            shape = RoundedCornerShape(0.dp, 0.dp, 20.dp, 20.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = Color(0xFFDDDDDD),
+            )
+        ) {
+            TextField(
+                modifier = Modifier.fillMaxSize(),
+                textStyle = TextStyle(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    lineHeight = 50.sp
+                ),
+                colors = TextFieldDefaults.textFieldColors(
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledLabelColor = Color.Black,
+                    focusedLabelColor = Color.Black
+                ),
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.confirm_password),
+                        contentDescription = null
+                    )
+                },
                 value = confirmPassword.value,
                 onValueChange = userViewModel::updateConfirmPassword,
-                label = { Text(text = "确认密码") },
-                colors = TextFieldDefaults.textFieldColors(),
+                label = { Text(text = "Confirm Password") },
                 trailingIcon = {
                     // 若已开始输入
                     if (confirmPasswordState != ConfirmPasswordState.NOT_BEGIN) {
                         if (confirmPasswordState == ConfirmPasswordState.DIFFERENT) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.error),
-                                contentDescription = null,
-                                tint = Color.Red,
-                                modifier = Modifier.padding(start = 8.dp, end = 8.dp)
-                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(text = confirmPasswordState.desc)
+                                Icon(
+                                    painter = painterResource(id = R.drawable.error),
+                                    contentDescription = null,
+                                    tint = Color.Red,
+                                    modifier = Modifier.padding(start = 8.dp, end = 8.dp)
+                                )
+                            }
                         } else
                             Icon(
                                 painter = painterResource(id = R.drawable.correct),
@@ -172,14 +315,27 @@ fun RegisterScreen(resultLauncher: ActivityResultLauncher<Intent>) {
                                 tint = Color(0xFF08A808)
                             )
                     }
-                }
+                },
+                visualTransformation = PasswordVisualTransformation(),
+                maxLines = 1
             )
-            Text(text = confirmPasswordState.desc)
         }
-        Button(onClick = {
-            userViewModel.register()
-        }) {
-            Text(text = "注册")
+        Spacer(modifier = Modifier.height(60.dp))
+        Button(colors = ButtonDefaults.buttonColors(containerColor = Color.Blue),
+            onClick = {
+                userViewModel.register()
+
+            }) {
+            Text(
+                text = "Done",
+                fontSize = 17.sp,
+                modifier = Modifier.padding(
+                    start = 20.dp,
+                    end = 20.dp,
+                    top = 10.dp,
+                    bottom = 10.dp
+                ),
+            )
         }
     }
 }

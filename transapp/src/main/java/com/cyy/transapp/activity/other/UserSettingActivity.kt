@@ -46,7 +46,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -410,7 +409,7 @@ fun FullAvatarDialog(showFullAvatar: MutableState<Boolean>, avatar: String) {
                         colorFilter = ColorFilter.tint(Color.Black),
                         modifier = Modifier
                             .fillMaxSize()
-                            .size(300.dp),
+                            .size(300.dp)
                     )
                 } else {
                     Image(
@@ -419,7 +418,7 @@ fun FullAvatarDialog(showFullAvatar: MutableState<Boolean>, avatar: String) {
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .size(300.dp)
-                            .clip(RectangleShape)
+                            .clip(RoundedCornerShape(10.dp, 10.dp, 10.dp, 10.dp))
                     )
                 }
             }

@@ -12,7 +12,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -68,17 +67,10 @@ class LoginActivity : ComponentActivity() {
             ActivityResultContracts.StartActivityForResult(),
             // 意图结束后，执行这个「回调函数」
             ActivityResultCallback {
-                if (it.resultCode == RESULT_OK && it.data!!.hasExtra("isLogout")) {
-                    isLogout.value = it.data!!.getBooleanExtra("isLogout", true)
-                }
             }
         )
         setContent {
-            if (isLogout.value) {
-                this.finish()
-            } else {
-                LoginMainScreen(resultLauncher)
-            }
+            LoginMainScreen(resultLauncher)
         }
     }
 }
@@ -94,7 +86,7 @@ fun LoginMainScreen(resultLauncher: ActivityResultLauncher<Intent>) {
                 title = {
                     // TODO：显示查询的词汇
                     Text(
-                        text = "返回",
+                        text = "Back",
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp,
                         maxLines = 1
@@ -117,9 +109,7 @@ fun LoginMainScreen(resultLauncher: ActivityResultLauncher<Intent>) {
         },
         content = {
             // 页面的主体部分
-            Box {
-                LoginScreen(resultLauncher)
-            }
+            LoginScreen(resultLauncher)
         },
         floatingActionButton = {
         })
@@ -220,6 +210,7 @@ fun LoginScreen(resultLauncher: ActivityResultLauncher<Intent>) {
                     disabledLabelColor = Color.Black,
                     focusedLabelColor = Color.Black
                 ),
+                maxLines = 1
             )
         }
         Spacer(modifier = Modifier.height(10.dp))
@@ -232,6 +223,7 @@ fun LoginScreen(resultLauncher: ActivityResultLauncher<Intent>) {
             )
         ) {
             TextField(
+                maxLines = 1,
                 modifier = Modifier.fillMaxSize(),
                 textStyle = TextStyle(
                     fontWeight = FontWeight.Bold,
