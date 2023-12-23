@@ -228,7 +228,9 @@ fun LoginScreen(resultLauncher: ActivityResultLauncher<Intent>) {
             visualTransformation = PasswordVisualTransformation()
         )
         Spacer(modifier = Modifier.height(60.dp))
-        Button(colors = ButtonDefaults.buttonColors(containerColor = Color.Blue),
+        Button(
+            elevation = ButtonDefaults.elevatedButtonElevation(defaultElevation = 10.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color.Black),
             onClick = {
                 userViewModel.login()
             }) {

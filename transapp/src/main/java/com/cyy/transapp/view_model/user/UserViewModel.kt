@@ -16,6 +16,7 @@ import com.cyy.transapp.repository.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlin.concurrent.thread
 
 class UserViewModel(
     private val userRepository: UserRepository,
@@ -70,17 +71,24 @@ class UserViewModel(
             // TODO：注意给loginUser赋值 和 LoginState.SUCCESS 的顺序
             initLoginUser(user)
             loginState.value = LoginState.SUCCESS
-            clearInput()
+            thread {
+                // 过5秒再清空数据！
+                Thread.sleep(5000)
+                clearAll()
+            }
         } else {
             _usernameAndPasswordState.value = UsernameAndPasswordState.ERROR
             loginState.value = LoginState.FAILED
         }
     }
 
-    private fun clearInput() {
+    private fun clearAll() {
         _username.value = ""
         _password.value = ""
         _confirmPassword.value = ""
+        _usernameState.value = UsernameState.NOT_BEGIN
+        _confirmPasswordState.value = ConfirmPasswordState.NOT_BEGIN
+        _usernameAndPasswordState.value = UsernameAndPasswordState.NOT_BEGIN
     }
 
     fun register() = viewModelScope.launch {
