@@ -62,21 +62,6 @@ class UserViewModel(
     private fun initLoginUser(user: User) {
         loginUser = user
     }
-//
-//    var user = mutableStateOf(
-//        userRepository.getFlowById(1).stateIn(
-//            initialValue = User(),
-//            scope = viewModelScope,
-//            started = SharingStarted.WhileSubscribed(5000)
-//        )
-//    )
-//    fun updateUser() {
-//        user.value = userRepository.getFlowById(1).stateIn(
-//            initialValue = User(),
-//            scope = viewModelScope,
-//            started = SharingStarted.WhileSubscribed(5000)
-//        )
-//    }
 
     fun login() = viewModelScope.launch {
         val user = userRepository.getByUsernameAndPassword(_username.value, _password.value)
@@ -85,11 +70,17 @@ class UserViewModel(
             // TODO：注意给loginUser赋值 和 LoginState.SUCCESS 的顺序
             initLoginUser(user)
             loginState.value = LoginState.SUCCESS
-            // TODO：Initial--Today
+            clearInput()
         } else {
             _usernameAndPasswordState.value = UsernameAndPasswordState.ERROR
             loginState.value = LoginState.FAILED
         }
+    }
+
+    private fun clearInput() {
+        _username.value = ""
+        _password.value = ""
+        _confirmPassword.value = ""
     }
 
     fun register() = viewModelScope.launch {

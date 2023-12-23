@@ -17,19 +17,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -38,9 +33,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -164,7 +159,7 @@ fun RegisterScreen(resultLauncher: ActivityResultLauncher<Intent>) {
         }
     }
 
-    // TODO：UI
+
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -174,157 +169,101 @@ fun RegisterScreen(resultLauncher: ActivityResultLauncher<Intent>) {
         Spacer(modifier = Modifier.height(10.dp))
         Text(text = "Sign up", fontSize = 50.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(50.dp))
-        Card(
-            modifier = Modifier.size(width = 300.dp, height = 80.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+
+        // 1、用户名
+        TextFieldCard(
             shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = Color(0xFFDDDDDD),
-            )
-        ) {
-            TextField(
-                textStyle = TextStyle(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
-                ),
-                modifier = Modifier.fillMaxSize(),
-                value = username.value,
-                onValueChange = userViewModel::updateUsername,
-                label = { Text(text = "Username") },
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.person),
-                        contentDescription = null
-                    )
-                },
-                trailingIcon = {
-                    // 若已开始输入
-                    if (usernameState != UsernameState.NOT_BEGIN) {
-                        if (usernameState in listOf(UsernameState.EXIST, UsernameState.EMPTY)
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(text = usernameState.desc, color = Color.Red)
-                                Icon(
-                                    painter = painterResource(id = R.drawable.error),
-                                    contentDescription = null,
-                                    tint = Color.Red,
-                                    modifier = Modifier.padding(start = 8.dp, end = 8.dp)
-                                )
-                            }
-                        } else {
+            label = { Text(text = "Username") },
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.person),
+                    contentDescription = null
+                )
+            },
+            trailingIcon = {// 若已开始输入
+                if (usernameState != UsernameState.NOT_BEGIN) {
+                    if (usernameState in listOf(UsernameState.EXIST, UsernameState.EMPTY)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(text = usernameState.desc, color = Color.Red)
                             Icon(
-                                painter = painterResource(id = R.drawable.correct),
+                                painter = painterResource(id = R.drawable.error),
                                 contentDescription = null,
-                                tint = Color(0xFF08A808)
+                                tint = Color.Red,
+                                modifier = Modifier.padding(start = 8.dp, end = 8.dp)
                             )
                         }
+                    } else {
+                        Icon(
+                            painter = painterResource(id = R.drawable.correct),
+                            contentDescription = null,
+                            tint = Color(0xFF08A808)
+                        )
                     }
-                },
-                colors = TextFieldDefaults.textFieldColors(
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledLabelColor = Color.Black,
-                    focusedLabelColor = Color.Black
-                ),
-                maxLines = 1
-            )
-        }
+                }
+            },
+            value = username.value,
+            onValueChange = userViewModel::updateUsername,
+            visualTransformation = VisualTransformation.None
+        )
         Spacer(modifier = Modifier.height(10.dp))
-        Card(
-            modifier = Modifier.size(width = 300.dp, height = 80.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+        // 2、密码
+        TextFieldCard(
             shape = RoundedCornerShape(0.dp, 0.dp, 0.dp, 0.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = Color(0xFFDDDDDD),
-            )
-        ) {
-            TextField(
-                modifier = Modifier.fillMaxSize(),
-                textStyle = TextStyle(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
-                    lineHeight = 50.sp
-                ),
-                value = password.value,
-                onValueChange = userViewModel::updatePassword,
-                label = { Text(text = "Password", modifier = Modifier.padding(bottom = 10.dp)) },
-                colors = TextFieldDefaults.textFieldColors(
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledLabelColor = Color.Black,
-                    focusedLabelColor = Color.Black
-                ),
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.password),
-                        contentDescription = null
-                    )
-                },
-                visualTransformation = PasswordVisualTransformation(),
-                maxLines = 1
-            )
-        }
+            label = {
+                Text(text = "Password")
+            },
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.password),
+                    contentDescription = null
+                )
+            },
+            trailingIcon = {},
+            value = password.value,
+            onValueChange = userViewModel::updatePassword,
+            visualTransformation = PasswordVisualTransformation()
+        )
         Spacer(modifier = Modifier.height(10.dp))
-        Card(
-            modifier = Modifier.size(width = 300.dp, height = 80.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+        // 3、确认密码
+        TextFieldCard(
             shape = RoundedCornerShape(0.dp, 0.dp, 20.dp, 20.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = Color(0xFFDDDDDD),
-            )
-        ) {
-            TextField(
-                modifier = Modifier.fillMaxSize(),
-                textStyle = TextStyle(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
-                    lineHeight = 50.sp
-                ),
-                colors = TextFieldDefaults.textFieldColors(
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledLabelColor = Color.Black,
-                    focusedLabelColor = Color.Black
-                ),
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.confirm_password),
-                        contentDescription = null
-                    )
-                },
-                value = confirmPassword.value,
-                onValueChange = userViewModel::updateConfirmPassword,
-                label = { Text(text = "Confirm Password") },
-                trailingIcon = {
-                    // 若已开始输入
-                    if (confirmPasswordState != ConfirmPasswordState.NOT_BEGIN) {
-                        if (confirmPasswordState == ConfirmPasswordState.DIFFERENT) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(text = confirmPasswordState.desc)
-                                Icon(
-                                    painter = painterResource(id = R.drawable.error),
-                                    contentDescription = null,
-                                    tint = Color.Red,
-                                    modifier = Modifier.padding(start = 8.dp, end = 8.dp)
-                                )
-                            }
-                        } else
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.confirm_password),
+                    contentDescription = null
+                )
+            },
+            value = confirmPassword.value,
+            onValueChange = userViewModel::updateConfirmPassword,
+            label = { Text(text = "Confirm Password") },
+            trailingIcon = {
+                // 若已开始输入
+                if (confirmPasswordState != ConfirmPasswordState.NOT_BEGIN) {
+                    if (confirmPasswordState == ConfirmPasswordState.DIFFERENT) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(text = confirmPasswordState.desc)
                             Icon(
-                                painter = painterResource(id = R.drawable.correct),
+                                painter = painterResource(id = R.drawable.error),
                                 contentDescription = null,
-                                tint = Color(0xFF08A808)
+                                tint = Color.Red,
+                                modifier = Modifier.padding(start = 8.dp, end = 8.dp)
                             )
-                    }
-                },
-                visualTransformation = PasswordVisualTransformation(),
-                maxLines = 1
-            )
-        }
+                        }
+                    } else
+                        Icon(
+                            painter = painterResource(id = R.drawable.correct),
+                            contentDescription = null,
+                            tint = Color(0xFF08A808)
+                        )
+                }
+            },
+            visualTransformation = PasswordVisualTransformation(),
+        )
         Spacer(modifier = Modifier.height(60.dp))
         Button(colors = ButtonDefaults.buttonColors(containerColor = Color.Blue),
             onClick = {
                 userViewModel.register()
-
             }) {
             Text(
                 text = "Done",

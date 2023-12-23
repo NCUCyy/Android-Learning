@@ -46,9 +46,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cyy.transapp.R
@@ -176,98 +175,58 @@ fun LoginScreen(resultLauncher: ActivityResultLauncher<Intent>) {
         Spacer(modifier = Modifier.height(10.dp))
         Text(text = "Sign in", fontSize = 50.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(50.dp))
-        Card(
-            modifier = Modifier.size(width = 300.dp, height = 80.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+
+        // 1、用户名
+        TextFieldCard(
             shape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = Color(0xFFDDDDDD),
-            )
-        ) {
-            TextField(
-                textStyle = TextStyle(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
-                    lineHeight = 1.em,
-                    lineHeightStyle = LineHeightStyle(
-                        alignment = LineHeightStyle.Alignment.Center,
-                        trim = LineHeightStyle.Trim.None
-                    )
-                ),
-                modifier = Modifier.fillMaxSize(),
-                value = username.value,
-                onValueChange = userViewModel::updateUsername,
-                label = { Text(text = "Username") },
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.person),
-                        contentDescription = null
-                    )
-                },
-                colors = TextFieldDefaults.textFieldColors(
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledLabelColor = Color.Black,
-                    focusedLabelColor = Color.Black
-                ),
-                maxLines = 1
-            )
-        }
+            label = { Text(text = "Username") },
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.person),
+                    contentDescription = null
+                )
+            },
+            trailingIcon = {},
+            value = username.value,
+            onValueChange = userViewModel::updateUsername,
+            visualTransformation = VisualTransformation.None
+        )
         Spacer(modifier = Modifier.height(10.dp))
-        Card(
-            modifier = Modifier.size(width = 300.dp, height = 80.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+        // 2、密码
+        TextFieldCard(
             shape = RoundedCornerShape(0.dp, 0.dp, 20.dp, 20.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = Color(0xFFDDDDDD),
-            )
-        ) {
-            TextField(
-                maxLines = 1,
-                modifier = Modifier.fillMaxSize(),
-                textStyle = TextStyle(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
-                    lineHeight = 50.sp
-                ),
-                value = password.value,
-                onValueChange = userViewModel::updatePassword,
-                label = { Text(text = "Password", modifier = Modifier.padding(bottom = 10.dp)) },
-                colors = TextFieldDefaults.textFieldColors(
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledLabelColor = Color.Black,
-                    focusedLabelColor = Color.Black
-                ),
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.password),
-                        contentDescription = null
-                    )
-                },
-                visualTransformation = PasswordVisualTransformation(),
-                trailingIcon = {
-                    if (usernameAndPasswordState != UsernameAndPasswordState.NOT_BEGIN) {
-                        if (usernameAndPasswordState == UsernameAndPasswordState.ERROR) {
-                            Row {
-                                Text(text = usernameAndPasswordState.desc, color = Color.Red)
-                                Icon(
-                                    painter = painterResource(id = R.drawable.error),
-                                    contentDescription = null,
-                                    tint = Color.Red,
-                                    modifier = Modifier.padding(start = 8.dp, end = 8.dp)
-                                )
-                            }
-                        } else if (usernameAndPasswordState == UsernameAndPasswordState.CORRECT) {
+            leadingIcon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.password),
+                    contentDescription = null
+                )
+            },
+            trailingIcon = {
+                if (usernameAndPasswordState != UsernameAndPasswordState.NOT_BEGIN) {
+                    if (usernameAndPasswordState == UsernameAndPasswordState.ERROR) {
+                        Row {
+                            Text(text = usernameAndPasswordState.desc, color = Color.Red)
                             Icon(
-                                painter = painterResource(id = R.drawable.correct),
+                                painter = painterResource(id = R.drawable.error),
                                 contentDescription = null,
-                                tint = Color(0xFF08A808)
+                                tint = Color.Red,
+                                modifier = Modifier.padding(start = 8.dp, end = 8.dp)
                             )
                         }
+                    } else if (usernameAndPasswordState == UsernameAndPasswordState.CORRECT) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.correct),
+                            contentDescription = null,
+                            tint = Color(0xFF08A808)
+                        )
                     }
-                })
-        }
+                }
+            },
+            onValueChange = userViewModel::updatePassword,
+            value = password.value,
+            label = { Text(text = "Password") },
+            visualTransformation = PasswordVisualTransformation()
+        )
         Spacer(modifier = Modifier.height(60.dp))
         Button(colors = ButtonDefaults.buttonColors(containerColor = Color.Blue),
             onClick = {
@@ -294,5 +253,48 @@ fun LoginScreen(resultLauncher: ActivityResultLauncher<Intent>) {
                 val intent = Intent(context, RegisterActivity::class.java)
                 resultLauncher.launch(intent)
             })
+    }
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TextFieldCard(
+    shape: RoundedCornerShape,
+    label: @Composable () -> Unit,
+    leadingIcon: @Composable () -> Unit,
+    trailingIcon: @Composable () -> Unit,
+    value: String,
+    onValueChange: (String) -> Unit,
+    visualTransformation: VisualTransformation
+) {
+    Card(
+        modifier = Modifier.size(width = 300.dp, height = 80.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+        shape = shape,
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFFDDDDDD),
+        )
+    ) {
+        TextField(
+            maxLines = 1,
+            modifier = Modifier.fillMaxSize(),
+            textStyle = TextStyle(
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+            ),
+            value = value,
+            onValueChange = onValueChange,
+            label = label,
+            colors = TextFieldDefaults.textFieldColors(
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                disabledLabelColor = Color.Black,
+                focusedLabelColor = Color.Black
+            ),
+            leadingIcon = leadingIcon,
+            visualTransformation = visualTransformation,
+            trailingIcon = trailingIcon
+        )
     }
 }
