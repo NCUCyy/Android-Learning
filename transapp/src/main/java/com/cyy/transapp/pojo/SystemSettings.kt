@@ -1,5 +1,5 @@
 package com.cyy.transapp.pojo
 
-class SystemSetting {
+class SystemSettings {
     val fontSize: Int = 0
 }

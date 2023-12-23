@@ -112,7 +112,13 @@ class UserSettingViewModel(
 
     fun updateAvatar(imageUri: Uri) {
         _avatar.value = FileUtil.uriToString(context, imageUri)
-        saveEdit()
+        saveAvatar()
+    }
+
+    private fun saveAvatar() = viewModelScope.launch {
+        val user = userRepository.getById(userId)
+        user.avatar = _avatar.value
+        userRepository.update(curUser.value)
     }
 }
 
