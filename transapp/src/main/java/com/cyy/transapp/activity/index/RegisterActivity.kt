@@ -185,7 +185,11 @@ fun RegisterScreen(resultLauncher: ActivityResultLauncher<Intent>) {
                     if (usernameState in listOf(UsernameState.EXIST, UsernameState.EMPTY)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(text = usernameState.desc, color = Color.Red)
+                            Text(
+                                text = usernameState.desc,
+                                color = Color.Red,
+                                fontWeight = FontWeight.Bold
+                            )
                             Icon(
                                 painter = painterResource(id = R.drawable.error),
                                 contentDescription = null,
@@ -206,7 +210,7 @@ fun RegisterScreen(resultLauncher: ActivityResultLauncher<Intent>) {
             onValueChange = userViewModel::updateUsername,
             visualTransformation = VisualTransformation.None
         )
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(7.dp))
         // 2、密码
         TextFieldCard(
             shape = RoundedCornerShape(0.dp, 0.dp, 0.dp, 0.dp),
@@ -224,7 +228,7 @@ fun RegisterScreen(resultLauncher: ActivityResultLauncher<Intent>) {
             onValueChange = userViewModel::updatePassword,
             visualTransformation = PasswordVisualTransformation()
         )
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(7.dp))
         // 3、确认密码
         TextFieldCard(
             shape = RoundedCornerShape(0.dp, 0.dp, 20.dp, 20.dp),
@@ -242,7 +246,11 @@ fun RegisterScreen(resultLauncher: ActivityResultLauncher<Intent>) {
                 if (confirmPasswordState != ConfirmPasswordState.NOT_BEGIN) {
                     if (confirmPasswordState == ConfirmPasswordState.DIFFERENT) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(text = confirmPasswordState.desc)
+                            Text(
+                                text = confirmPasswordState.desc,
+                                color = Color.Red,
+                                fontWeight = FontWeight.Bold
+                            )
                             Icon(
                                 painter = painterResource(id = R.drawable.error),
                                 contentDescription = null,

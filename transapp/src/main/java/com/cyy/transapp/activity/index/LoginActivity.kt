@@ -191,7 +191,7 @@ fun LoginScreen(resultLauncher: ActivityResultLauncher<Intent>) {
             onValueChange = userViewModel::updateUsername,
             visualTransformation = VisualTransformation.None
         )
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(7.dp))
         // 2、密码
         TextFieldCard(
             shape = RoundedCornerShape(0.dp, 0.dp, 20.dp, 20.dp),
@@ -204,8 +204,12 @@ fun LoginScreen(resultLauncher: ActivityResultLauncher<Intent>) {
             trailingIcon = {
                 if (usernameAndPasswordState != UsernameAndPasswordState.NOT_BEGIN) {
                     if (usernameAndPasswordState == UsernameAndPasswordState.ERROR) {
-                        Row {
-                            Text(text = usernameAndPasswordState.desc, color = Color.Red)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = usernameAndPasswordState.desc,
+                                color = Color.Red,
+                                fontWeight = FontWeight.Bold
+                            )
                             Icon(
                                 painter = painterResource(id = R.drawable.error),
                                 contentDescription = null,

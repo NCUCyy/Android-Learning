@@ -117,7 +117,7 @@ class UserViewModel(
 
     fun updateUsername(username: String) {
         _username.value = username
-        if (username == "") {
+        if (username.trim() == "") {
             _usernameState.value = UsernameState.EMPTY
         } else {
             // 同步修改
