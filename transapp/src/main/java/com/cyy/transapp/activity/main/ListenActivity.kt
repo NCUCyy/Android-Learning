@@ -18,13 +18,17 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -45,7 +49,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
@@ -225,6 +231,8 @@ fun ListenScreen(
     runningState: MutableState<Boolean>
 ) {
     val context = LocalContext.current as Activity
+    val en = FileUtil.readRawToTxt(context, listenResource.en)
+    val zh = FileUtil.readRawToTxt(context, listenResource.zh)
     Scaffold(
         topBar = {
             TopAppBar(
@@ -258,7 +266,7 @@ fun ListenScreen(
                 actions = {
                     IconButton(onClick = {
                         // TODO：分享听力资源
-
+                        share(context, en, zh)
                     }) {
                         Icon(
                             painterResource(id = R.drawable.share),
@@ -280,12 +288,28 @@ fun ListenScreen(
                     playAction = playAction,
                     stopAction = stopAction,
                     listenResource = listenResource,
-                    runningState = runningState
+                    runningState = runningState,
+                    en = en,
+                    zh = zh
                 )
             }
         },
         floatingActionButton = {
         })
+}
+
+fun share(context: Activity, en: String, zh: String) {
+    val intent = Intent(Intent.ACTION_SEND)
+    intent.type = "text/plain"
+    val sharedValue = "英文：\n$en \n 中文：\n$zh"
+    intent.putExtra(Intent.EXTRA_TEXT, sharedValue) //extraText为文本的内容
+    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK //为Activity新建一个任务栈
+    context.startActivity(
+        Intent.createChooser(
+            intent,
+            "分享"
+        )
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -296,25 +320,22 @@ fun ListenContentScreen(
     playAction: () -> Unit,
     stopAction: () -> Unit,
     listenResource: ListenResource,
-    runningState: MutableState<Boolean>
+    runningState: MutableState<Boolean>,
+    en: String,
+    zh: String
 ) {
     val context = LocalContext.current as Activity
     val expanded = remember { mutableStateOf(false) }
     val options = listOf("只显示英文", "只显示中文", "中英文")
     val selectedOptionText = remember { mutableStateOf("只显示英文") }
-    val en = FileUtil.readRawToTxt(context, listenResource.en)
-    val zh = FileUtil.readRawToTxt(context, listenResource.zh)
-    Column(
-        modifier = Modifier
-            .fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    val scrollState = rememberScrollState()
+    Column(modifier = Modifier.padding(start = 10.dp, end = 10.dp)) {
         Card(
             elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
-                .padding(10.dp),
+                .padding(top = 10.dp, bottom = 10.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White)
         ) {
             val iconSIze = 38.dp
@@ -353,77 +374,104 @@ fun ListenContentScreen(
                 )
             }
         }
-        ExposedDropdownMenuBox(
-            expanded = expanded.value,
-            onExpandedChange = {
-                expanded.value = !expanded.value
-            }
+        Card(
+            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = Color.White,
+            ),
         ) {
-            TextField(
-                readOnly = true,
-                value = selectedOptionText.value,
-                onValueChange = { },
-                label = { },
-                trailingIcon = {
-                    ExposedDropdownMenuDefaults.TrailingIcon(
-                        expanded = expanded.value
-                    )
-                },
-                colors = ExposedDropdownMenuDefaults.textFieldColors(
-
-                ),
-                modifier = Modifier.menuAnchor()
-            )
-            ExposedDropdownMenu(
+            ExposedDropdownMenuBox(
                 expanded = expanded.value,
-                onDismissRequest = {
-                    expanded.value = false
-                },
+                onExpandedChange = {
+                    expanded.value = !expanded.value
+                }
             ) {
-                options.forEach { selectionOption ->
-                    DropdownMenuItem(
-                        text = {
-                            Text(selectionOption)
-                        },
-                        onClick = {
-                            selectedOptionText.value = selectionOption
-                            expanded.value = false
-                        }
-                    )
+                TextField(
+                    textStyle = TextStyle(fontWeight = FontWeight.W900),
+                    readOnly = true,
+                    value = selectedOptionText.value,
+                    onValueChange = { },
+                    label = { Text(text = "显示文本") },
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(
+                            expanded = expanded.value
+                        )
+                    },
+                    colors = ExposedDropdownMenuDefaults.textFieldColors(
+                        unfocusedIndicatorColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        containerColor = Color.LightGray
+                    ),
+                    modifier = Modifier
+                        .menuAnchor()
+                        .size(width = 200.dp, height = Dp.Infinity)
+                )
+                ExposedDropdownMenu(
+                    expanded = expanded.value,
+                    onDismissRequest = {
+                        expanded.value = false
+                    },
+                ) {
+                    options.forEach { selectionOption ->
+                        DropdownMenuItem(
+                            text = {
+                                Text(selectionOption)
+                            },
+                            onClick = {
+                                selectedOptionText.value = selectionOption
+                                expanded.value = false
+                            }
+                        )
+                    }
                 }
             }
         }
-        when (selectedOptionText.value) {
-            "只显示英文" -> {
-                Text(
-                    text = en,
-                    fontSize = 20.sp,
-                    modifier = Modifier.padding(10.dp)
-                )
-            }
+        Spacer(modifier = Modifier.height(8.dp))
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(scrollState),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Card(
+                elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White)
+            ) {
+                when (selectedOptionText.value) {
+                    "只显示英文" -> {
+                        TextCard(text = en, "英文")
+                    }
 
-            "只显示中文" -> {
-                Text(
-                    text = zh,
-                    fontSize = 20.sp,
-                    modifier = Modifier.padding(10.dp)
-                )
-            }
+                    "只显示中文" -> {
+                        TextCard(text = zh, "中文")
+                    }
 
-            else -> {
-                Column {
-                    Text(
-                        text = en,
-                        fontSize = 20.sp,
-                        modifier = Modifier.padding(10.dp)
-                    )
-                    Text(
-                        text = zh,
-                        fontSize = 20.sp,
-                        modifier = Modifier.padding(10.dp)
-                    )
+                    else -> {
+                        TextCard(text = en, "英文")
+                        Divider(
+                            thickness = 2.dp,
+                            modifier = Modifier.padding(10.dp),
+                            color = Color.LightGray
+                        )
+                        TextCard(text = zh, "中文")
+                    }
                 }
             }
         }
     }
+}
+
+@Composable
+fun TextCard(text: String, title: String) {
+    Text(
+        text = title,
+        fontWeight = FontWeight.W900,
+        fontSize = 25.sp,
+        modifier = Modifier.padding(10.dp)
+    )
+    Text(
+        text = text, fontSize = 20.sp,
+        modifier = Modifier.padding(10.dp)
+    )
 }
