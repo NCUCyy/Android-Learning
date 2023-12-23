@@ -193,7 +193,7 @@ fun LearnMainScreen(
 fun StarIconButton(action: () -> Unit, icon: Int) {
     IconButton(onClick = {
         action.invoke()
-    }, modifier = Modifier.padding(end = 16.dp)) {
+    }, modifier = Modifier.padding(end = 8.dp)) {
         Icon(
             painter = painterResource(id = icon),
             contentDescription = null,
@@ -261,8 +261,10 @@ fun TranslateOrNextBtn(
     val curQuizWord = learnViewModel.curQuizWord.collectAsState().value
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 15.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly,
     ) {
         Card(
             modifier = Modifier

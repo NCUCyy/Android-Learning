@@ -11,7 +11,7 @@ import kotlinx.serialization.json.Json
 
 class VocabularyRepository {
     val vocabularies =
-        listOf(Vocabulary.NOT_SELECTED, Vocabulary.CET4, Vocabulary.CET6, Vocabulary.TOEFL)
+        listOf(Vocabulary.NOT_SELECTED, Vocabulary.CET4, Vocabulary.CET6, Vocabulary.TOEFL,Vocabulary.SAT)
 
     fun getVocabularyByStr(str: String): Vocabulary {
         return when (str) {

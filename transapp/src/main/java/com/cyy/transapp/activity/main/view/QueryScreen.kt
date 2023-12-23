@@ -255,7 +255,7 @@ fun TransRecordCard(transRecord: TransRecord, isLast: Boolean, states: StateHold
             .clickable {
                 // 点击卡片即可翻译查询
                 toTransActivity(context, states.resultLauncher, transRecord.word, userId)
-            }, colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+            }, colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         ConstraintLayout {
             val (iconRef, wordRef, transRef, freqRef) = createRefs()

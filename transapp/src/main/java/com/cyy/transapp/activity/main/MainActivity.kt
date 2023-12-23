@@ -14,6 +14,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -260,20 +261,25 @@ fun MainScreen(
                         },
                         // 标签
                         label = {
-                            Text(text = it.title)
                         },
                         // 图标
                         icon = {
-                            Icon(
-                                painter = painterResource(id = it.icon),
-                                contentDescription = null
-                            )
+                            Column(
+                                verticalArrangement = Arrangement.Center,
+                                modifier = Modifier.padding(5.dp)
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = it.icon),
+                                    contentDescription = null
+                                )
+                                Text(text = it.title)
+                            }
                         })
                 }
             }
         },
         content = {
-            Surface(color = Color.Transparent) {
+            Surface(color = Color.White) {
                 // 页面的主体部分
                 Box(modifier = Modifier.padding(it)) {
                     // 侧滑导航视图（侧滑界面+导航图）

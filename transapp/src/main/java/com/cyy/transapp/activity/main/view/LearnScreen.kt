@@ -152,7 +152,7 @@ fun VocabularyCard(states: StateHolder, learnReviewViewModel: LearnReviewViewMod
             color = Color(0xFF269C2A)
         )
         Text(
-            text = "共计 $vocabularySize 个单词",
+            text = if (curUser.value.vocabulary != "未选择") "共计 $vocabularySize 个单词" else "",
             modifier = Modifier.padding(start = 10.dp),
             color = Color.Gray,
             fontSize = 13.sp
@@ -243,7 +243,7 @@ fun LearnAndReviewCard(states: StateHolder, learnReviewViewModel: LearnReviewVie
             if (plan.value.vocabulary != "未选择") {
                 // 有选择
                 // TODO：Learn-Part
-                Card(
+                Card(colors = CardDefaults.cardColors(containerColor = Color(0xFFCEF0FF)),
                     elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
                     modifier = Modifier
                         .size(width = 175.dp, height = Dp.Infinity)
@@ -277,6 +277,7 @@ fun LearnAndReviewCard(states: StateHolder, learnReviewViewModel: LearnReviewVie
                 Spacer(modifier = Modifier.width(15.dp))
                 // TODO：Review-Part
                 Card(
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFF1FFE1)),
                     elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
                     modifier = Modifier
                         .size(width = 175.dp, height = Dp.Infinity)
@@ -395,7 +396,7 @@ fun DailyAttendanceCard(states: StateHolder, learnReviewViewModel: LearnReviewVi
 @Composable
 fun DailyCardItem(day: Int, month: String, days: List<Int>) {
     val iconSize = 40.dp
-    Card {
+    Card(colors = CardDefaults.cardColors(containerColor = Color(0xFFF3F3F3))) {
         Column(
             modifier = Modifier.padding(10.dp),
             verticalArrangement = Arrangement.Center,
@@ -454,7 +455,7 @@ fun TodayCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel) {
                 today.reviewNum.toString(),
                 R.drawable.book,
                 iconTint = Color(0xFF476D1A),
-                containerColor = Color(0xFFE7BAAC)
+                containerColor = Color(0xFFF5DBD3)
             )
             Spacer(modifier = Modifier.width(10.dp))
             TodayCardItem(
@@ -462,7 +463,7 @@ fun TodayCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel) {
                 today.newLearnNum.toString(),
                 R.drawable.book,
                 iconTint = Color(0xFF476D1A),
-                containerColor = Color(0xFFE7BAAC)
+                containerColor = Color(0xFFF5DBD3)
             )
         }
         Row(
@@ -477,7 +478,7 @@ fun TodayCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel) {
                 today.starNum.toString(),
                 R.drawable.star2,
                 iconTint = Color(0xFFDDB405),
-                containerColor = Color(0xFFF8EF9D)
+                containerColor = Color(0xFFFDF8CA)
             )
             Spacer(modifier = Modifier.width(10.dp))
             TodayCardItem(
@@ -485,7 +486,7 @@ fun TodayCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel) {
                 today.removeNum.toString(),
                 R.drawable.delete,
                 iconTint = Color(0xFFEB3838),
-                containerColor = Color(0xFFF5AAC3)
+                containerColor = Color(0xFFFCCADB)
             )
         }
         Row(
@@ -500,7 +501,7 @@ fun TodayCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel) {
                 today.learnTime.toString() + " 分钟",
                 R.drawable.time,
                 iconTint = Color(0xFF118EF1),
-                containerColor = Color(0xFFA2D2F8)
+                containerColor = Color(0xFFC3DFF5)
             )
             Spacer(modifier = Modifier.width(10.dp))
             TodayCardItem(
@@ -508,7 +509,7 @@ fun TodayCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel) {
                 today.openNum.toString() + " 次",
                 R.drawable.open,
                 iconTint = Color(0xFF118EF1),
-                containerColor = Color(0xFFA2D2F8)
+                containerColor = Color(0xFFC3DFF5)
             )
         }
         Spacer(modifier = Modifier.height(10.dp))

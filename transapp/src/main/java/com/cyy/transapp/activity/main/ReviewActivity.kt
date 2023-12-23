@@ -250,7 +250,7 @@ fun ReviewContentScreen(
 
             is OpResult.NotBegin -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(text = "恭喜你完成全部复习任务！")
+                    Text(text = "🎉🎉🎉 恭喜你完成全部复习任务！", fontWeight = FontWeight.Bold, fontSize = 23.sp)
                 }
                 // 延迟1s后退出
                 val scope = rememberCoroutineScope()

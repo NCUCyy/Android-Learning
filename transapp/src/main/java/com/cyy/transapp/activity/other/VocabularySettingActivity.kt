@@ -100,7 +100,6 @@ fun VocabularySettingMainScreen(userId: Int, vocabulary: String) {
                             Activity.RESULT_OK,
                             intent.putExtra("vocabulary", plan.value.vocabulary)
                         )
-                        Log.i("CYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY", "vocabulary: ${plan.value.vocabulary}")
                         context.finish()
                     }) {
                         Icon(
