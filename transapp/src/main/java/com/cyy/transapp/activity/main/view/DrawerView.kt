@@ -1,6 +1,7 @@
 package com.cyy.transapp.activity.main.view
 
 import android.app.Activity
+import android.app.Activity.RESULT_OK
 import android.content.Intent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -301,6 +302,9 @@ fun DrawerView(
                             contentColor = Color.White
                         ),
                         onClick = {
+                            val intent = Intent()
+                            intent.putExtra("isLogout", true)
+                            context.setResult(RESULT_OK, intent)
                             context.finish()
                         }) {
                         Text(

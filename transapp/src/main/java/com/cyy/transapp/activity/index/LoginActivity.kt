@@ -1,5 +1,7 @@
 package com.cyy.transapp.activity.index
 
+import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -10,6 +12,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -25,9 +28,12 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
@@ -62,17 +68,61 @@ class LoginActivity : ComponentActivity() {
             ActivityResultContracts.StartActivityForResult(),
             // 意图结束后，执行这个「回调函数」
             ActivityResultCallback {
-                this.finish()
+                if (it.resultCode == RESULT_OK && it.data!!.hasExtra("isLogout")) {
+                    isLogout.value = it.data!!.getBooleanExtra("isLogout", true)
+                }
             }
         )
         setContent {
             if (isLogout.value) {
                 this.finish()
             } else {
-                LoginScreen(resultLauncher)
+                LoginMainScreen(resultLauncher)
             }
         }
     }
+}
+
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LoginMainScreen(resultLauncher: ActivityResultLauncher<Intent>) {
+    val context = LocalContext.current as Activity
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    // TODO：显示查询的词汇
+                    Text(
+                        text = "返回",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp,
+                        maxLines = 1
+                    )
+                },
+                // 左侧图标
+                navigationIcon = {
+                    // 图标按钮
+                    IconButton(onClick = {
+                        // TODO：返回Index
+                        context.finish()
+                    }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.back),
+                            contentDescription = null,
+                        )
+                    }
+                },
+            )
+        },
+        content = {
+            // 页面的主体部分
+            Box {
+                LoginScreen(resultLauncher)
+            }
+        },
+        floatingActionButton = {
+        })
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -216,13 +266,13 @@ fun LoginScreen(resultLauncher: ActivityResultLauncher<Intent>) {
                                     modifier = Modifier.padding(start = 8.dp, end = 8.dp)
                                 )
                             }
+                        } else if (usernameAndPasswordState == UsernameAndPasswordState.CORRECT) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.correct),
+                                contentDescription = null,
+                                tint = Color(0xFF08A808)
+                            )
                         }
-                    } else if (usernameAndPasswordState == UsernameAndPasswordState.CORRECT) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.correct),
-                            contentDescription = null,
-                            tint = Color(0xFF08A808)
-                        )
                     }
                 })
         }
