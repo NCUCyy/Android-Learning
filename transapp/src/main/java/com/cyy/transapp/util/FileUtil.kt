@@ -12,6 +12,9 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 
 object FileUtil {
+    /**
+     * 把raw文件读到内存中
+     */
     fun readRawToTxt(context: Context, resourceId: Int): String {
         val inputStream = context.resources.openRawResource(resourceId)
         return inputStream.bufferedReader().use { it.readText() }

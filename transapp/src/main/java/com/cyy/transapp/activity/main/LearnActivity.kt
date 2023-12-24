@@ -438,7 +438,10 @@ fun TitleWordCard(learnViewModel: LearnViewModel) {
 @Composable
 fun ProcessCard(curProcess: Int) {
     // TODO：显示当前进度————球球
-    Row(modifier = Modifier.padding(start = 15.dp, top = 5.dp)) {
+    Row(
+        modifier = Modifier.padding(start = 15.dp, top = 5.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         when (curProcess) {
             0 -> {
                 ProcessIcon(0)
@@ -462,6 +465,12 @@ fun ProcessCard(curProcess: Int) {
                 ProcessIcon(1)
                 ProcessIcon(2)
                 ProcessIcon(3)
+                Text(
+                    text = "Pass！",
+                    modifier = Modifier.padding(start = 10.dp),
+                    color = Color(0xFF4CAF50),
+                    fontStyle = FontStyle.Italic
+                )
             }
         }
     }
@@ -493,9 +502,9 @@ fun ProcessIcon(process: Int) {
         )
 
         3 -> Icon(
-            painter = painterResource(id = R.drawable.counter_3),
+            painter = painterResource(id = R.drawable.correct),
             contentDescription = null,
-            modifier = Modifier.size(30.dp),
+            modifier = Modifier.size(25.dp),
             tint = tintColor
         )
     }
