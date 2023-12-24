@@ -11,16 +11,29 @@ import kotlinx.serialization.json.Json
 
 class VocabularyRepository {
     val vocabularies =
-        listOf(Vocabulary.NOT_SELECTED, Vocabulary.CET4, Vocabulary.CET6, Vocabulary.TOEFL,Vocabulary.SAT)
+        listOf(
+            Vocabulary.NOT_SELECTED,
+            Vocabulary.CHUZHONG,
+            Vocabulary.GAOZHONG,
+            Vocabulary.CET4,
+            Vocabulary.CET6,
+            Vocabulary.TOEFL,
+            Vocabulary.SAT,
+            Vocabulary.KAOYAN
+        )
 
-    fun getVocabularyByStr(str: String): Vocabulary {
-        return when (str) {
-            "CET4" -> Vocabulary.CET4
-            "CET6" -> Vocabulary.CET6
+    fun getVocabularyByStr(str: String): Vocabulary =
+        when (str) {
+            "未选择" -> Vocabulary.NOT_SELECTED
+            "CET-4" -> Vocabulary.CET4
+            "CET-6" -> Vocabulary.CET6
             "TOEFL" -> Vocabulary.TOEFL
-            else -> Vocabulary.CET4
+            "SAT" -> Vocabulary.SAT
+            "考研" -> Vocabulary.KAOYAN
+            "高中" -> Vocabulary.GAOZHONG
+            "初中" -> Vocabulary.CHUZHONG
+            else -> Vocabulary.NOT_SELECTED
         }
-    }
 
     /**
      * 用这个（比下面那个解析更快！）

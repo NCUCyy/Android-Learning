@@ -400,7 +400,7 @@ fun ListenContentScreen(
                     colors = ExposedDropdownMenuDefaults.textFieldColors(
                         unfocusedIndicatorColor = Color.Transparent,
                         focusedIndicatorColor = Color.Transparent,
-                        containerColor = Color.LightGray
+                        containerColor = Color(0xFFC4EDFF)
                     ),
                     modifier = Modifier
                         .menuAnchor()

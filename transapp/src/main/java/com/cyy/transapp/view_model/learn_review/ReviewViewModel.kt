@@ -12,7 +12,6 @@ import com.cyy.transapp.model.PlanWord
 import com.cyy.transapp.model.QuizType
 import com.cyy.transapp.model.QuizWord
 import com.cyy.transapp.model.ReviewProcess
-import com.cyy.transapp.model.Vocabulary
 import com.cyy.transapp.pojo.Plan
 import com.cyy.transapp.pojo.StarWord
 import com.cyy.transapp.pojo.User
@@ -106,7 +105,10 @@ class ReviewViewModel(
         _loadVocabularyState.value = OpResult.Loading
         thread {
             allWords =
-                vocabularyRepository.getVocabularyWord(context, Vocabulary.valueOf(vocabulary))
+                vocabularyRepository.getVocabularyWord(
+                    context,
+                    vocabularyRepository.getVocabularyByStr(vocabulary)
+                )
             _loadVocabularyState.value = OpResult.Success("加载成功！")
             nextWord()
         }

@@ -11,7 +11,6 @@ import com.cyy.transapp.model.LearnProcess
 import com.cyy.transapp.model.OpResult
 import com.cyy.transapp.model.PlanWord
 import com.cyy.transapp.model.ReviewProcess
-import com.cyy.transapp.model.Vocabulary
 import com.cyy.transapp.pojo.Plan
 import com.cyy.transapp.pojo.Today
 import com.cyy.transapp.pojo.User
@@ -194,7 +193,7 @@ class LearnReviewViewModel(
                     _vocabulary.value =
                         vocabularyRepository.getVocabularyWord(
                             context,
-                            Vocabulary.valueOf(user.vocabulary)
+                            vocabularyRepository.getVocabularyByStr(user.vocabulary)
                         )
                 }
                 _loadVocabularyState.value = OpResult.Success("加载完成")

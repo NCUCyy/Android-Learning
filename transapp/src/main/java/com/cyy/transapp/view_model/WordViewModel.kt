@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.cyy.app.word_bank.model.Word
 import com.cyy.transapp.model.OpResult
-import com.cyy.transapp.model.Vocabulary
 import com.cyy.transapp.repository.VocabularyRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -37,7 +36,7 @@ class WordViewModel(
                 _wordList.value =
                     vocabularyRepository.getVocabularyWord(
                         context,
-                        Vocabulary.valueOf(vocabulary)
+                        vocabularyRepository.getVocabularyByStr(vocabulary)
                     )
                 _loadVocabularyState.value = OpResult.Success("加载完成")
             }
