@@ -158,6 +158,7 @@ fun DrawerView(
                                     states.navController.context,
                                     UserSettingActivity::class.java
                                 )
+                            intent.putExtra("userId", userId)
                             states.resultLauncher.launch(intent)
                         })
                     Divider(thickness = 1.dp)
