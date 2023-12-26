@@ -71,69 +71,69 @@ fun QueryScreen(states: StateHolder, queryViewModel: QueryViewModel) {
     ) {
         // 1、输入框
         Card(
-                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color.White,
-                ),
+            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 10.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = Color.White,
+            ),
+            modifier = Modifier
+                .fillMaxWidth(),
+        ) {
+            TextField(
+                value = query.value,
                 modifier = Modifier
                     .fillMaxWidth(),
-            ) {
-                TextField(
-                    value = query.value,
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    onValueChange = { it: String ->
-                        queryViewModel.updateQuery(it)
-                    },
-                    placeholder = {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(text = "查询单词或句子")
+                onValueChange = { it: String ->
+                    queryViewModel.updateQuery(it)
+                },
+                placeholder = {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = "查询单词或句子")
+                    }
+                },
+                trailingIcon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.search),
+                        contentDescription = null,
+                        modifier = Modifier.clickable {
+                            toTransActivity(
+                                context,
+                                states.resultLauncher,
+                                query.value,
+                                queryViewModel.userId
+                            )
                         }
-                    },
-                    trailingIcon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.search),
-                            contentDescription = null,
-                            modifier = Modifier.clickable {
-                                toTransActivity(
-                                    context,
-                                    states.resultLauncher,
-                                    query.value,
-                                    queryViewModel.userId
-                                )
-                            }
-                        )
-                    },
-                    shape = MaterialTheme.shapes.extraSmall, // 设置边框形状
-                    textStyle = TextStyle.Default.copy(
-                        color = Color.Black,
-                        fontSize = 16.sp
-                    ), // 设置文本颜色
-                    colors = TextFieldDefaults.textFieldColors(
-                        containerColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        disabledIndicatorColor = Color.Transparent,
-                        placeholderColor = Color.Gray,
-                    ), keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Search
-                    ),
-                    keyboardActions = KeyboardActions(onSearch = {
-                        // TODO:跳转到TransActivity
-                        toTransActivity(
-                            context,
-                            states.resultLauncher,
-                            query.value,
-                            queryViewModel.userId
-                        )
-                        // 关闭输入框
-                        states.showQueryDialog.value = false
-                    })
-                )
-            }
+                    )
+                },
+                shape = MaterialTheme.shapes.extraSmall, // 设置边框形状
+                textStyle = TextStyle.Default.copy(
+                    color = Color.Black,
+                    fontSize = 16.sp
+                ), // 设置文本颜色
+                colors = TextFieldDefaults.textFieldColors(
+                    containerColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent,
+                    placeholderColor = Color.Gray,
+                ), keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Search
+                ),
+                keyboardActions = KeyboardActions(onSearch = {
+                    // TODO:跳转到TransActivity
+                    toTransActivity(
+                        context,
+                        states.resultLauncher,
+                        query.value,
+                        queryViewModel.userId
+                    )
+                    // 关闭输入框
+                    states.showQueryDialog.value = false
+                })
+            )
+        }
         Spacer(modifier = Modifier.height(10.dp))
         // 2、每日一句
         Box(
@@ -215,9 +215,11 @@ fun DailySentenceCard(sentenceModel: SentenceModel, states: StateHolder, userId:
         colors = CardDefaults.cardColors(
             containerColor = Color(0xFFEBF4FA),
             contentColor = Color.Black
-        ), modifier = Modifier.clickable {
-            toTransActivity(context, states.resultLauncher, data.en, userId)
-        }
+        ), modifier = Modifier
+            .clickable {
+                toTransActivity(context, states.resultLauncher, data.en, userId)
+            }
+            .fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(10.dp)) {
             Text(
@@ -228,7 +230,6 @@ fun DailySentenceCard(sentenceModel: SentenceModel, states: StateHolder, userId:
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(10.dp)
             )
-            Spacer(modifier = Modifier.width(10.dp))
             Text(
                 text = data.en,
                 fontSize = 20.sp,
@@ -242,7 +243,6 @@ fun DailySentenceCard(sentenceModel: SentenceModel, states: StateHolder, userId:
                 modifier = Modifier.padding(10.dp)
             )
         }
-
     }
 }
 

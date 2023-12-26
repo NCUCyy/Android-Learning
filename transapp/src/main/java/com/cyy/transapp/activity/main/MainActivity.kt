@@ -11,12 +11,14 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -55,6 +57,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -68,6 +71,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import coil.compose.rememberAsyncImagePainter
 import com.cyy.transapp.R
 import com.cyy.transapp.TransApp
 import com.cyy.transapp.activity.main.view.DrawerView
@@ -75,6 +79,8 @@ import com.cyy.transapp.activity.main.view.toTransActivity
 import com.cyy.transapp.activity.main.view.toVocabularySettingActivity
 import com.cyy.transapp.activity.other.AvatarImage
 import com.cyy.transapp.activity.other.StarWordActivity
+import com.cyy.transapp.activity.other.bgColor
+import com.cyy.transapp.activity.other.imageUri
 import com.cyy.transapp.view_model.CurUserViewModel
 import com.cyy.transapp.view_model.CurUserViewModelFactory
 import com.cyy.transapp.view_model.trans.QueryViewModel
@@ -279,7 +285,17 @@ fun MainScreen(
             }
         },
         content = {
-            Surface(color = Color.White) {
+            Surface(color = bgColor.value) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    imageUri.value?.let {
+                        Image(
+                            painter = rememberAsyncImagePainter(model = imageUri.value),
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.FillBounds
+                        )
+                    }
+                }
                 // 页面的主体部分
                 Box(modifier = Modifier.padding(it)) {
                     // 侧滑导航视图（侧滑界面+导航图）
