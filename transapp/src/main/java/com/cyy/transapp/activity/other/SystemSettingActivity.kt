@@ -24,7 +24,6 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
@@ -32,7 +31,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
@@ -48,10 +46,14 @@ class SystemSettingActivity : ComponentActivity() {
     }
 }
 
-
+// 背景色
 var bgColor = mutableStateOf(Color.White)
+
+// 背景图
 var imageUri = mutableStateOf<Uri?>(null)
-var fontSize = mutableStateOf(14f)
+
+// 字体（部分元素）
+var syncFontSize = mutableStateOf(0f)
 
 @Preview
 @OptIn(ExperimentalMaterial3Api::class)
@@ -66,7 +68,7 @@ fun SettingMainScreen() {
                     Text(
                         text = "设置",
                         fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp,
+                        fontSize = (20 + syncFontSize.value).sp,
                     )
                 },
                 // 左侧图标
@@ -90,18 +92,8 @@ fun SettingMainScreen() {
         },
         content = {
             Surface(color = bgColor.value) {
-                /*设置字体大小*/
-                val myTypography = Typography(
-                    bodyLarge = TextStyle(
-                        fontSize = fontSize.value.sp,
-                    ),
-                )
-                MaterialTheme(
-                    typography = myTypography
-                ) {
-                    Box(modifier = Modifier.padding(it)) {
-                        SettingScreen()
-                    }
+                Box(modifier = Modifier.padding(it)) {
+                    SettingScreen()
                 }
             }
         },
@@ -120,9 +112,9 @@ fun SettingScreen() {
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
         onResult = { uri ->
-            uri?.let {
+            uri.let {
                 // 更新头像
-                uri?.let {
+                uri.let {
                     imageUri.value = it
                 }
                 Toast.makeText(context, "修改成功！", Toast.LENGTH_SHORT).show()
@@ -165,14 +157,15 @@ fun SettingScreen() {
         }) {
             Text(text = "点击切换护眼模式", style = MaterialTheme.typography.bodyLarge)
         }
+        Text(text = "字体测试", fontSize = (20 + syncFontSize.value).sp)
         // 字体
         Slider(
-            value = fontSize.value,
+            value = syncFontSize.value,
             onValueChange = { newFontSize ->
-                fontSize.value = newFontSize
-                Log.i("fontSize", fontSize.value.toString())
+                syncFontSize.value = newFontSize
+                Log.i("fontSize", syncFontSize.value.toString())
             },
-            valueRange = 12f..30f,
+            valueRange = -5f..5f,
             steps = 18
         )
     }

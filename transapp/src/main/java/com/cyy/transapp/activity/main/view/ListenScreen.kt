@@ -28,6 +28,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cyy.transapp.TransApp
 import com.cyy.transapp.activity.main.ListenActivity
 import com.cyy.transapp.activity.main.StateHolder
+import com.cyy.transapp.activity.other.syncFontSize
 import com.cyy.transapp.pojo.ListenResource
 import com.cyy.transapp.util.FileUtil
 import com.cyy.transapp.view_model.listen.ListenViewModel
@@ -85,7 +86,7 @@ fun ListenResourceCard(listenResource: ListenResource, states: StateHolder) {
             ) {
                 Text(
                     text = listenResource.topic,
-                    fontSize = 23.sp,
+                    fontSize = (23 + syncFontSize.value).sp,
                     textAlign = TextAlign.Center,
                     color = Color(0xFF2196F3),
                     fontWeight = FontWeight.Bold,

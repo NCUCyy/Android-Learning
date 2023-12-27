@@ -81,6 +81,7 @@ import com.cyy.transapp.activity.other.AvatarImage
 import com.cyy.transapp.activity.other.StarWordActivity
 import com.cyy.transapp.activity.other.bgColor
 import com.cyy.transapp.activity.other.imageUri
+import com.cyy.transapp.activity.other.syncFontSize
 import com.cyy.transapp.view_model.CurUserViewModel
 import com.cyy.transapp.view_model.CurUserViewModelFactory
 import com.cyy.transapp.view_model.trans.QueryViewModel
@@ -174,7 +175,8 @@ fun MainScreen(
                     Row(modifier = Modifier.fillMaxWidth()) {
                         Text(
                             text = states.currentScreen.value.title,
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
+                            fontSize = (20 + syncFontSize.value).sp,
                         )
                     }
                 },

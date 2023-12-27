@@ -71,7 +71,8 @@ fun StarWordMainScreen(userId: Int, resultLauncher: ActivityResultLauncher<Inten
                     Row(modifier = Modifier.fillMaxWidth()) {
                         Text(
                             text = "生词本",
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
+                            fontSize = (20 + syncFontSize.value).sp,
                         )
                     }
                 },
@@ -140,7 +141,7 @@ fun StarWordCard(starWord: StarWord, resultLauncher: ActivityResultLauncher<Inte
                 text = starWord.word,
                 modifier = Modifier.padding(20.dp),
                 fontWeight = FontWeight.Bold,
-                fontSize = 20.sp
+                fontSize = (20 + syncFontSize.value).sp
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),

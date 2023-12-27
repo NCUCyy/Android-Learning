@@ -77,7 +77,8 @@ fun WordMainScreen(
                     Row(modifier = Modifier.fillMaxWidth()) {
                         Text(
                             text = vocabulary,
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
+                            fontSize = (20 + syncFontSize.value).sp,
                         )
                     }
                 },
@@ -176,14 +177,14 @@ fun WordItemCard(userId: Int, wordItem: WordItem, resultLauncher: ActivityResult
                 text = wordItem.word,
                 modifier = Modifier.padding(20.dp),
                 fontWeight = FontWeight.Bold,
-                fontSize = 20.sp
+                fontSize = (20 + syncFontSize.value).sp
             )
             val showTrans =
                 "${wordItem.translations[0].type}. ${wordItem.translations[0].translation}"
             Text(
                 text = showTrans,
                 color = Color.Gray,
-                fontSize = 15.sp,
+                fontSize = (15 + syncFontSize.value).sp,
             )
         }
     }

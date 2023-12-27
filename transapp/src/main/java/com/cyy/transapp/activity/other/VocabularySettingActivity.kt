@@ -87,7 +87,7 @@ fun VocabularySettingMainScreen(userId: Int, vocabulary: String) {
                     Text(
                         text = "切换单词本",
                         fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp,
+                        fontSize = (20 + syncFontSize.value).sp,
                     )
                 },
                 // 左侧图标
@@ -231,7 +231,7 @@ fun VocabularySettingItem(
         ) {
             Text(
                 text = vocabulary.desc,
-                fontSize = 20.sp,
+                fontSize = (20 + syncFontSize.value).sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(start = 15.dp)
             )

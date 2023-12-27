@@ -43,6 +43,7 @@ import com.cyy.transapp.activity.main.ReviewActivity
 import com.cyy.transapp.activity.main.StateHolder
 import com.cyy.transapp.activity.other.VocabularySettingActivity
 import com.cyy.transapp.activity.other.WordActivity
+import com.cyy.transapp.activity.other.syncFontSize
 import com.cyy.transapp.model.LearnProcess
 import com.cyy.transapp.model.OpResult
 import com.cyy.transapp.view_model.learn_review.LearnReviewViewModel
@@ -129,7 +130,7 @@ fun VocabularyCard(states: StateHolder, learnReviewViewModel: LearnReviewViewMod
             Text(
                 text = "Vocabulary",
                 fontWeight = FontWeight.W900,
-                fontSize = 20.sp,
+                fontSize = (20 + syncFontSize.value).sp,
                 modifier = Modifier.padding(10.dp)
             )
             Spacer(modifier = Modifier.width(15.dp))
@@ -174,7 +175,7 @@ fun ProgressCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel
             Text(
                 text = "Progress",
                 fontWeight = FontWeight.W900,
-                fontSize = 20.sp,
+                fontSize = (20 + syncFontSize.value).sp,
                 modifier = Modifier.padding(10.dp)
             )
             Spacer(modifier = Modifier.width(35.dp))
@@ -329,12 +330,12 @@ fun LearnReviewText(type: String, num: Int) {
         modifier = Modifier
             .padding(start = 20.dp, top = 10.dp, bottom = 10.dp)
     ) {
-        Text(text = type, fontWeight = FontWeight.W900, fontSize = 25.sp)
+        Text(text = type, fontWeight = FontWeight.W900, fontSize = (25 + syncFontSize.value).sp)
         Text(
             text = num.toString(),
             color = Color(0xFFFF5722),
             fontWeight = FontWeight.Bold,
-            fontSize = 20.sp
+            fontSize = (20 + syncFontSize.value).sp,
         )
     }
 }
@@ -379,7 +380,7 @@ fun DailyAttendanceCard(states: StateHolder, learnReviewViewModel: LearnReviewVi
     ) {
         Text(
             text = "Daily Attendance", fontWeight = FontWeight.W900,
-            fontSize = 20.sp,
+            fontSize = (20 + syncFontSize.value).sp,
             modifier = Modifier.padding(10.dp)
         )
         LazyRow(
@@ -440,7 +441,7 @@ fun TodayCard(states: StateHolder, learnReviewViewModel: LearnReviewViewModel) {
         Text(
             text = "Today",
             fontWeight = FontWeight.W900,
-            fontSize = 20.sp,
+            fontSize = (20 + syncFontSize.value).sp,
             modifier = Modifier.padding(10.dp)
         )
         Row(

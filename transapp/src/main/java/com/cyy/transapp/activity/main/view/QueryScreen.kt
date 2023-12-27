@@ -49,6 +49,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import com.cyy.transapp.R
 import com.cyy.transapp.activity.main.StateHolder
 import com.cyy.transapp.activity.main.TransActivity
+import com.cyy.transapp.activity.other.syncFontSize
 import com.cyy.transapp.model.OpResult
 import com.cyy.transapp.model.daily_sentence.SentenceModel
 import com.cyy.transapp.pojo.TransRecord
@@ -134,12 +135,12 @@ fun QueryScreen(states: StateHolder, queryViewModel: QueryViewModel) {
                 })
             )
         }
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(15.dp))
         // 2、每日一句
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .size(width = Dp.Infinity, height = 180.dp)
+                .size(width = Dp.Infinity, height = 160.dp)
         ) {
             when (sentenceState.value) {
                 is OpResult.Success -> {
@@ -224,7 +225,7 @@ fun DailySentenceCard(sentenceModel: SentenceModel, states: StateHolder, userId:
         Column(modifier = Modifier.padding(10.dp)) {
             Text(
                 text = "${data.day}.${data.month}",
-                fontSize = 20.sp,
+                fontSize = (20 + syncFontSize.value).sp,
                 textAlign = TextAlign.Center,
                 color = Color(0xFF2196F3),
                 fontWeight = FontWeight.Bold,
@@ -232,13 +233,13 @@ fun DailySentenceCard(sentenceModel: SentenceModel, states: StateHolder, userId:
             )
             Text(
                 text = data.en.trim(),
-                fontSize = 20.sp,
+                fontSize = (20 + syncFontSize.value).sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(start = 10.dp, end = 10.dp)
             )
             Text(
                 text = data.zh.trim(),
-                fontSize = 15.sp,
+                fontSize = (15 + syncFontSize.value).sp,
                 color = Color.Gray,
                 modifier = Modifier.padding(10.dp)
             )
@@ -255,7 +256,7 @@ fun TransRecordCard(transRecord: TransRecord, isLast: Boolean, states: StateHold
             .clickable {
                 // 点击卡片即可翻译查询
                 toTransActivity(context, states.resultLauncher, transRecord.word, userId)
-            }, colors = CardDefaults.cardColors(containerColor = Color.White)
+            }, colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
         ConstraintLayout {
             val (iconRef, wordRef, transRef, freqRef) = createRefs()
@@ -276,7 +277,7 @@ fun TransRecordCard(transRecord: TransRecord, isLast: Boolean, states: StateHold
                 })
             Text(
                 text = transRecord.word,
-                fontSize = 20.sp,
+                fontSize = (20 + syncFontSize.value).sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
                     .padding(start = 10.dp)

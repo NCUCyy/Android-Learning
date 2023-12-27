@@ -48,6 +48,7 @@ import com.cyy.transapp.activity.other.AvatarImage
 import com.cyy.transapp.activity.other.StarWordActivity
 import com.cyy.transapp.activity.other.SystemSettingActivity
 import com.cyy.transapp.activity.other.UserSettingActivity
+import com.cyy.transapp.activity.other.syncFontSize
 import com.cyy.transapp.view_model.CurUserViewModel
 import com.cyy.transapp.view_model.CurUserViewModelFactory
 
@@ -111,7 +112,7 @@ fun DrawerView(
                     Spacer(modifier = Modifier.height(5.dp))
                     Text(
                         text = curUser.value.username,
-                        fontSize = 30.sp,
+                        fontSize = (30 + syncFontSize.value).sp,
                         fontWeight = FontWeight.Bold,
                         style = TextStyle(
                             shadow = Shadow(
@@ -141,7 +142,11 @@ fun DrawerView(
                         ),
                         shape = RoundedCornerShape(0.dp, 0.dp, 0.dp, 0.dp),
                         label = {
-                            Text("个人信息", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                            Text(
+                                "个人信息",
+                                fontSize = (20 + syncFontSize.value).sp,
+                                fontWeight = FontWeight.Bold
+                            )
                         },
                         icon = {
                             Icon(
@@ -169,7 +174,11 @@ fun DrawerView(
                         ),
                         shape = RoundedCornerShape(0.dp, 0.dp, 0.dp, 0.dp),
                         label = {
-                            Text("我的生词本", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                            Text(
+                                "我的生词本",
+                                fontSize = (20 + syncFontSize.value).sp,
+                                fontWeight = FontWeight.Bold
+                            )
                         },
                         icon = {
                             Icon(
@@ -194,7 +203,11 @@ fun DrawerView(
                         ),
                         shape = RoundedCornerShape(0.dp, 0.dp, 0.dp, 0.dp),
                         label = {
-                            Text("清空翻译记录", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                            Text(
+                                "清空翻译记录",
+                                fontSize = (20 + syncFontSize.value).sp,
+                                fontWeight = FontWeight.Bold
+                            )
                         },
                         icon = {
                             Icon(
@@ -218,7 +231,11 @@ fun DrawerView(
                         shape = RoundedCornerShape(0.dp, 0.dp, 0.dp, 0.dp),
                         label = {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text("正在学习", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                                Text(
+                                    "正在学习",
+                                    fontSize = (20 + syncFontSize.value).sp,
+                                    fontWeight = FontWeight.Bold
+                                )
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.End,
@@ -226,7 +243,7 @@ fun DrawerView(
                                 ) {
                                     Text(
                                         text = curUser.value.vocabulary,
-                                        fontSize = 20.sp,
+                                        fontSize = (20 + syncFontSize.value).sp,
                                         fontWeight = FontWeight.W900,
                                         color = Color.Gray
                                     )
@@ -265,7 +282,11 @@ fun DrawerView(
                         ),
                         shape = RoundedCornerShape(0.dp, 0.dp, 0.dp, 0.dp),
                         label = {
-                            Text("设置", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                            Text(
+                                "设置",
+                                fontSize = (20 + syncFontSize.value).sp,
+                                fontWeight = FontWeight.Bold
+                            )
                         },
                         icon = {
                             Icon(
@@ -307,7 +328,7 @@ fun DrawerView(
                         Text(
                             text = "退出登录",
                             fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp
+                            fontSize = (20 + syncFontSize.value).sp
                         )
                     }
                 }

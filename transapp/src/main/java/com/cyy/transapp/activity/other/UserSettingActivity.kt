@@ -91,7 +91,7 @@ fun UserMainScreen(userId: Int) {
                     Text(
                         text = "个人信息",
                         fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp,
+                        fontSize = (20 + syncFontSize.value).sp,
                     )
                 },
                 // 左侧图标

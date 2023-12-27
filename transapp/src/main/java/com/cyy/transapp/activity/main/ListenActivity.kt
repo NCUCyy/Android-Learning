@@ -56,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import com.cyy.transapp.R
+import com.cyy.transapp.activity.other.syncFontSize
 import com.cyy.transapp.pojo.ListenResource
 import com.cyy.transapp.service.ListenService
 import com.cyy.transapp.util.FileUtil
@@ -449,11 +450,7 @@ fun ListenContentScreen(
 
                     else -> {
                         TextCard(text = en, "英文")
-                        Divider(
-                            thickness = 2.dp,
-                            modifier = Modifier.padding(10.dp),
-                            color = Color.LightGray
-                        )
+                        Spacer(modifier = Modifier.height(20.dp))
                         TextCard(text = zh, "中文")
                     }
                 }
@@ -468,10 +465,15 @@ fun TextCard(text: String, title: String) {
         text = title,
         fontWeight = FontWeight.W900,
         fontSize = 25.sp,
-        modifier = Modifier.padding(10.dp)
+        modifier = Modifier.padding(20.dp)
+    )
+    Divider(
+        thickness = 1.dp,
+        color = Color.LightGray,
+        modifier = Modifier.padding(start = 10.dp, end = 10.dp)
     )
     Text(
-        text = text, fontSize = 20.sp,
-        modifier = Modifier.padding(10.dp)
+        text = text, fontSize = (18 + syncFontSize.value).sp,
+        modifier = Modifier.padding(20.dp)
     )
 }
