@@ -231,13 +231,13 @@ fun DailySentenceCard(sentenceModel: SentenceModel, states: StateHolder, userId:
                 modifier = Modifier.padding(10.dp)
             )
             Text(
-                text = data.en,
+                text = data.en.trim(),
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(start = 10.dp, end = 10.dp)
             )
             Text(
-                text = data.zh,
+                text = data.zh.trim(),
                 fontSize = 15.sp,
                 color = Color.Gray,
                 modifier = Modifier.padding(10.dp)
