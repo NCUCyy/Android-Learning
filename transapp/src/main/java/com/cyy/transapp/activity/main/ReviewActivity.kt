@@ -9,6 +9,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -30,6 +31,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -41,6 +43,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -48,9 +51,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.rememberAsyncImagePainter
 import com.cyy.transapp.R
 import com.cyy.transapp.TransApp
 import com.cyy.transapp.activity.main.view.toTransActivity
+import com.cyy.transapp.activity.other.bgColor
+import com.cyy.transapp.activity.other.imageUri
 import com.cyy.transapp.model.OpResult
 import com.cyy.transapp.model.ReviewState
 import com.cyy.transapp.view_model.learn_review.ReviewViewModel
@@ -177,9 +183,21 @@ fun ReviewMainScreen(
             }
         },
         content = {
-            // 页面的主体部分
-            Box(modifier = Modifier.padding(it)) {
-                ReviewContentScreen(reviewViewModel, showDetail)
+            Surface(color = bgColor.value) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    imageUri.value?.let {
+                        Image(
+                            painter = rememberAsyncImagePainter(model = imageUri.value),
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.FillBounds
+                        )
+                    }
+                }
+                // 页面的主体部分
+                Box(modifier = Modifier.padding(it)) {
+                    ReviewContentScreen(reviewViewModel, showDetail)
+                }
             }
         },
         floatingActionButton = {
@@ -250,7 +268,11 @@ fun ReviewContentScreen(
 
             is OpResult.NotBegin -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(text = "🎉🎉🎉 恭喜你完成全部复习任务！", fontWeight = FontWeight.Bold, fontSize = 23.sp)
+                    Text(
+                        text = "🎉🎉🎉 恭喜你完成全部复习任务！",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 23.sp
+                    )
                 }
                 // 延迟1s后退出
                 val scope = rememberCoroutineScope()

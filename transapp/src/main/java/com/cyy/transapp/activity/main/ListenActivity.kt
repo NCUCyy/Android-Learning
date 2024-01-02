@@ -243,8 +243,10 @@ fun ListenScreen(
                             text = listenResource.topic,
                             modifier = Modifier.padding(start = 5.dp),
                             fontWeight = FontWeight.Bold,
-                            fontSize = 23.sp
+                            fontSize = 23.sp,
+                            maxLines = 1
                         )
+
                     }
                 },
                 // 左侧图标

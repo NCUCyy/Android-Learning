@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,6 +28,7 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
@@ -36,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -45,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.rememberAsyncImagePainter
 import com.cyy.transapp.R
 import com.cyy.transapp.TransApp
 import com.cyy.transapp.model.Vocabulary
@@ -115,9 +119,21 @@ fun VocabularySettingMainScreen(userId: Int, vocabulary: String) {
         bottomBar = {
         },
         content = {
-            // 页面的主体部分
-            Box(modifier = Modifier.padding(it)) {
-                VocabularySettingScreen(vocabularySettingViewModel)
+            Surface(color = bgColor.value) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    imageUri.value?.let {
+                        Image(
+                            painter = rememberAsyncImagePainter(model = imageUri.value),
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.FillBounds
+                        )
+                    }
+                }
+                // 页面的主体部分
+                Box(modifier = Modifier.padding(it)) {
+                    VocabularySettingScreen(vocabularySettingViewModel)
+                }
             }
         },
         floatingActionButton = {

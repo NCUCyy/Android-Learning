@@ -1,0 +1,29 @@
+Google has launched a new tool designed to help people prepare for job interviews.
+The system, called Interview Warmup, is powered by artificial intelligence (AI) methods.
+The tool creates interview test questions related to several major technology fields.
+These include information technology (IT) and support, project management, data analytics and online sales and marketing.
+The tool was created as part of Google’s efforts to develop “conversational AI” systems.
+These systems use messaging technologies and voice recognition to permit users to interact with computers and devices in more natural ways.
+Google recently launched Interview Warmup to the public for free.
+Users first choose the field they are interested in for a practice interview.
+The process involves users typing or speaking their answers into the system after each question is presented. Video is currently not part of the tool.
+The system centers on three main kinds of questions – background, situational and technical, Google explains.
+Background questions cover a user’s past training and job history.
+Situational questions seek information on how a job seeker has dealt with different career situations in the past.
+And technical questions cover the specific knowledge and skills a person has.
+If the user speaks using a microphone, the tool puts the user’s answers into written form.
+The Interview Warmup system then uses AI and machine learning methods to analyze the answers and provide suggestions for improvements.
+For example, the system can let a user know when he or she is using important terms related to specific jobs of interest. It also identifies the words used most by the interviewee.
+Google says this information can help job seekers recognize whether using such repeated words can help or hurt them during an interview.
+The tool can also point out any “talking points” that were used or suggest new ones that could be effective when interviewing for different kinds of jobs.
+For people with privacy concerns, Google says none of the information entered or spoken into the tool is stored or shared.
+Since the system does not store information, users are asked to copy any answers they want to keep in a separate document.
+While creating the system, developers spoke with individuals who had completed job training classes offered by Google and were actively looking for work. The classes are part of the company’s Career Certificate Program.
+Jasmin Rubinovitz is a software engineer and researcher with Google Creative Lab. She helped develop the Interview Warmup tool.
+Rubinovitz explains in a video that there are currently more than 1.3 million job openings in the United States for high-paying technology jobs across different fields.
+She notes, however, that the company’s career training programs can only go so far in helping prepare job seekers to get one of those available positions.
+“We found that the one thing (job seekers) had a hard time with was interviewing,” Rubinovitz said.
+“So we tried to think, could we use machine learning and large language models to build a tool to help you practice for a job interview,” she added.
+Rubinovitz says the tool is designed to permit job seekers to practice their interview skills in a “safe space” as many times as they desire.
+Interview Warmup can be used with most internet browsers, as well as the Android and iOS mobile operating systems.
+I’m Bryan Lynn.

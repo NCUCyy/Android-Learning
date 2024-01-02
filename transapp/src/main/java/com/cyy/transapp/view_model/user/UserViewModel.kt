@@ -82,7 +82,7 @@ class UserViewModel(
         }
     }
 
-    private fun clearAll() {
+    fun clearAll() {
         _username.value = ""
         _password.value = ""
         _confirmPassword.value = ""

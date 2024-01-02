@@ -9,6 +9,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,6 +34,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -45,6 +47,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
@@ -53,11 +56,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.rememberAsyncImagePainter
 import com.cyy.app.word_bank.model.Phrase
 import com.cyy.app.word_bank.model.Translation
 import com.cyy.transapp.R
 import com.cyy.transapp.TransApp
 import com.cyy.transapp.activity.main.view.toTransActivity
+import com.cyy.transapp.activity.other.bgColor
+import com.cyy.transapp.activity.other.imageUri
 import com.cyy.transapp.model.OpResult
 import com.cyy.transapp.view_model.learn_review.LearnViewModel
 import com.cyy.transapp.view_model.learn_review.LearnViewModelFactory
@@ -180,9 +186,21 @@ fun LearnMainScreen(
                 )
         },
         content = {
-            // 页面的主体部分
-            Box(modifier = Modifier.padding(it)) {
-                LearnContentScreen(learnViewModel, resultLauncher, showDetail)
+            Surface(color = bgColor.value) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    imageUri.value?.let {
+                        Image(
+                            painter = rememberAsyncImagePainter(model = imageUri.value),
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.FillBounds
+                        )
+                    }
+                }
+                // 页面的主体部分
+                Box(modifier = Modifier.padding(it)) {
+                    LearnContentScreen(learnViewModel, resultLauncher, showDetail)
+                }
             }
         },
         floatingActionButton = {
@@ -228,7 +246,10 @@ fun LearnContentScreen(
             }
 
             is OpResult.Loading -> {
-                CircularProgressIndicator(modifier = Modifier.fillMaxSize())
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                    // TODO：显示加载中
+                    CircularProgressIndicator()
+                }
             }
 
             is OpResult.NotBegin -> {

@@ -86,16 +86,18 @@ fun ListenResourceCard(listenResource: ListenResource, states: StateHolder) {
             ) {
                 Text(
                     text = listenResource.topic,
-                    fontSize = (23 + syncFontSize.value).sp,
+                    fontSize = (20 + syncFontSize.value).sp,
                     textAlign = TextAlign.Center,
                     color = Color(0xFF2196F3),
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(10.dp)
+                    modifier = Modifier
+                        .padding(top = 10.dp, bottom = 10.dp)
+                        .fillMaxWidth(),
                 )
                 Text(
                     text = en,
                     fontSize = 13.sp,
-                    modifier = Modifier.padding(start = 10.dp, end = 10.dp),
+                    modifier = Modifier.padding(start = 10.dp, end = 10.dp, bottom = 5.dp),
                     maxLines = 2,
                     color = Color.Gray
                 )

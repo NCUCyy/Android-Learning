@@ -257,6 +257,7 @@ fun LoginScreen(resultLauncher: ActivityResultLauncher<Intent>) {
             modifier = Modifier.clickable {
                 // 跳转到注册界面
                 val intent = Intent(context, RegisterActivity::class.java)
+                userViewModel.clearAll()
                 resultLauncher.launch(intent)
             })
     }

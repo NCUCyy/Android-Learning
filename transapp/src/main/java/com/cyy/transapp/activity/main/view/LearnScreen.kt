@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -83,8 +84,10 @@ fun LearnScreen(states: StateHolder, learnReviewViewModel: LearnReviewViewModel)
             }
 
             is OpResult.Loading -> {
-                // TODO：显示加载中
-                CircularProgressIndicator(modifier = Modifier.fillMaxSize())
+                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                    // TODO：显示加载中
+                    CircularProgressIndicator()
+                }
             }
 
             else -> {
