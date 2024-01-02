@@ -191,9 +191,10 @@ fun SelectDailyNumCard(vocabularySettingViewModel: VocabularySettingViewModel) {
                     )
                 },
                 colors = ExposedDropdownMenuDefaults.textFieldColors(
-                    unfocusedIndicatorColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent,
-                ),
+                        unfocusedIndicatorColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        containerColor = Color(0xFFC4EDFF)
+                    ),
                 modifier = Modifier
                     .menuAnchor()
                     .fillMaxWidth()

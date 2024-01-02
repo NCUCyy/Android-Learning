@@ -327,7 +327,6 @@ fun ListenContentScreen(
     en: String,
     zh: String
 ) {
-    val context = LocalContext.current as Activity
     val expanded = remember { mutableStateOf(false) }
     val options = listOf("只显示英文", "只显示中文", "中英文")
     val selectedOptionText = remember { mutableStateOf("只显示英文") }

@@ -165,7 +165,8 @@ fun SettingCard() {
         Text(
             text = "更换背景",
             fontSize = (20 + syncFontSize.value).sp,
-            modifier = Modifier.padding(20.dp)
+            modifier = Modifier.padding(20.dp),
+            fontWeight = FontWeight.Bold
         )
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
             // 切换背景图
@@ -268,7 +269,8 @@ fun SettingCard() {
         Text(
             text = "修改字体",
             fontSize = (20 + syncFontSize.value).sp,
-            modifier = Modifier.padding(20.dp)
+            modifier = Modifier.padding(20.dp),
+            fontWeight = FontWeight.Bold
         )
         Row(
             modifier = Modifier.fillMaxWidth(),
